@@ -1,4 +1,4 @@
-# 1 "LEDs.c"
+# 1 "leds.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,7 +6,7 @@
 # 1 "<built-in>" 2
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "LEDs.c" 2
+# 1 "leds.c" 2
 
 
 
@@ -14,8 +14,8 @@
 
 
 
-# 1 "./LEDs.h" 1
-# 11 "./LEDs.h"
+# 1 "./leds.h" 1
+# 11 "./leds.h"
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 1 3
 # 18 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -36623,11 +36623,11 @@ __attribute__((__unsupported__("The READTIMER" "0" "() macro is not available wi
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
-# 11 "./LEDs.h" 2
+# 11 "./leds.h" 2
 
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdbool.h" 1 3
-# 13 "./LEDs.h" 2
+# 13 "./leds.h" 2
 
 
 void LEDs_Init(void);
@@ -36637,7 +36637,7 @@ void toggle_LED_Green(_Bool);
 void toggle_LED_Blue(_Bool);
 
 void toggle_LED_Red(_Bool);
-# 8 "LEDs.c" 2
+# 8 "leds.c" 2
 
 
 void LEDs_Init() {

@@ -3052,64 +3052,64 @@ Version 4.0 HI-TECH Software Intermediate Code
 "72305
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 72305: __asm("TOSU equ 03FFFh");
 [; <" TOSU equ 03FFFh ;# ">
-"10 LEDs.c
-[; ;LEDs.c: 10: void LEDs_Init() {
+"10 leds.c
+[; ;leds.c: 10: void LEDs_Init() {
 [v _LEDs_Init `(v ~T0 @X0 1 ef ]
 {
 [e :U _LEDs_Init ]
 [f ]
 "12
-[; ;LEDs.c: 12:     TRISAbits.TRISA2 = 0;
+[; ;leds.c: 12:     TRISAbits.TRISA2 = 0;
 [e = . . _TRISAbits 0 2 -> -> 0 `i `uc ]
 "13
-[; ;LEDs.c: 13:     TRISAbits.TRISA3 = 0;
+[; ;leds.c: 13:     TRISAbits.TRISA3 = 0;
 [e = . . _TRISAbits 0 3 -> -> 0 `i `uc ]
 "14
-[; ;LEDs.c: 14:     TRISAbits.TRISA4 = 0;
+[; ;leds.c: 14:     TRISAbits.TRISA4 = 0;
 [e = . . _TRISAbits 0 4 -> -> 0 `i `uc ]
 "15
-[; ;LEDs.c: 15: }
+[; ;leds.c: 15: }
 [e :UE 3248 ]
 }
 "17
-[; ;LEDs.c: 17: void toggle_LED_Green (_Bool LED_On) {
+[; ;leds.c: 17: void toggle_LED_Green (_Bool LED_On) {
 [v _toggle_LED_Green `(v ~T0 @X0 1 ef1`a ]
 {
 [e :U _toggle_LED_Green ]
 [v _LED_On `a ~T0 @X0 1 r1 ]
 [f ]
 "18
-[; ;LEDs.c: 18:     LATA2 = LED_On;
+[; ;leds.c: 18:     LATA2 = LED_On;
 [e = _LATA2 _LED_On ]
 "19
-[; ;LEDs.c: 19: }
+[; ;leds.c: 19: }
 [e :UE 3249 ]
 }
 "21
-[; ;LEDs.c: 21: void toggle_LED_Blue (_Bool LED_On) {
+[; ;leds.c: 21: void toggle_LED_Blue (_Bool LED_On) {
 [v _toggle_LED_Blue `(v ~T0 @X0 1 ef1`a ]
 {
 [e :U _toggle_LED_Blue ]
 [v _LED_On `a ~T0 @X0 1 r1 ]
 [f ]
 "22
-[; ;LEDs.c: 22:     LATA3 = LED_On;
+[; ;leds.c: 22:     LATA3 = LED_On;
 [e = _LATA3 _LED_On ]
 "23
-[; ;LEDs.c: 23: }
+[; ;leds.c: 23: }
 [e :UE 3250 ]
 }
 "25
-[; ;LEDs.c: 25: void toggle_LED_Red (_Bool LED_On) {
+[; ;leds.c: 25: void toggle_LED_Red (_Bool LED_On) {
 [v _toggle_LED_Red `(v ~T0 @X0 1 ef1`a ]
 {
 [e :U _toggle_LED_Red ]
 [v _LED_On `a ~T0 @X0 1 r1 ]
 [f ]
 "26
-[; ;LEDs.c: 26:     LATA4 = LED_On;
+[; ;leds.c: 26:     LATA4 = LED_On;
 [e = _LATA4 _LED_On ]
 "27
-[; ;LEDs.c: 27: }
+[; ;leds.c: 27: }
 [e :UE 3251 ]
 }

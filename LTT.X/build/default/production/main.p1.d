@@ -1,2 +1,5 @@
 build/default/production/main.p1:  \
-main.c 
+main.c  \
+leds.h  \
+adc.h  \
+spi.h 

@@ -36624,10 +36624,42 @@ unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
 # 9 "main.c" 2
 
+# 1 "./leds.h" 1
+# 13 "./leds.h"
+# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdbool.h" 1 3
+# 13 "./leds.h" 2
+
+
+void LEDs_Init(void);
+
+void toggle_LED_Green(_Bool);
+
+void toggle_LED_Blue(_Bool);
+
+void toggle_LED_Red(_Bool);
+# 10 "main.c" 2
+
+# 1 "./adc.h" 1
+# 13 "./adc.h"
+void ADC_Init(void);
+
+uint16_t read_ADC(void);
+# 11 "main.c" 2
+
+# 1 "./spi.h" 1
+# 15 "./spi.h"
+void SPI_Init(void);
+
+uint8_t Read_SPI(void);
+
+void Write_SPI(uint8_t);
+# 12 "main.c" 2
 
 
 void Board_Init() {
-    return;
+    LEDs_Init();
+    ADC_Init();
+    SPI_Init();
 }
 
 void main(void) {

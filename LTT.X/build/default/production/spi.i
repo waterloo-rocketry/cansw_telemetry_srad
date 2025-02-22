@@ -1,4 +1,4 @@
-# 1 "main.c"
+# 1 "spi.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,7 +6,7 @@
 # 1 "<built-in>" 2
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "main.c" 2
+# 1 "spi.c" 2
 
 
 
@@ -14,7 +14,8 @@
 
 
 
-
+# 1 "./spi.h" 1
+# 11 "./spi.h"
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 1 3
 # 18 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -36622,30 +36623,58 @@ __attribute__((__unsupported__("The READTIMER" "0" "() macro is not available wi
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
-# 9 "main.c" 2
-
-# 1 "./leds.h" 1
-# 13 "./leds.h"
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdbool.h" 1 3
-# 13 "./leds.h" 2
+# 11 "./spi.h" 2
 
 
-void LEDs_Init(void);
-
-void toggle_LED_Green(_Bool);
-
-void toggle_LED_Blue(_Bool);
-
-void toggle_LED_Red(_Bool);
-# 10 "main.c" 2
 
 
-void Board_Init() {
-    LEDs_Init();
+void SPI_Init(void);
+
+uint8_t Read_SPI(void);
+
+void Write_SPI(uint8_t);
+# 8 "spi.c" 2
+
+
+void SPI_Init() {
+
+    TRISCbits.TRISC3 = 0;
+    TRISCbits.TRISC4 = 1;
+    TRISCbits.TRISC5 = 0;
+    TRISAbits.TRISA5 = 0;
+
+    LATAbits.LATA5 = 1;
+
+    SPI1CON0bits.EN = 0;
+
+    SPI1CON0bits.MST = 1;
+    SPI1CON0bits.LSBF = 0;
+
+    SPI1CON1bits.CKP = 0;
+    SPI1CON1bits.CKE = 0;
+
+
+    SPI1CON2bits.TXR = 1;
+    SPI1CON2bits.RXR = 1;
+
+
+    SPI1BAUD = 0;
+
+
+    SPI1CON0bits.EN = 1;
+
 }
 
-void main(void) {
-    Board_Init();
+uint8_t Read_SPI() {
+    uint8_t data;
 
-    return;
+    while(!SPI1STATUSbits.RXBF);
+    data = SPI1RXB;
+    return data;
+}
+
+void Write_SPI(uint8_t data) {
+
+    while (SPI1STATUSbits.TXBE);
+    SPI1TXB = data;
 }

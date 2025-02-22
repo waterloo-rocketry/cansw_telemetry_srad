@@ -1,4 +1,4 @@
-# 1 "leds.c"
+# 1 "adc.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,16 +6,10 @@
 # 1 "<built-in>" 2
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "leds.c" 2
-
-
-
-
-
-
-
-# 1 "./leds.h" 1
-# 11 "./leds.h"
+# 1 "adc.c" 2
+# 10 "adc.c"
+# 1 "./adc.h" 1
+# 11 "./adc.h"
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 1 3
 # 18 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -36623,38 +36617,28 @@ __attribute__((__unsupported__("The READTIMER" "0" "() macro is not available wi
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
-# 11 "./leds.h" 2
+# 11 "./adc.h" 2
 
 
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdbool.h" 1 3
-# 13 "./leds.h" 2
+void ADC_Init(void);
+
+uint16_t read_ADC(void);
+# 10 "adc.c" 2
 
 
-void LEDs_Init(void);
-
-void toggle_LED_Green(_Bool);
-
-void toggle_LED_Blue(_Bool);
-
-void toggle_LED_Red(_Bool);
-# 8 "leds.c" 2
-
-
-void LEDs_Init() {
-
-    TRISAbits.TRISA2 = 0;
-    TRISAbits.TRISA3 = 0;
-    TRISAbits.TRISA4 = 0;
+void ADC_Init() {
+    ADCON0bits.FM = 1;
+    ADCON0bits.CS = 1;
+    ADPCH = 0x00;
+    TRISAbits.TRISA0 = 1;
+    ANSELAbits.ANSELA0 = 1;
+    ADCON0bits.ON = 1;
 }
 
-void toggle_LED_Green (_Bool LED_On) {
-    LATA2 = LED_On;
-}
+uint16_t read_ADC() {
+    ADCON0bits.GO = 1;
+    while (ADCON0bits.GO);
+    uint16_t result = ((uint16_t)ADRESH << 8) | ADRESL;
 
-void toggle_LED_Blue (_Bool LED_On) {
-    LATA3 = LED_On;
-}
-
-void toggle_LED_Red (_Bool LED_On) {
-    LATA4 = LED_On;
+    return result;
 }

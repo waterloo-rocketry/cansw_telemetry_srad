@@ -1,5 +1,35 @@
 Version 4.0 HI-TECH Software Intermediate Code
-"4860 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
+"51799 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51799:     struct {
+[s S2265 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S2265 . GO . FM CS . CONT ON ]
+"51808
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51808:     struct {
+[s S2266 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S2266 . ADGO . ADFM ADCS . ADCONT ADON ]
+"51817
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51817:     struct {
+[s S2267 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S2267 . DONE . FM0 ]
+"51822
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51822:     struct {
+[s S2268 :1 `uc 1 ]
+[n S2268 . GO_NOT_DONE ]
+"51825
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51825:     struct {
+[s S2269 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S2269 . GO_nDONE . ADFM0 ]
+"51798
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51798: typedef union {
+[u S2264 `S2265 1 `S2266 1 `S2267 1 `S2268 1 `S2269 1 ]
+[n S2264 . . . . . . ]
+"51831
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51831: extern volatile ADCON0bits_t ADCON0bits __attribute__((address(0x3EF8)));
+[v _ADCON0bits `VS2264 ~T0 @X0 0 e@16120 ]
+"51143
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51143: extern volatile unsigned char ADPCH __attribute__((address(0x3EF1)));
+[v _ADPCH `Vuc ~T0 @X0 0 e@16113 ]
+"4860
 [s S3121 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S3121 . TRISA0 TRISA1 TRISA2 TRISA3 TRISA4 TRISA5 TRISA6 TRISA7 ]
 "4859
@@ -7,12 +37,23 @@ Version 4.0 HI-TECH Software Intermediate Code
 [n S3120 . . ]
 "4871
 [v _TRISAbits `VS3120 ~T0 @X0 0 e@16322 ]
-"12742
-[v _LATA2 `Vb ~T0 @X0 0 e@130514 ]
-"12745
-[v _LATA3 `Vb ~T0 @X0 0 e@130515 ]
-"12748
-[v _LATA4 `Vb ~T0 @X0 0 e@130516 ]
+"29606
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 29606:     struct {
+[s S1251 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1251 . ANSELA0 ANSELA1 ANSELA2 ANSELA3 ANSELA4 ANSELA5 ANSELA6 ANSELA7 ]
+"29605
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 29605: typedef union {
+[u S1250 `S1251 1 ]
+[n S1250 . . ]
+"29617
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 29617: extern volatile ANSELAbits_t ANSELAbits __attribute__((address(0x3A40)));
+[v _ANSELAbits `VS1250 ~T0 @X0 0 e@14912 ]
+"51023
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 51023: extern volatile unsigned char ADRESH __attribute__((address(0x3EF0)));
+[v _ADRESH `Vuc ~T0 @X0 0 e@16112 ]
+"50895
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 50895: extern volatile unsigned char ADRESL __attribute__((address(0x3EEF)));
+[v _ADRESL `Vuc ~T0 @X0 0 e@16111 ]
 "272 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 272: __asm("CIOCON equ 03700h");
 [; <" CIOCON equ 03700h ;# ">
@@ -3052,64 +3093,59 @@ Version 4.0 HI-TECH Software Intermediate Code
 "72305
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 72305: __asm("TOSU equ 03FFFh");
 [; <" TOSU equ 03FFFh ;# ">
-"10 leds.c
-[; ;leds.c: 10: void LEDs_Init() {
-[v _LEDs_Init `(v ~T0 @X0 1 ef ]
+"12 adc.c
+[; ;adc.c: 12: void ADC_Init() {
+[v _ADC_Init `(v ~T0 @X0 1 ef ]
 {
-[e :U _LEDs_Init ]
+[e :U _ADC_Init ]
 [f ]
-"12
-[; ;leds.c: 12:     TRISAbits.TRISA2 = 0;
-[e = . . _TRISAbits 0 2 -> -> 0 `i `uc ]
 "13
-[; ;leds.c: 13:     TRISAbits.TRISA3 = 0;
-[e = . . _TRISAbits 0 3 -> -> 0 `i `uc ]
+[; ;adc.c: 13:     ADCON0bits.FM = 1;
+[e = . . _ADCON0bits 0 2 -> -> 1 `i `uc ]
 "14
-[; ;leds.c: 14:     TRISAbits.TRISA4 = 0;
-[e = . . _TRISAbits 0 4 -> -> 0 `i `uc ]
+[; ;adc.c: 14:     ADCON0bits.CS = 1;
+[e = . . _ADCON0bits 0 3 -> -> 1 `i `uc ]
 "15
-[; ;leds.c: 15: }
+[; ;adc.c: 15:     ADPCH = 0x00;
+[e = _ADPCH -> -> 0 `i `uc ]
+"16
+[; ;adc.c: 16:     TRISAbits.TRISA0 = 1;
+[e = . . _TRISAbits 0 0 -> -> 1 `i `uc ]
+"17
+[; ;adc.c: 17:     ANSELAbits.ANSELA0 = 1;
+[e = . . _ANSELAbits 0 0 -> -> 1 `i `uc ]
+"18
+[; ;adc.c: 18:     ADCON0bits.ON = 1;
+[e = . . _ADCON0bits 0 6 -> -> 1 `i `uc ]
+"19
+[; ;adc.c: 19: }
 [e :UE 3248 ]
 }
-"17
-[; ;leds.c: 17: void toggle_LED_Green (_Bool LED_On) {
-[v _toggle_LED_Green `(v ~T0 @X0 1 ef1`a ]
-{
-[e :U _toggle_LED_Green ]
-[v _LED_On `a ~T0 @X0 1 r1 ]
-[f ]
-"18
-[; ;leds.c: 18:     LATA2 = LED_On;
-[e = _LATA2 _LED_On ]
-"19
-[; ;leds.c: 19: }
-[e :UE 3249 ]
-}
 "21
-[; ;leds.c: 21: void toggle_LED_Blue (_Bool LED_On) {
-[v _toggle_LED_Blue `(v ~T0 @X0 1 ef1`a ]
+[; ;adc.c: 21: uint16_t read_ADC() {
+[v _read_ADC `(us ~T0 @X0 1 ef ]
 {
-[e :U _toggle_LED_Blue ]
-[v _LED_On `a ~T0 @X0 1 r1 ]
+[e :U _read_ADC ]
 [f ]
 "22
-[; ;leds.c: 22:     LATA3 = LED_On;
-[e = _LATA3 _LED_On ]
+[; ;adc.c: 22:     ADCON0bits.GO = 1;
+[e = . . _ADCON0bits 0 0 -> -> 1 `i `uc ]
 "23
-[; ;leds.c: 23: }
-[e :UE 3250 ]
-}
-"25
-[; ;leds.c: 25: void toggle_LED_Red (_Bool LED_On) {
-[v _toggle_LED_Red `(v ~T0 @X0 1 ef1`a ]
-{
-[e :U _toggle_LED_Red ]
-[v _LED_On `a ~T0 @X0 1 r1 ]
-[f ]
+[; ;adc.c: 23:     while (ADCON0bits.GO);
+[e $U 3250  ]
+[e :U 3251 ]
+[e :U 3250 ]
+[e $ != -> . . _ADCON0bits 0 0 `i -> 0 `i 3251  ]
+[e :U 3252 ]
+"24
+[; ;adc.c: 24:     uint16_t result = ((uint16_t)ADRESH << 8) | ADRESL;
+[v _result `us ~T0 @X0 1 a ]
+[e = _result -> | << -> -> _ADRESH `us `ui -> 8 `i -> _ADRESL `ui `us ]
 "26
-[; ;leds.c: 26:     LATA4 = LED_On;
-[e = _LATA4 _LED_On ]
+[; ;adc.c: 26:     return result;
+[e ) _result ]
+[e $UE 3249  ]
 "27
-[; ;leds.c: 27: }
-[e :UE 3251 ]
+[; ;adc.c: 27: }
+[e :UE 3249 ]
 }

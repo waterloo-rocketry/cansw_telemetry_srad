@@ -1,3 +1,3 @@
-build/default/production/LEDs.p1:  \
-LEDs.c  \
-LEDs.h 
+build/default/production/leds.p1:  \
+leds.c  \
+leds.h 

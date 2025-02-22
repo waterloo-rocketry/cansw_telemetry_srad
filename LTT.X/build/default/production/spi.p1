@@ -1,8 +1,103 @@
 Version 4.0 HI-TECH Software Intermediate Code
-"15 ./leds.h
-[; ;./leds.h: 15: void LEDs_Init(void);
-[v _LEDs_Init `(v ~T0 @X0 0 ef ]
-[p mainexit ]
+"4984 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
+[s S3125 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S3125 . TRISC0 TRISC1 TRISC2 TRISC3 TRISC4 TRISC5 TRISC6 TRISC7 ]
+"4983
+[u S3124 `S3125 1 ]
+[n S3124 . . ]
+"4995
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 4995: 
+[v _TRISCbits `VS3124 ~T0 @X0 0 e@16324 ]
+"4860
+[s S3121 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S3121 . TRISA0 TRISA1 TRISA2 TRISA3 TRISA4 TRISA5 TRISA6 TRISA7 ]
+"4859
+[u S3120 `S3121 1 ]
+[n S3120 . . ]
+"4871
+[v _TRISAbits `VS3120 ~T0 @X0 0 e@16322 ]
+"4524
+[s S3112 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S3112 . LATA0 LATA1 LATA2 LATA3 LATA4 LATA5 LATA6 LATA7 ]
+"4534
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 4534:         unsigned F7BP :4;
+[s S3113 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S3113 . LA0 LA1 LA2 LA3 LA4 LA5 LA6 LA7 ]
+"4523
+[u S3111 `S3112 1 `S3113 1 ]
+[n S3111 . . . ]
+"4545
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 4545:     };
+[v _LATAbits `VS3111 ~T0 @X0 0 e@16314 ]
+"42828
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42828:     struct {
+[s S1841 :1 `uc 1 :1 `uc 1 :1 `uc 1 :4 `uc 1 :1 `uc 1 ]
+[n S1841 . BMODE MST LSBF . EN ]
+"42835
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42835:     struct {
+[s S1842 :1 `uc 1 :1 `uc 1 :1 `uc 1 :4 `uc 1 :1 `uc 1 ]
+[n S1842 . SPI1BMODE SPI1MST SPI1LSBF . SPI1SPIEN ]
+"42827
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42827: typedef union {
+[u S1840 `S1841 1 `S1842 1 ]
+[n S1840 . . . ]
+"42843
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42843: extern volatile SPI1CON0bits_t SPI1CON0bits __attribute__((address(0x3D14)));
+[v _SPI1CON0bits `VS1840 ~T0 @X0 0 e@15636 ]
+"42894
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42894:     struct {
+[s S1844 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1844 . SDOP SDIP SSP . FST CKP CKE SMP ]
+"42904
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42904:     struct {
+[s S1845 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1845 . SPI1SDOP SPI1SDIP SPI1SSP . SPI1FST SPI1CKP SPI1CKE SPI1SMP ]
+"42893
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42893: typedef union {
+[u S1843 `S1844 1 `S1845 1 ]
+[n S1843 . . . ]
+"42915
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42915: extern volatile SPI1CON1bits_t SPI1CON1bits __attribute__((address(0x3D15)));
+[v _SPI1CON1bits `VS1843 ~T0 @X0 0 e@15637 ]
+"42996
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42996:     struct {
+[s S1847 :1 `uc 1 :1 `uc 1 :1 `uc 1 :3 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1847 . RXR TXR SSET . SSFLT BUSY ]
+"43004
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43004:     struct {
+[s S1848 :1 `uc 1 :1 `uc 1 :1 `uc 1 :3 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1848 . SPI1RXR SPI1TXR SPI1SSET . SPI1SSFLT SPI1BUSY ]
+"42995
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42995: typedef union {
+[u S1846 `S1847 1 `S1848 1 ]
+[n S1846 . . . ]
+"43013
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43013: extern volatile SPI1CON2bits_t SPI1CON2bits __attribute__((address(0x3D16)));
+[v _SPI1CON2bits `VS1846 ~T0 @X0 0 e@15638 ]
+"43190
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43190: extern volatile unsigned char SPI1BAUD __attribute__((address(0x3D19)));
+[v _SPI1BAUD `Vuc ~T0 @X0 0 e@15641 ]
+"43074
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43074:     struct {
+[s S1850 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1850 . RXBF . CLRBF RXRE . TXBE . TXWE ]
+"43084
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43084:     struct {
+[s S1851 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1851 . SPI1RXBF . SPI1CLRBF SPI1RXRE . SPI1TXBE . SPI1TXWE ]
+"43073
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43073: typedef union {
+[u S1849 `S1850 1 `S1851 1 ]
+[n S1849 . . . ]
+"43095
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 43095: extern volatile SPI1STATUSbits_t SPI1STATUSbits __attribute__((address(0x3D17)));
+[v _SPI1STATUSbits `VS1849 ~T0 @X0 0 e@15639 ]
+"42635
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42635: extern volatile unsigned char SPI1RXB __attribute__((address(0x3D10)));
+[v _SPI1RXB `Vuc ~T0 @X0 0 e@15632 ]
+"42705
+[; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 42705: extern volatile unsigned char SPI1TXB __attribute__((address(0x3D11)));
+[v _SPI1TXB `Vuc ~T0 @X0 0 e@15633 ]
 "272 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 272: __asm("CIOCON equ 03700h");
 [; <" CIOCON equ 03700h ;# ">
@@ -3042,33 +3137,103 @@ Version 4.0 HI-TECH Software Intermediate Code
 "72305
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 72305: __asm("TOSU equ 03FFFh");
 [; <" TOSU equ 03FFFh ;# ">
-"12 main.c
-[; ;main.c: 12: void Board_Init() {
-[v _Board_Init `(v ~T0 @X0 1 ef ]
+"10 spi.c
+[; ;spi.c: 10: void SPI_Init() {
+[v _SPI_Init `(v ~T0 @X0 1 ef ]
 {
-[e :U _Board_Init ]
+[e :U _SPI_Init ]
 [f ]
+"12
+[; ;spi.c: 12:     TRISCbits.TRISC3 = 0;
+[e = . . _TRISCbits 0 3 -> -> 0 `i `uc ]
 "13
-[; ;main.c: 13:     LEDs_Init();
-[e ( _LEDs_Init ..  ]
+[; ;spi.c: 13:     TRISCbits.TRISC4 = 1;
+[e = . . _TRISCbits 0 4 -> -> 1 `i `uc ]
 "14
-[; ;main.c: 14: }
+[; ;spi.c: 14:     TRISCbits.TRISC5 = 0;
+[e = . . _TRISCbits 0 5 -> -> 0 `i `uc ]
+"15
+[; ;spi.c: 15:     TRISAbits.TRISA5 = 0;
+[e = . . _TRISAbits 0 5 -> -> 0 `i `uc ]
+"17
+[; ;spi.c: 17:     LATAbits.LATA5 = 1;
+[e = . . _LATAbits 0 5 -> -> 1 `i `uc ]
+"19
+[; ;spi.c: 19:     SPI1CON0bits.EN = 0;
+[e = . . _SPI1CON0bits 0 4 -> -> 0 `i `uc ]
+"21
+[; ;spi.c: 21:     SPI1CON0bits.MST = 1;
+[e = . . _SPI1CON0bits 0 1 -> -> 1 `i `uc ]
+"22
+[; ;spi.c: 22:     SPI1CON0bits.LSBF = 0;
+[e = . . _SPI1CON0bits 0 2 -> -> 0 `i `uc ]
+"24
+[; ;spi.c: 24:     SPI1CON1bits.CKP = 0;
+[e = . . _SPI1CON1bits 0 5 -> -> 0 `i `uc ]
+"25
+[; ;spi.c: 25:     SPI1CON1bits.CKE = 0;
+[e = . . _SPI1CON1bits 0 6 -> -> 0 `i `uc ]
+"28
+[; ;spi.c: 28:     SPI1CON2bits.TXR = 1;
+[e = . . _SPI1CON2bits 0 1 -> -> 1 `i `uc ]
+"29
+[; ;spi.c: 29:     SPI1CON2bits.RXR = 1;
+[e = . . _SPI1CON2bits 0 0 -> -> 1 `i `uc ]
+"32
+[; ;spi.c: 32:     SPI1BAUD = 0;
+[e = _SPI1BAUD -> -> 0 `i `uc ]
+"35
+[; ;spi.c: 35:     SPI1CON0bits.EN = 1;
+[e = . . _SPI1CON0bits 0 4 -> -> 1 `i `uc ]
+"37
+[; ;spi.c: 37: }
 [e :UE 3248 ]
 }
-[v $root$_main `(v ~T0 @X0 0 e ]
-"16
-[; ;main.c: 16: void main(void) {
-[v _main `(v ~T0 @X0 1 ef ]
+"39
+[; ;spi.c: 39: uint8_t Read_SPI() {
+[v _Read_SPI `(uc ~T0 @X0 1 ef ]
 {
-[e :U _main ]
+[e :U _Read_SPI ]
 [f ]
-"17
-[; ;main.c: 17:     Board_Init();
-[e ( _Board_Init ..  ]
-"19
-[; ;main.c: 19:     return;
+"40
+[; ;spi.c: 40:     uint8_t data;
+[v _data `uc ~T0 @X0 1 a ]
+"42
+[; ;spi.c: 42:     while(!SPI1STATUSbits.RXBF);
+[e $U 3250  ]
+[e :U 3251 ]
+[e :U 3250 ]
+[e $ ! != -> . . _SPI1STATUSbits 0 0 `i -> 0 `i 3251  ]
+[e :U 3252 ]
+"43
+[; ;spi.c: 43:     data = SPI1RXB;
+[e = _data _SPI1RXB ]
+"44
+[; ;spi.c: 44:     return data;
+[e ) _data ]
 [e $UE 3249  ]
-"20
-[; ;main.c: 20: }
+"45
+[; ;spi.c: 45: }
 [e :UE 3249 ]
+}
+"47
+[; ;spi.c: 47: void Write_SPI(uint8_t data) {
+[v _Write_SPI `(v ~T0 @X0 1 ef1`uc ]
+{
+[e :U _Write_SPI ]
+[v _data `uc ~T0 @X0 1 r1 ]
+[f ]
+"49
+[; ;spi.c: 49:     while (SPI1STATUSbits.TXBE);
+[e $U 3254  ]
+[e :U 3255 ]
+[e :U 3254 ]
+[e $ != -> . . _SPI1STATUSbits 0 5 `i -> 0 `i 3255  ]
+[e :U 3256 ]
+"50
+[; ;spi.c: 50:     SPI1TXB = data;
+[e = _SPI1TXB _data ]
+"51
+[; ;spi.c: 51: }
+[e :UE 3253 ]
 }

@@ -1,4 +1,13 @@
 Version 4.0 HI-TECH Software Intermediate Code
+"15 ./leds.h
+[; ;./leds.h: 15: void LEDs_Init(void);
+[v _LEDs_Init `(v ~T0 @X0 0 ef ]
+"13 ./adc.h
+[; ;./adc.h: 13: void ADC_Init(void);
+[v _ADC_Init `(v ~T0 @X0 0 ef ]
+"15 ./spi.h
+[; ;./spi.h: 15: void SPI_Init(void);
+[v _SPI_Init `(v ~T0 @X0 0 ef ]
 [p mainexit ]
 "272 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 272: __asm("CIOCON equ 03700h");
@@ -3039,33 +3048,39 @@ Version 4.0 HI-TECH Software Intermediate Code
 "72305
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h: 72305: __asm("TOSU equ 03FFFh");
 [; <" TOSU equ 03FFFh ;# ">
-"12 main.c
-[; ;main.c: 12: void Board_Init() {
+"14 main.c
+[; ;main.c: 14: void Board_Init() {
 [v _Board_Init `(v ~T0 @X0 1 ef ]
 {
 [e :U _Board_Init ]
 [f ]
-"13
-[; ;main.c: 13:     return;
-[e $UE 3248  ]
-"14
-[; ;main.c: 14: }
+"15
+[; ;main.c: 15:     LEDs_Init();
+[e ( _LEDs_Init ..  ]
+"16
+[; ;main.c: 16:     ADC_Init();
+[e ( _ADC_Init ..  ]
+"17
+[; ;main.c: 17:     SPI_Init();
+[e ( _SPI_Init ..  ]
+"18
+[; ;main.c: 18: }
 [e :UE 3248 ]
 }
 [v $root$_main `(v ~T0 @X0 0 e ]
-"16
-[; ;main.c: 16: void main(void) {
+"20
+[; ;main.c: 20: void main(void) {
 [v _main `(v ~T0 @X0 1 ef ]
 {
 [e :U _main ]
 [f ]
-"17
-[; ;main.c: 17:     Board_Init();
+"21
+[; ;main.c: 21:     Board_Init();
 [e ( _Board_Init ..  ]
-"19
-[; ;main.c: 19:     return;
+"23
+[; ;main.c: 23:     return;
 [e $UE 3249  ]
-"20
-[; ;main.c: 20: }
+"24
+[; ;main.c: 24: }
 [e :UE 3249 ]
 }
