@@ -1,0 +1,261 @@
+[p GLOBOPT AUTOSTATIC IEEE_FLT IEEE_DBL LFSROK EMI_WORD ]
+[d version 1.1 ]
+[d edition pro ]
+[d chip 18LF26K83 ]
+[d frameptr 16353 ]
+"12 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\adc.c
+[v _ADC_Init ADC_Init `(v  1 e 1 0 ]
+"4 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\fleq.c
+[v ___fleq __fleq `(b  1 e 0 0 ]
+"62 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\float.c
+[v ___ftpack __ftpack `(f  1 e 4 0 ]
+"86 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\ftadd.c
+[v ___ftadd __ftadd `(f  1 e 4 0 ]
+"54 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\ftdiv.c
+[v ___ftdiv __ftdiv `(f  1 e 4 0 ]
+"62 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\ftmul.c
+[v ___ftmul __ftmul `(f  1 e 4 0 ]
+"19 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\ftsub.c
+[v ___ftsub __ftsub `(f  1 e 4 0 ]
+"10 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\sprcadd.c
+[v ___fladd __fladd `(d  1 e 4 0 ]
+"245
+[v ___flsub __flsub `(d  1 e 4 0 ]
+"11 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\sprcdiv.c
+[v ___fldiv __fldiv `(d  1 e 4 0 ]
+"8 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\sprcmul.c
+[v ___flmul __flmul `(d  1 e 4 0 ]
+"15 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\Umul32.c
+[v ___lmul __lmul `(ul  1 e 4 0 ]
+"91 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\Umul64.c
+[v ___omul __omul `(uo  1 e 8 0 ]
+"10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\leds.c
+[v _LEDs_Init LEDs_Init `(v  1 e 1 0 ]
+"17 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
+[v _Board_Init Board_Init `(v  1 e 1 0 ]
+"23
+[v _main main `(v  1 e 1 0 ]
+"10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\spi.c
+[v _SPI_Init SPI_Init `(v  1 e 1 0 ]
+[s S228 . 1 `uc 1 LATA0 1 0 :1:0 
+`uc 1 LATA1 1 0 :1:1 
+`uc 1 LATA2 1 0 :1:2 
+`uc 1 LATA3 1 0 :1:3 
+`uc 1 LATA4 1 0 :1:4 
+`uc 1 LATA5 1 0 :1:5 
+`uc 1 LATA6 1 0 :1:6 
+`uc 1 LATA7 1 0 :1:7 
+]
+"4545 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
+[s S237 . 1 `uc 1 LA0 1 0 :1:0 
+`uc 1 LA1 1 0 :1:1 
+`uc 1 LA2 1 0 :1:2 
+`uc 1 LA3 1 0 :1:3 
+`uc 1 LA4 1 0 :1:4 
+`uc 1 LA5 1 0 :1:5 
+`uc 1 LA6 1 0 :1:6 
+`uc 1 LA7 1 0 :1:7 
+]
+[u S246 . 1 `S228 1 . 1 0 `S237 1 . 1 0 ]
+[v _LATAbits LATAbits `VES246  1 e 1 @16314 ]
+[s S43 . 1 `uc 1 TRISA0 1 0 :1:0 
+`uc 1 TRISA1 1 0 :1:1 
+`uc 1 TRISA2 1 0 :1:2 
+`uc 1 TRISA3 1 0 :1:3 
+`uc 1 TRISA4 1 0 :1:4 
+`uc 1 TRISA5 1 0 :1:5 
+`uc 1 TRISA6 1 0 :1:6 
+`uc 1 TRISA7 1 0 :1:7 
+]
+"4871
+[u S52 . 1 `S43 1 . 1 0 ]
+[v _TRISAbits TRISAbits `VES52  1 e 1 @16322 ]
+[s S195 . 1 `uc 1 TRISC0 1 0 :1:0 
+`uc 1 TRISC1 1 0 :1:1 
+`uc 1 TRISC2 1 0 :1:2 
+`uc 1 TRISC3 1 0 :1:3 
+`uc 1 TRISC4 1 0 :1:4 
+`uc 1 TRISC5 1 0 :1:5 
+`uc 1 TRISC6 1 0 :1:6 
+`uc 1 TRISC7 1 0 :1:7 
+]
+"4995
+[u S204 . 1 `S195 1 . 1 0 ]
+[v _TRISCbits TRISCbits `VES204  1 e 1 @16324 ]
+"12742
+[v _LATA2 LATA2 `VEb  1 e 0 @130514 ]
+"12745
+[v _LATA3 LATA3 `VEb  1 e 0 @130515 ]
+"12748
+[v _LATA4 LATA4 `VEb  1 e 0 @130516 ]
+[s S154 . 1 `uc 1 ANSELA0 1 0 :1:0 
+`uc 1 ANSELA1 1 0 :1:1 
+`uc 1 ANSELA2 1 0 :1:2 
+`uc 1 ANSELA3 1 0 :1:3 
+`uc 1 ANSELA4 1 0 :1:4 
+`uc 1 ANSELA5 1 0 :1:5 
+`uc 1 ANSELA6 1 0 :1:6 
+`uc 1 ANSELA7 1 0 :1:7 
+]
+"29617
+[u S163 . 1 `S154 1 . 1 0 ]
+[v _ANSELAbits ANSELAbits `VES163  1 e 1 @14912 ]
+"42635
+"42635
+[v _SPI1RXB SPI1RXB `VEuc  1 e 1 @15632 ]
+"42705
+[v _SPI1TXB SPI1TXB `VEuc  1 e 1 @15633 ]
+[s S268 . 1 `uc 1 BMODE 1 0 :1:0 
+`uc 1 MST 1 0 :1:1 
+`uc 1 LSBF 1 0 :1:2 
+`uc 1 . 1 0 :4:3 
+`uc 1 EN 1 0 :1:7 
+]
+"42843
+[s S274 . 1 `uc 1 SPI1BMODE 1 0 :1:0 
+`uc 1 SPI1MST 1 0 :1:1 
+`uc 1 SPI1LSBF 1 0 :1:2 
+`uc 1 . 1 0 :4:3 
+`uc 1 SPI1SPIEN 1 0 :1:7 
+]
+"42843
+[u S280 . 1 `S268 1 . 1 0 `S274 1 . 1 0 ]
+"42843
+"42843
+[v _SPI1CON0bits SPI1CON0bits `VES280  1 e 1 @15636 ]
+[s S296 . 1 `uc 1 SDOP 1 0 :1:0 
+`uc 1 SDIP 1 0 :1:1 
+`uc 1 SSP 1 0 :1:2 
+`uc 1 . 1 0 :1:3 
+`uc 1 FST 1 0 :1:4 
+`uc 1 CKP 1 0 :1:5 
+`uc 1 CKE 1 0 :1:6 
+`uc 1 SMP 1 0 :1:7 
+]
+"42915
+[s S305 . 1 `uc 1 SPI1SDOP 1 0 :1:0 
+`uc 1 SPI1SDIP 1 0 :1:1 
+`uc 1 SPI1SSP 1 0 :1:2 
+`uc 1 . 1 0 :1:3 
+`uc 1 SPI1FST 1 0 :1:4 
+`uc 1 SPI1CKP 1 0 :1:5 
+`uc 1 SPI1CKE 1 0 :1:6 
+`uc 1 SPI1SMP 1 0 :1:7 
+]
+"42915
+[u S314 . 1 `S296 1 . 1 0 `S305 1 . 1 0 ]
+"42915
+"42915
+[v _SPI1CON1bits SPI1CON1bits `VES314  1 e 1 @15637 ]
+[s S336 . 1 `uc 1 RXR 1 0 :1:0 
+`uc 1 TXR 1 0 :1:1 
+`uc 1 SSET 1 0 :1:2 
+`uc 1 . 1 0 :3:3 
+`uc 1 SSFLT 1 0 :1:6 
+`uc 1 BUSY 1 0 :1:7 
+]
+"43013
+[s S343 . 1 `uc 1 SPI1RXR 1 0 :1:0 
+`uc 1 SPI1TXR 1 0 :1:1 
+`uc 1 SPI1SSET 1 0 :1:2 
+`uc 1 . 1 0 :3:3 
+`uc 1 SPI1SSFLT 1 0 :1:6 
+`uc 1 SPI1BUSY 1 0 :1:7 
+]
+"43013
+[u S350 . 1 `S336 1 . 1 0 `S343 1 . 1 0 ]
+"43013
+"43013
+[v _SPI1CON2bits SPI1CON2bits `VES350  1 e 1 @15638 ]
+[s S369 . 1 `uc 1 RXBF 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 CLRBF 1 0 :1:2 
+`uc 1 RXRE 1 0 :1:3 
+`uc 1 . 1 0 :1:4 
+`uc 1 TXBE 1 0 :1:5 
+`uc 1 . 1 0 :1:6 
+`uc 1 TXWE 1 0 :1:7 
+]
+"43095
+[s S378 . 1 `uc 1 SPI1RXBF 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 SPI1CLRBF 1 0 :1:2 
+`uc 1 SPI1RXRE 1 0 :1:3 
+`uc 1 . 1 0 :1:4 
+`uc 1 SPI1TXBE 1 0 :1:5 
+`uc 1 . 1 0 :1:6 
+`uc 1 SPI1TXWE 1 0 :1:7 
+]
+"43095
+[u S387 . 1 `S369 1 . 1 0 `S378 1 . 1 0 ]
+"43095
+"43095
+[v _SPI1STATUSbits SPI1STATUSbits `VES387  1 e 1 @15639 ]
+"43190
+[v _SPI1BAUD SPI1BAUD `VEuc  1 e 1 @15641 ]
+"50895
+[v _ADRESL ADRESL `VEuc  1 e 1 @16111 ]
+"51023
+[v _ADRESH ADRESH `VEuc  1 e 1 @16112 ]
+"51143
+[v _ADPCH ADPCH `VEuc  1 e 1 @16113 ]
+[s S82 . 1 `uc 1 GO 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 FM 1 0 :2:2 
+`uc 1 CS 1 0 :1:4 
+`uc 1 . 1 0 :1:5 
+`uc 1 CONT 1 0 :1:6 
+`uc 1 ON 1 0 :1:7 
+]
+"51831
+[s S90 . 1 `uc 1 ADGO 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 ADFM 1 0 :2:2 
+`uc 1 ADCS 1 0 :1:4 
+`uc 1 . 1 0 :1:5 
+`uc 1 ADCONT 1 0 :1:6 
+`uc 1 ADON 1 0 :1:7 
+]
+"51831
+[s S98 . 1 `uc 1 DONE 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 FM0 1 0 :1:2 
+]
+"51831
+[s S102 . 1 `uc 1 GO_NOT_DONE 1 0 :1:0 
+]
+"51831
+[s S104 . 1 `uc 1 GO_nDONE 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 ADFM0 1 0 :1:2 
+]
+"51831
+[u S108 . 1 `S82 1 . 1 0 `S90 1 . 1 0 `S98 1 . 1 0 `S102 1 . 1 0 `S104 1 . 1 0 ]
+"51831
+"51831
+[v _ADCON0bits ADCON0bits `VES108  1 e 1 @16120 ]
+"23 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
+[v _main main `(v  1 e 1 0 ]
+{
+"27
+} 0
+"17
+[v _Board_Init Board_Init `(v  1 e 1 0 ]
+{
+"21
+} 0
+"10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\spi.c
+[v _SPI_Init SPI_Init `(v  1 e 1 0 ]
+{
+"37
+} 0
+"10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\leds.c
+[v _LEDs_Init LEDs_Init `(v  1 e 1 0 ]
+{
+"15
+} 0
+"12 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\adc.c
+[v _ADC_Init ADC_Init `(v  1 e 1 0 ]
+{
+"19
+} 0

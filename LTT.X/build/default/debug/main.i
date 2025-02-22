@@ -36690,21 +36690,6 @@ typedef struct {
 } can_msg_t;
 # 12 "main.c" 2
 
-# 1 "./canlib/pic18f26k83/pic18f26k83_can.h" 1
-# 16 "./canlib/pic18f26k83/pic18f26k83_can.h"
-void can_init(const can_timing_t *timing,
-              void (*receive_callback)(const can_msg_t *message));
-
-
-void can_send(const can_msg_t* message);
-
-
-_Bool can_send_rdy(void);
-
-
-void can_handle_interrupt(void);
-# 13 "main.c" 2
-
 # 1 "./canlib/message_types.h" 1
 
 
@@ -36908,47 +36893,7 @@ typedef enum {
     STATE_ID_COEFF_CL = 0x0B,
     STATE_ID_CANARD_ANGLE = 0x0C,
 } can_state_est_id_t;
-# 14 "main.c" 2
-
-# 1 "./canlib/util/timing_util.h" 1
-
-
-
-
-
-
-
-_Bool can_generate_timing_params(uint32_t can_frequency, can_timing_t *timing);
-# 15 "main.c" 2
-
-# 1 "./canlib/util/can_tx_buffer.h" 1
-
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stddef.h" 1 3
-# 19 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stddef.h" 3
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 1 3
-# 138 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef int ptrdiff_t;
-# 20 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stddef.h" 2 3
-# 2 "./canlib/util/can_tx_buffer.h" 2
-# 12 "./canlib/util/can_tx_buffer.h"
-void txb_init(void *pool, size_t pool_size,
-              void (*can_send_fp)(const can_msg_t *),
-              _Bool (*can_tx_ready)(void));
-
-
-
-
-
-
-_Bool txb_enqueue(const can_msg_t *msg);
-
-
-
-
-
-
-void txb_heartbeat(void);
-# 16 "main.c" 2
+# 13 "main.c" 2
 
 
 
@@ -36957,8 +36902,6 @@ void Board_Init() {
     LEDs_Init();
     ADC_Init();
     SPI_Init();
-
-    can_init();
 }
 
 void main(void) {
