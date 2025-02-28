@@ -9,6 +9,7 @@
 #include "leds.h"
 #include "adc.h"
 #include "spi.h"
+#include "cc1200.h"
 #include "canlib/can.h"
 #include "canlib/message_types.h"
 
@@ -22,6 +23,9 @@ void Board_Init() {
 
 void main(void) {
     Board_Init();
+    
+    Read_CC1200(0x3D);
+    
     
     return;
 }

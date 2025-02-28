@@ -1,3 +1,4 @@
 [submodule "LTT.X/canlib"]
 	path = LTT.X/canlib
 	url = https://github.com/waterloo-rocketry/canlib.git
+	branch = 2025-initial-canlib-update

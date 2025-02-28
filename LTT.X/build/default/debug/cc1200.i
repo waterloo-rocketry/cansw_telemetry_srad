@@ -1,4 +1,4 @@
-# 1 "canlib/pic18f26k83/pic18f26k83_can.c"
+# 1 "cc1200.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,180 +6,17 @@
 # 1 "<built-in>" 2
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "canlib/pic18f26k83/pic18f26k83_can.c" 2
-# 1 "canlib/pic18f26k83/pic18f26k83_can.h" 1
+# 1 "cc1200.c" 2
 
 
 
-# 1 "canlib/pic18f26k83/../can.h" 1
 
 
 
 
 
-
-
-
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 1 3
-
-
-
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\musl_xc8.h" 1 3
-# 5 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 2 3
-# 26 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 3
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 1 3
-# 133 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef unsigned __int24 uintptr_t;
-# 148 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef __int24 intptr_t;
-# 164 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef signed char int8_t;
-
-
-
-
-typedef short int16_t;
-
-
-
-
-typedef __int24 int24_t;
-
-
-
-
-typedef long int32_t;
-
-
-
-
-
-typedef long long int64_t;
-# 194 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef long long intmax_t;
-
-
-
-
-
-typedef unsigned char uint8_t;
-
-
-
-
-typedef unsigned short uint16_t;
-
-
-
-
-typedef __uint24 uint24_t;
-
-
-
-
-typedef unsigned long uint32_t;
-
-
-
-
-
-typedef unsigned long long uint64_t;
-# 235 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef unsigned long long uintmax_t;
-# 27 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 2 3
-
-typedef int8_t int_fast8_t;
-
-typedef int64_t int_fast64_t;
-
-
-typedef int8_t int_least8_t;
-typedef int16_t int_least16_t;
-
-typedef int24_t int_least24_t;
-typedef int24_t int_fast24_t;
-
-typedef int32_t int_least32_t;
-
-typedef int64_t int_least64_t;
-
-
-typedef uint8_t uint_fast8_t;
-
-typedef uint64_t uint_fast64_t;
-
-
-typedef uint8_t uint_least8_t;
-typedef uint16_t uint_least16_t;
-
-typedef uint24_t uint_least24_t;
-typedef uint24_t uint_fast24_t;
-
-typedef uint32_t uint_least32_t;
-
-typedef uint64_t uint_least64_t;
-# 148 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 3
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/stdint.h" 1 3
-typedef int16_t int_fast16_t;
-typedef int32_t int_fast32_t;
-typedef uint16_t uint_fast16_t;
-typedef uint32_t uint_fast32_t;
-# 149 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 2 3
-# 9 "canlib/pic18f26k83/../can.h" 2
-
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdbool.h" 1 3
-# 10 "canlib/pic18f26k83/../can.h" 2
-
-
-
-
-typedef uint32_t can_sid_t;
-
-
-typedef struct {
-
-    uint8_t brp;
-
-    uint8_t sjw;
-
-
-    uint8_t sam;
-
-    uint8_t seg1ph;
-
-    uint8_t seg2ph;
-
-    uint8_t prseg;
-
-
-
-    _Bool btlmode;
-} can_timing_t;
-
-
-typedef struct {
-
-    can_sid_t sid;
-
-    uint8_t data_len;
-
-    uint8_t data[8];
-} can_msg_t;
-# 4 "canlib/pic18f26k83/pic18f26k83_can.h" 2
-# 16 "canlib/pic18f26k83/pic18f26k83_can.h"
-void can_init(const can_timing_t *timing,
-              void (*receive_callback)(const can_msg_t *message));
-
-
-void can_send(const can_msg_t* message);
-
-
-_Bool can_send_rdy(void);
-
-
-void can_handle_interrupt(void);
-# 1 "canlib/pic18f26k83/pic18f26k83_can.c" 2
-
+# 1 "./cc1200.h" 1
+# 12 "./cc1200.h"
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 1 3
 # 18 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -193,7 +30,16 @@ extern double __fpnormalize(double);
 
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdlib.h" 1 3
-# 10 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdlib.h" 3
+
+
+
+# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\musl_xc8.h" 1 3
+# 5 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdlib.h" 2 3
+
+
+
+
+
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\features.h" 1 3
 # 11 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdlib.h" 2 3
 # 21 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdlib.h" 3
@@ -202,6 +48,10 @@ extern double __fpnormalize(double);
 typedef long int wchar_t;
 # 128 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
 typedef unsigned size_t;
+# 174 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef __int24 int24_t;
+# 210 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef __uint24 uint24_t;
 # 22 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdlib.h" 2 3
 
 int atoi (const char *);
@@ -290,6 +140,91 @@ extern void __builtin_software_breakpoint(void);
 
 
 
+# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 1 3
+# 26 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 3
+# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 1 3
+# 133 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef unsigned __int24 uintptr_t;
+# 148 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef __int24 intptr_t;
+# 164 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef signed char int8_t;
+
+
+
+
+typedef short int16_t;
+# 179 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef long int32_t;
+
+
+
+
+
+typedef long long int64_t;
+# 194 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef long long intmax_t;
+
+
+
+
+
+typedef unsigned char uint8_t;
+
+
+
+
+typedef unsigned short uint16_t;
+# 215 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef unsigned long uint32_t;
+
+
+
+
+
+typedef unsigned long long uint64_t;
+# 235 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
+typedef unsigned long long uintmax_t;
+# 27 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 2 3
+
+typedef int8_t int_fast8_t;
+
+typedef int64_t int_fast64_t;
+
+
+typedef int8_t int_least8_t;
+typedef int16_t int_least16_t;
+
+typedef int24_t int_least24_t;
+typedef int24_t int_fast24_t;
+
+typedef int32_t int_least32_t;
+
+typedef int64_t int_least64_t;
+
+
+typedef uint8_t uint_fast8_t;
+
+typedef uint64_t uint_fast64_t;
+
+
+typedef uint8_t uint_least8_t;
+typedef uint16_t uint_least16_t;
+
+typedef uint24_t uint_least24_t;
+typedef uint24_t uint_fast24_t;
+
+typedef uint32_t uint_least32_t;
+
+typedef uint64_t uint_least64_t;
+# 148 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 3
+# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/stdint.h" 1 3
+typedef int16_t int_fast16_t;
+typedef int32_t int_fast32_t;
+typedef uint16_t uint_fast16_t;
+typedef uint32_t uint_fast32_t;
+# 149 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdint.h" 2 3
+# 4 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\builtins.h" 2 3
 
 
 
@@ -36689,253 +36624,57 @@ __attribute__((__unsupported__("The READTIMER" "0" "() macro is not available wi
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
-# 2 "canlib/pic18f26k83/pic18f26k83_can.c" 2
-
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\string.h" 1 3
-# 25 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\string.h" 3
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 1 3
-# 421 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\bits/alltypes.h" 3
-typedef struct __locale_struct * locale_t;
-# 26 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\string.h" 2 3
-
-void *memcpy (void *restrict, const void *restrict, size_t);
-void *memmove (void *, const void *, size_t);
-void *memset (void *, int, size_t);
-int memcmp (const void *, const void *, size_t);
-void *memchr (const void *, int, size_t);
-
-char *strcpy (char *restrict, const char *restrict);
-char *strncpy (char *restrict, const char *restrict, size_t);
-
-char *strcat (char *restrict, const char *restrict);
-char *strncat (char *restrict, const char *restrict, size_t);
-
-int strcmp (const char *, const char *);
-int strncmp (const char *, const char *, size_t);
-
-int strcoll (const char *, const char *);
-size_t strxfrm (char *restrict, const char *restrict, size_t);
-
-char *strchr (const char *, int);
-char *strrchr (const char *, int);
-
-size_t strcspn (const char *, const char *);
-size_t strspn (const char *, const char *);
-char *strpbrk (const char *, const char *);
-char *strstr (const char *, const char *);
-char *strtok (char *restrict, const char *restrict);
-
-size_t strlen (const char *);
-
-char *strerror (int);
+# 12 "./cc1200.h" 2
 
 
+# 1 "./spi.h" 1
+# 15 "./spi.h"
+void SPI_Init(void);
+
+uint8_t Read_SPI(void);
+
+void Write_SPI(uint8_t);
+# 14 "./cc1200.h" 2
 
 
-char *strtok_r (char *restrict, const char *restrict, char **restrict);
-int strerror_r (int, char *, size_t);
-char *stpcpy(char *restrict, const char *restrict);
-char *stpncpy(char *restrict, const char *restrict, size_t);
-size_t strnlen (const char *, size_t);
-char *strdup (const char *);
-char *strndup (const char *, size_t);
-char *strsignal(int);
-char *strerror_l (int, locale_t);
-int strcoll_l (const char *, const char *, locale_t);
-size_t strxfrm_l (char *restrict, const char *restrict, size_t, locale_t);
+void Write_CC1200(uint8_t, uint8_t);
+
+uint8_t Read_CC1200(uint8_t);
+# 9 "cc1200.c" 2
 
 
+void Write_CC1200(uint8_t reg, uint8_t val){
+    LATA5 = 0;
+    while (PORTCbits.RC4);
+    if (reg > 0x2F) {
+
+        Write_SPI(0b00101111);
+        Write_SPI(reg);
+    } else {
 
 
-void *memccpy (void *restrict, const void *restrict, int, size_t);
-# 3 "canlib/pic18f26k83/pic18f26k83_can.c" 2
-
-
-static void (*can_rcv_cb)(const can_msg_t *message);
-# 16 "canlib/pic18f26k83/pic18f26k83_can.c"
-void can_init(const can_timing_t *timing,
-              void (*receive_callback)(const can_msg_t *message)) {
-
-    can_rcv_cb = receive_callback;
-
-
-    CANCONbits.REQOP = 0b100;
-
-    while (CANSTATbits.OPMODE != 0x4);
-
-
-
-    ECANCONbits.MDSEL = 0;
-
-
-
-    CIOCONbits.CLKSEL = 0;
-
-    BRGCON1bits.SJW = timing->sjw;
-    BRGCON1bits.BRP = timing->brp;
-    BRGCON2bits.SEG2PHTS = timing->btlmode;
-    BRGCON2bits.SAM = timing->sam;
-    BRGCON2bits.SEG1PH = timing->seg1ph;
-    BRGCON2bits.PRSEG = timing->prseg;
-    BRGCON3bits.SEG2PH = timing->seg2ph;
-
-
-
-
-
-    BRGCON3bits.WAKDIS = 1;
-    BRGCON3bits.WAKFIL = 0;
-
-
-
-    RXM0SIDH = 0;
-    RXM0SIDL = 0;
-    RXM1SIDH = 0;
-    RXM1SIDL = 0;
-
-
-
-    RXB0CONbits.RXM0 = 1;
-    RXB0CONbits.RXM1 = 1;
-
-
-    RXB0CONbits.RB0DBEN = 1;
-
-
-
-    PIE5bits.IRXIE = 1;
-
-    PIE5bits.WAKIE = 0;
-
-    PIE5bits.ERRIE = 1;
-
-    PIE5bits.TXB2IE = 0;
-    PIE5bits.TXB1IE = 0;
-    PIE5bits.TXB0IE = 0;
-
-    PIE5bits.RXB1IE = 1;
-    PIE5bits.RXB0IE = 1;
-
-
-    CANCONbits.REQOP = 0;
-
-    while (CANSTATbits.OPMODE != 0x0);
-}
-
-void can_send(const can_msg_t* message) {
-
-    if (TXB0CONbits.TXREQ != 0) {
-        return;
+        Write_SPI(reg);
     }
 
+    Write_SPI(val);
+    LATA5 = 1;
+};
 
-    if(message->data_len > 8 || message->sid > 0x1FFFFFFF) {
-        return;
+uint8_t Read_CC1200(uint8_t reg){
+    uint8_t val;
+    LATA5 = 0;
+    while (PORTCbits.RC4);
+    if (reg > 0x2F) {
+
+        Write_SPI(0b10101111);
+        Write_SPI(reg);
+    } else {
+
+
+        reg |= (1 << 7);
+        Write_SPI(reg);
     }
-
-
-    TXB0CONbits.TXPRI = 0;
-    TXB0SIDH = (message->sid >> 21);
-    TXB0SIDL = (((message->sid >> 18) & 0x7) << 5) | (1 << 3) | ((message->sid >> 16) & 0x3);
-    TXB0EIDH = message->sid >> 8;
-    TXB0EIDL = message->sid;
-
-
-    TXB0DLCbits.TXRTR = 0;
-
-    TXB0DLCbits.DLC = message->data_len;
-
-
-
-    memcpy((void*) &TXB0D0, message->data, message->data_len);
-
-
-    TXB0CONbits.TXREQ = 1;
-}
-
-_Bool can_send_rdy(void) {
-    return TXB0CONbits.TXREQ == 0;
-}
-
-
-
-void can_handle_interrupt() {
-
-
-
-    if (COMSTATbits.RXB0OVFL || COMSTATbits.RXB1OVFL) {
-        COMSTATbits.RXB0OVFL = 0;
-        COMSTATbits.RXB1OVFL = 0;
-    }
-
-    if (TXB0CONbits.TXREQ && TXB0CONbits.TXERR && PIR5bits.IRXIF) {
-
-        TXB0CONbits.TXREQ = 0;
-        return;
-    }
-
-
-
-    if (PIR5bits.RXB0IF) {
-        can_msg_t rcvd_msg;
-        rcvd_msg.sid = (uint32_t)RXB0SIDH << 21;
-        rcvd_msg.sid |= (((uint32_t)RXB0SIDL >> 5) & 0x7) << 18;
-        rcvd_msg.sid |= ((uint32_t)RXB0SIDL & 0x3) << 16;
-        rcvd_msg.sid |= (uint32_t)RXB0EIDH << 8;
-        rcvd_msg.sid |= RXB0EIDL;
-
-        rcvd_msg.data_len = RXB0DLCbits.DLC;
-        memcpy(rcvd_msg.data, (const void *) &RXB0D0, rcvd_msg.data_len);
-
-
-        if (((void*)0) != can_rcv_cb) {
-            can_rcv_cb(&rcvd_msg);
-        }
-
-        PIR5bits.RXB0IF = 0;
-        RXB0CONbits.RXFUL = 0;
-        return;
-    } else if (PIR5bits.RXB1IF) {
-
-        can_msg_t rcvd_msg;
-        rcvd_msg.sid = (uint32_t)RXB1SIDH << 21;
-        rcvd_msg.sid |= (((uint32_t)RXB1SIDL >> 5) & 0x7) << 18;
-        rcvd_msg.sid |= ((uint32_t)RXB1SIDL & 0x3) << 16;
-        rcvd_msg.sid |= (uint32_t)RXB1EIDH << 8;
-        rcvd_msg.sid |= RXB1EIDL;
-
-        rcvd_msg.data_len = RXB1DLCbits.DLC;
-        memcpy(rcvd_msg.data, (const void *) &RXB1D0, rcvd_msg.data_len);
-
-
-        if (((void*)0) != can_rcv_cb) {
-            can_rcv_cb(&rcvd_msg);
-        }
-
-        PIR5bits.RXB1IF = 0;
-        RXB1CONbits.RXFUL = 0;
-    }
-
-
-
-    else if (PIR5bits.TXB0IF) {
-        PIR5bits.TXB0IF = 0;
-        return;
-    } else if (PIR5bits.TXB1IF) {
-        PIR5bits.TXB1IF = 0;
-        return;
-    } else if (PIR5bits.TXB2IF) {
-        PIR5bits.TXB2IF = 0;
-        return;
-    } else if (PIR5bits.IRXIF) {
-
-
-        PIR5bits.IRXIF = 0;
-        return;
-    } else if (PIR5bits.ERRIF) {
-
-
-        PIR5bits.ERRIF = 0;
-        return;
-    }
-}
+    val = Read_SPI();
+    LATA5 = 1;
+    return val;
+};

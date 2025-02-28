@@ -36654,6 +36654,13 @@ uint8_t Read_SPI(void);
 void Write_SPI(uint8_t);
 # 11 "main.c" 2
 
+# 1 "./cc1200.h" 1
+# 16 "./cc1200.h"
+void Write_CC1200(uint8_t, uint8_t);
+
+uint8_t Read_CC1200(uint8_t);
+# 12 "main.c" 2
+
 # 1 "./canlib/can.h" 1
 # 14 "./canlib/can.h"
 typedef uint32_t can_sid_t;
@@ -36688,7 +36695,7 @@ typedef struct {
 
     uint8_t data[8];
 } can_msg_t;
-# 12 "main.c" 2
+# 13 "main.c" 2
 
 # 1 "./canlib/message_types.h" 1
 
@@ -36893,7 +36900,7 @@ typedef enum {
     STATE_ID_COEFF_CL = 0x0B,
     STATE_ID_CANARD_ANGLE = 0x0C,
 } can_state_est_id_t;
-# 13 "main.c" 2
+# 14 "main.c" 2
 
 
 
@@ -36906,6 +36913,9 @@ void Board_Init() {
 
 void main(void) {
     Board_Init();
+
+    Read_CC1200(0x3D);
+
 
     return;
 }

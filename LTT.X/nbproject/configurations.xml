@@ -10,6 +10,7 @@
       <itemPath>canlib/can.h</itemPath>
       <itemPath>canlib/canlib.h</itemPath>
       <itemPath>canlib/message_types.h</itemPath>
+      <itemPath>cc1200.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -28,6 +29,7 @@
       <itemPath>leds.c</itemPath>
       <itemPath>adc.c</itemPath>
       <itemPath>spi.c</itemPath>
+      <itemPath>cc1200.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

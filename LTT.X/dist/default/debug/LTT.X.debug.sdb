@@ -29,15 +29,21 @@
 [v ___lmul __lmul `(ul  1 e 4 0 ]
 "91 C:\Program Files\Microchip\xc8\v2.46\pic\sources\c99\common\Umul64.c
 [v ___omul __omul `(uo  1 e 8 0 ]
+"28 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\cc1200.c
+[v _Read_CC1200 Read_CC1200 `(uc  1 e 1 0 ]
 "10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\leds.c
 [v _LEDs_Init LEDs_Init `(v  1 e 1 0 ]
-"17 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
+"18 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
 [v _Board_Init Board_Init `(v  1 e 1 0 ]
-"23
+"24
 [v _main main `(v  1 e 1 0 ]
 "10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\spi.c
 [v _SPI_Init SPI_Init `(v  1 e 1 0 ]
-[s S228 . 1 `uc 1 LATA0 1 0 :1:0 
+"39
+[v _Read_SPI Read_SPI `(uc  1 e 1 0 ]
+"47
+[v _Write_SPI Write_SPI `(v  1 e 1 0 ]
+[s S233 . 1 `uc 1 LATA0 1 0 :1:0 
 `uc 1 LATA1 1 0 :1:1 
 `uc 1 LATA2 1 0 :1:2 
 `uc 1 LATA3 1 0 :1:3 
@@ -47,7 +53,7 @@
 `uc 1 LATA7 1 0 :1:7 
 ]
 "4545 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-K_DFP/1.13.292/xc8\pic\include\proc\pic18lf26k83.h
-[s S237 . 1 `uc 1 LA0 1 0 :1:0 
+[s S242 . 1 `uc 1 LA0 1 0 :1:0 
 `uc 1 LA1 1 0 :1:1 
 `uc 1 LA2 1 0 :1:2 
 `uc 1 LA3 1 0 :1:3 
@@ -56,9 +62,9 @@
 `uc 1 LA6 1 0 :1:6 
 `uc 1 LA7 1 0 :1:7 
 ]
-[u S246 . 1 `S228 1 . 1 0 `S237 1 . 1 0 ]
-[v _LATAbits LATAbits `VES246  1 e 1 @16314 ]
-[s S43 . 1 `uc 1 TRISA0 1 0 :1:0 
+[u S251 . 1 `S233 1 . 1 0 `S242 1 . 1 0 ]
+[v _LATAbits LATAbits `VES251  1 e 1 @16314 ]
+[s S48 . 1 `uc 1 TRISA0 1 0 :1:0 
 `uc 1 TRISA1 1 0 :1:1 
 `uc 1 TRISA2 1 0 :1:2 
 `uc 1 TRISA3 1 0 :1:3 
@@ -68,9 +74,9 @@
 `uc 1 TRISA7 1 0 :1:7 
 ]
 "4871
-[u S52 . 1 `S43 1 . 1 0 ]
-[v _TRISAbits TRISAbits `VES52  1 e 1 @16322 ]
-[s S195 . 1 `uc 1 TRISC0 1 0 :1:0 
+[u S57 . 1 `S48 1 . 1 0 ]
+[v _TRISAbits TRISAbits `VES57  1 e 1 @16322 ]
+[s S200 . 1 `uc 1 TRISC0 1 0 :1:0 
 `uc 1 TRISC1 1 0 :1:1 
 `uc 1 TRISC2 1 0 :1:2 
 `uc 1 TRISC3 1 0 :1:3 
@@ -80,15 +86,36 @@
 `uc 1 TRISC7 1 0 :1:7 
 ]
 "4995
-[u S204 . 1 `S195 1 . 1 0 ]
-[v _TRISCbits TRISCbits `VES204  1 e 1 @16324 ]
+[u S209 . 1 `S200 1 . 1 0 ]
+[v _TRISCbits TRISCbits `VES209  1 e 1 @16324 ]
+[s S465 . 1 `uc 1 RC0 1 0 :1:0 
+`uc 1 RC1 1 0 :1:1 
+`uc 1 RC2 1 0 :1:2 
+`uc 1 RC3 1 0 :1:3 
+`uc 1 RC4 1 0 :1:4 
+`uc 1 RC5 1 0 :1:5 
+`uc 1 RC6 1 0 :1:6 
+`uc 1 RC7 1 0 :1:7 
+]
+"5221
+[s S474 . 1 `uc 1 . 1 0 :1:0 
+`uc 1 CCP2 1 0 :1:1 
+`uc 1 PA1 1 0 :1:2 
+]
+[s S478 . 1 `uc 1 . 1 0 :1:0 
+`uc 1 PA2 1 0 :1:1 
+]
+[u S481 . 1 `S465 1 . 1 0 `S474 1 . 1 0 `S478 1 . 1 0 ]
+[v _PORTCbits PORTCbits `VES481  1 e 1 @16332 ]
 "12742
 [v _LATA2 LATA2 `VEb  1 e 0 @130514 ]
 "12745
 [v _LATA3 LATA3 `VEb  1 e 0 @130515 ]
 "12748
 [v _LATA4 LATA4 `VEb  1 e 0 @130516 ]
-[s S154 . 1 `uc 1 ANSELA0 1 0 :1:0 
+"12751
+[v _LATA5 LATA5 `VEb  1 e 0 @130517 ]
+[s S159 . 1 `uc 1 ANSELA0 1 0 :1:0 
 `uc 1 ANSELA1 1 0 :1:1 
 `uc 1 ANSELA2 1 0 :1:2 
 `uc 1 ANSELA3 1 0 :1:3 
@@ -98,32 +125,31 @@
 `uc 1 ANSELA7 1 0 :1:7 
 ]
 "29617
-[u S163 . 1 `S154 1 . 1 0 ]
-[v _ANSELAbits ANSELAbits `VES163  1 e 1 @14912 ]
-"42635
+[u S168 . 1 `S159 1 . 1 0 ]
+[v _ANSELAbits ANSELAbits `VES168  1 e 1 @14912 ]
 "42635
 [v _SPI1RXB SPI1RXB `VEuc  1 e 1 @15632 ]
 "42705
 [v _SPI1TXB SPI1TXB `VEuc  1 e 1 @15633 ]
-[s S268 . 1 `uc 1 BMODE 1 0 :1:0 
+[s S273 . 1 `uc 1 BMODE 1 0 :1:0 
 `uc 1 MST 1 0 :1:1 
 `uc 1 LSBF 1 0 :1:2 
 `uc 1 . 1 0 :4:3 
 `uc 1 EN 1 0 :1:7 
 ]
 "42843
-[s S274 . 1 `uc 1 SPI1BMODE 1 0 :1:0 
+[s S279 . 1 `uc 1 SPI1BMODE 1 0 :1:0 
 `uc 1 SPI1MST 1 0 :1:1 
 `uc 1 SPI1LSBF 1 0 :1:2 
 `uc 1 . 1 0 :4:3 
 `uc 1 SPI1SPIEN 1 0 :1:7 
 ]
 "42843
-[u S280 . 1 `S268 1 . 1 0 `S274 1 . 1 0 ]
+[u S285 . 1 `S273 1 . 1 0 `S279 1 . 1 0 ]
 "42843
 "42843
-[v _SPI1CON0bits SPI1CON0bits `VES280  1 e 1 @15636 ]
-[s S296 . 1 `uc 1 SDOP 1 0 :1:0 
+[v _SPI1CON0bits SPI1CON0bits `VES285  1 e 1 @15636 ]
+[s S301 . 1 `uc 1 SDOP 1 0 :1:0 
 `uc 1 SDIP 1 0 :1:1 
 `uc 1 SSP 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
@@ -133,7 +159,7 @@
 `uc 1 SMP 1 0 :1:7 
 ]
 "42915
-[s S305 . 1 `uc 1 SPI1SDOP 1 0 :1:0 
+[s S310 . 1 `uc 1 SPI1SDOP 1 0 :1:0 
 `uc 1 SPI1SDIP 1 0 :1:1 
 `uc 1 SPI1SSP 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
@@ -143,11 +169,11 @@
 `uc 1 SPI1SMP 1 0 :1:7 
 ]
 "42915
-[u S314 . 1 `S296 1 . 1 0 `S305 1 . 1 0 ]
+[u S319 . 1 `S301 1 . 1 0 `S310 1 . 1 0 ]
 "42915
 "42915
-[v _SPI1CON1bits SPI1CON1bits `VES314  1 e 1 @15637 ]
-[s S336 . 1 `uc 1 RXR 1 0 :1:0 
+[v _SPI1CON1bits SPI1CON1bits `VES319  1 e 1 @15637 ]
+[s S341 . 1 `uc 1 RXR 1 0 :1:0 
 `uc 1 TXR 1 0 :1:1 
 `uc 1 SSET 1 0 :1:2 
 `uc 1 . 1 0 :3:3 
@@ -155,7 +181,7 @@
 `uc 1 BUSY 1 0 :1:7 
 ]
 "43013
-[s S343 . 1 `uc 1 SPI1RXR 1 0 :1:0 
+[s S348 . 1 `uc 1 SPI1RXR 1 0 :1:0 
 `uc 1 SPI1TXR 1 0 :1:1 
 `uc 1 SPI1SSET 1 0 :1:2 
 `uc 1 . 1 0 :3:3 
@@ -163,11 +189,11 @@
 `uc 1 SPI1BUSY 1 0 :1:7 
 ]
 "43013
-[u S350 . 1 `S336 1 . 1 0 `S343 1 . 1 0 ]
+[u S355 . 1 `S341 1 . 1 0 `S348 1 . 1 0 ]
 "43013
 "43013
-[v _SPI1CON2bits SPI1CON2bits `VES350  1 e 1 @15638 ]
-[s S369 . 1 `uc 1 RXBF 1 0 :1:0 
+[v _SPI1CON2bits SPI1CON2bits `VES355  1 e 1 @15638 ]
+[s S374 . 1 `uc 1 RXBF 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 CLRBF 1 0 :1:2 
 `uc 1 RXRE 1 0 :1:3 
@@ -177,7 +203,7 @@
 `uc 1 TXWE 1 0 :1:7 
 ]
 "43095
-[s S378 . 1 `uc 1 SPI1RXBF 1 0 :1:0 
+[s S383 . 1 `uc 1 SPI1RXBF 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 SPI1CLRBF 1 0 :1:2 
 `uc 1 SPI1RXRE 1 0 :1:3 
@@ -187,10 +213,10 @@
 `uc 1 SPI1TXWE 1 0 :1:7 
 ]
 "43095
-[u S387 . 1 `S369 1 . 1 0 `S378 1 . 1 0 ]
+[u S392 . 1 `S374 1 . 1 0 `S383 1 . 1 0 ]
 "43095
 "43095
-[v _SPI1STATUSbits SPI1STATUSbits `VES387  1 e 1 @15639 ]
+[v _SPI1STATUSbits SPI1STATUSbits `VES392  1 e 1 @15639 ]
 "43190
 [v _SPI1BAUD SPI1BAUD `VEuc  1 e 1 @15641 ]
 "50895
@@ -199,7 +225,7 @@
 [v _ADRESH ADRESH `VEuc  1 e 1 @16112 ]
 "51143
 [v _ADPCH ADPCH `VEuc  1 e 1 @16113 ]
-[s S82 . 1 `uc 1 GO 1 0 :1:0 
+[s S87 . 1 `uc 1 GO 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 FM 1 0 :2:2 
 `uc 1 CS 1 0 :1:4 
@@ -208,7 +234,7 @@
 `uc 1 ON 1 0 :1:7 
 ]
 "51831
-[s S90 . 1 `uc 1 ADGO 1 0 :1:0 
+[s S95 . 1 `uc 1 ADGO 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 ADFM 1 0 :2:2 
 `uc 1 ADCS 1 0 :1:4 
@@ -217,32 +243,56 @@
 `uc 1 ADON 1 0 :1:7 
 ]
 "51831
-[s S98 . 1 `uc 1 DONE 1 0 :1:0 
+[s S103 . 1 `uc 1 DONE 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 FM0 1 0 :1:2 
 ]
 "51831
-[s S102 . 1 `uc 1 GO_NOT_DONE 1 0 :1:0 
+[s S107 . 1 `uc 1 GO_NOT_DONE 1 0 :1:0 
 ]
 "51831
-[s S104 . 1 `uc 1 GO_nDONE 1 0 :1:0 
+[s S109 . 1 `uc 1 GO_nDONE 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 ADFM0 1 0 :1:2 
 ]
 "51831
-[u S108 . 1 `S82 1 . 1 0 `S90 1 . 1 0 `S98 1 . 1 0 `S102 1 . 1 0 `S104 1 . 1 0 ]
+[u S113 . 1 `S87 1 . 1 0 `S95 1 . 1 0 `S103 1 . 1 0 `S107 1 . 1 0 `S109 1 . 1 0 ]
 "51831
 "51831
-[v _ADCON0bits ADCON0bits `VES108  1 e 1 @16120 ]
-"23 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
+[v _ADCON0bits ADCON0bits `VES113  1 e 1 @16120 ]
+"24 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
 [v _main main `(v  1 e 1 0 ]
 {
-"27
+"31
 } 0
-"17
+"28 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\cc1200.c
+[v _Read_CC1200 Read_CC1200 `(uc  1 e 1 0 ]
+{
+[v Read_CC1200@reg reg `uc  1 a 1 wreg ]
+[v Read_CC1200@reg reg `uc  1 a 1 wreg ]
+"30
+[v Read_CC1200@reg reg `uc  1 a 1 1 ]
+"45
+} 0
+"47 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\spi.c
+[v _Write_SPI Write_SPI `(v  1 e 1 0 ]
+{
+[v Write_SPI@data data `uc  1 a 1 wreg ]
+[v Write_SPI@data data `uc  1 a 1 wreg ]
+[v Write_SPI@data data `uc  1 a 1 0 ]
+"51
+} 0
+"39
+[v _Read_SPI Read_SPI `(uc  1 e 1 0 ]
+{
+"40
+[v Read_SPI@data data `uc  1 a 1 0 ]
+"45
+} 0
+"18 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\main.c
 [v _Board_Init Board_Init `(v  1 e 1 0 ]
 {
-"21
+"22
 } 0
 "10 C:\Users\Manav\Desktop\Rocketry\cansw_telemetry_srad\LTT.X\spi.c
 [v _SPI_Init SPI_Init `(v  1 e 1 0 ]

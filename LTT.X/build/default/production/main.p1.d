@@ -1,4 +1,4 @@
-build/default/debug/main.p1:  \
+build/default/production/main.p1:  \
 main.c  \
 leds.h  \
 adc.h  \
