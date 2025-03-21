@@ -1,0 +1,815 @@
+Version 4.0 HI-TECH Software Intermediate Code
+"9 canlib/message/msg_gps.c
+[; ;canlib/message/msg_gps.c: 9: _Bool build_gps_time_msg(
+[c E51 0 1 2 3 .. ]
+[n E51 . PRIO_HIGHEST PRIO_HIGH PRIO_MEDIUM PRIO_LOW  ]
+"38 canlib\can.h
+[; ;canlib\can.h: 38: typedef struct {
+[s S2 `ul 1 `uc 1 `uc -> 8 `i ]
+[n S2 . sid data_len data ]
+"17 canlib/message/msg_gps.c
+[; ;canlib/message/msg_gps.c: 17:     output->sid = (((uint32_t)prio << 27) | ((uint32_t)MSG_GPS_TIMESTAMP << 18) | ((uint32_t)BOARD_TYPE_ID_TELEMETRY << 8) | BOARD_INST_ID_GENERIC);
+[c E57 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 .. ]
+[n E57 . MSG_GENERAL_BOARD_STATUS MSG_RESET_CMD MSG_DEBUG_RAW MSG_CONFIG_SET MSG_CONFIG_STATUS MSG_ACTUATOR_CMD MSG_ACTUATOR_ANALOG_CMD MSG_ACTUATOR_STATUS MSG_ALT_ARM_CMD MSG_ALT_ARM_STATUS MSG_SENSOR_TEMP MSG_SENSOR_ALTITUDE MSG_SENSOR_IMU_X MSG_SENSOR_IMU_Y MSG_SENSOR_IMU_Z MSG_SENSOR_MAG_X MSG_SENSOR_MAG_Y MSG_SENSOR_MAG_Z MSG_SENSOR_ANALOG MSG_GPS_TIMESTAMP MSG_GPS_LATITUDE MSG_GPS_LONGITUDE MSG_GPS_ALTITUDE MSG_GPS_INFO MSG_STATE_EST_DATA MSG_LEDS_ON MSG_LEDS_OFF  ]
+[c E86 0 1 2 3 4 5 6 7 8 9 10 11 64 65 128 129 130 131 132 133 134 192 .. ]
+[n E86 . BOARD_TYPE_ID_ANY BOARD_TYPE_ID_INJ_SENSOR BOARD_TYPE_ID_CANARD_MOTOR BOARD_TYPE_ID_CAMERA BOARD_TYPE_ID_POWER BOARD_TYPE_ID_LOGGER BOARD_TYPE_ID_PROCESSOR BOARD_TYPE_ID_TELEMETRY BOARD_TYPE_ID_GPS BOARD_TYPE_ID_SRAD_GNSS BOARD_TYPE_ID_ALTIMETER BOARD_TYPE_ID_ARMING BOARD_TYPE_ID_PAY_SENSOR BOARD_TYPE_ID_PAY_MOTOR BOARD_TYPE_ID_RLCS_GLS BOARD_TYPE_ID_RLCS_RELAY BOARD_TYPE_ID_RLCS_HEATING BOARD_TYPE_ID_DAQ BOARD_TYPE_ID_CHARGING BOARD_TYPE_ID_THERMOCOUPLE BOARD_TYPE_ID_USB BOARD_TYPE_ID_FYDP25_TVCA  ]
+[c E110 0 1 .. ]
+[n E110 . BOARD_INST_ID_ANY BOARD_INST_ID_GENERIC  ]
+"26 canlib/message/msg_common.h
+[; ;canlib/message/msg_common.h: 26: void write_timestamp_2bytes(uint16_t timestamp, can_msg_t *output);
+[v _write_timestamp_2bytes `(v ~T0 @X0 0 ef2`us`*S2 ]
+"28
+[; ;canlib/message/msg_common.h: 28: uint16_t get_message_type(const can_msg_t *msg);
+[v _get_message_type `(us ~T0 @X0 0 ef1`*CS2 ]
+"9 canlib/message/msg_gps.c
+[; ;canlib/message/msg_gps.c: 9: _Bool build_gps_time_msg(
+[v _build_gps_time_msg `(a ~T0 @X0 1 ef7`E51`us`uc`uc`uc`uc`*S2 ]
+"12
+[; ;canlib/message/msg_gps.c: 12: ) {
+{
+[e :U _build_gps_time_msg ]
+"10
+[; ;canlib/message/msg_gps.c: 10:     can_msg_prio_t prio, uint16_t timestamp, uint8_t utc_hours, uint8_t utc_mins, uint8_t utc_secs,
+[v _prio `E51 ~T0 @X0 1 r1 ]
+[v _timestamp `us ~T0 @X0 1 r2 ]
+[v _utc_hours `uc ~T0 @X0 1 r3 ]
+[v _utc_mins `uc ~T0 @X0 1 r4 ]
+[v _utc_secs `uc ~T0 @X0 1 r5 ]
+"11
+[; ;canlib/message/msg_gps.c: 11:     uint8_t utc_dsecs, can_msg_t *output
+[v _utc_dsecs `uc ~T0 @X0 1 r6 ]
+[v _output `*S2 ~T0 @X0 1 r7 ]
+"12
+[; ;canlib/message/msg_gps.c: 12: ) {
+[f ]
+"13
+[; ;canlib/message/msg_gps.c: 13:     if (!output) {
+[e $ ! ! != _output -> -> 0 `i `*S2 4  ]
+{
+"14
+[; ;canlib/message/msg_gps.c: 14:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 3  ]
+"15
+[; ;canlib/message/msg_gps.c: 15:     }
+}
+[e :U 4 ]
+"17
+[; ;canlib/message/msg_gps.c: 17:     output->sid = (((uint32_t)prio << 27) | ((uint32_t)MSG_GPS_TIMESTAMP << 18) | ((uint32_t)BOARD_TYPE_ID_TELEMETRY << 8) | BOARD_INST_ID_GENERIC);
+[e = . *U _output 0 | | | << -> _prio `ul -> 27 `i << -> . `E57 19 `ul -> 18 `i << -> . `E86 7 `ul -> 8 `i -> -> . `E110 1 `l `ul ]
+"18
+[; ;canlib/message/msg_gps.c: 18:     write_timestamp_2bytes(timestamp, output);
+[e ( _write_timestamp_2bytes (2 , _timestamp _output ]
+"20
+[; ;canlib/message/msg_gps.c: 20:     output->data[2] = utc_hours;
+[e = *U + &U . *U _output 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _utc_hours ]
+"21
+[; ;canlib/message/msg_gps.c: 21:     output->data[3] = utc_mins;
+[e = *U + &U . *U _output 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _utc_mins ]
+"22
+[; ;canlib/message/msg_gps.c: 22:     output->data[4] = utc_secs;
+[e = *U + &U . *U _output 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _utc_secs ]
+"23
+[; ;canlib/message/msg_gps.c: 23:     output->data[5] = utc_dsecs;
+[e = *U + &U . *U _output 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _utc_dsecs ]
+"25
+[; ;canlib/message/msg_gps.c: 25:     output->data_len = 6;
+[e = . *U _output 1 -> -> 6 `i `uc ]
+"27
+[; ;canlib/message/msg_gps.c: 27:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 3  ]
+"28
+[; ;canlib/message/msg_gps.c: 28: }
+[e :UE 3 ]
+}
+"30
+[; ;canlib/message/msg_gps.c: 30: _Bool build_gps_lat_msg(
+[v _build_gps_lat_msg `(a ~T0 @X0 1 ef7`E51`us`uc`uc`us`uc`*S2 ]
+"33
+[; ;canlib/message/msg_gps.c: 33: ) {
+{
+[e :U _build_gps_lat_msg ]
+"31
+[; ;canlib/message/msg_gps.c: 31:     can_msg_prio_t prio, uint16_t timestamp, uint8_t degrees, uint8_t minutes, uint16_t dminutes,
+[v _prio `E51 ~T0 @X0 1 r1 ]
+[v _timestamp `us ~T0 @X0 1 r2 ]
+[v _degrees `uc ~T0 @X0 1 r3 ]
+[v _minutes `uc ~T0 @X0 1 r4 ]
+[v _dminutes `us ~T0 @X0 1 r5 ]
+"32
+[; ;canlib/message/msg_gps.c: 32:     uint8_t direction, can_msg_t *output
+[v _direction `uc ~T0 @X0 1 r6 ]
+[v _output `*S2 ~T0 @X0 1 r7 ]
+"33
+[; ;canlib/message/msg_gps.c: 33: ) {
+[f ]
+"34
+[; ;canlib/message/msg_gps.c: 34:     if (!output) {
+[e $ ! ! != _output -> -> 0 `i `*S2 6  ]
+{
+"35
+[; ;canlib/message/msg_gps.c: 35:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 5  ]
+"36
+[; ;canlib/message/msg_gps.c: 36:     }
+}
+[e :U 6 ]
+"38
+[; ;canlib/message/msg_gps.c: 38:     output->sid = (((uint32_t)prio << 27) | ((uint32_t)MSG_GPS_LATITUDE << 18) | ((uint32_t)BOARD_TYPE_ID_TELEMETRY << 8) | BOARD_INST_ID_GENERIC);
+[e = . *U _output 0 | | | << -> _prio `ul -> 27 `i << -> . `E57 20 `ul -> 18 `i << -> . `E86 7 `ul -> 8 `i -> -> . `E110 1 `l `ul ]
+"39
+[; ;canlib/message/msg_gps.c: 39:     write_timestamp_2bytes(timestamp, output);
+[e ( _write_timestamp_2bytes (2 , _timestamp _output ]
+"41
+[; ;canlib/message/msg_gps.c: 41:     output->data[2] = degrees;
+[e = *U + &U . *U _output 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _degrees ]
+"42
+[; ;canlib/message/msg_gps.c: 42:     output->data[3] = minutes;
+[e = *U + &U . *U _output 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _minutes ]
+"43
+[; ;canlib/message/msg_gps.c: 43:     output->data[4] = dminutes >> 8;
+[e = *U + &U . *U _output 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> >> -> _dminutes `ui -> 8 `i `uc ]
+"44
+[; ;canlib/message/msg_gps.c: 44:     output->data[5] = dminutes & 0xFF;
+[e = *U + &U . *U _output 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> & -> _dminutes `ui -> -> 255 `i `ui `uc ]
+"45
+[; ;canlib/message/msg_gps.c: 45:     output->data[6] = direction;
+[e = *U + &U . *U _output 2 * -> -> -> 6 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _direction ]
+"47
+[; ;canlib/message/msg_gps.c: 47:     output->data_len = 7;
+[e = . *U _output 1 -> -> 7 `i `uc ]
+"49
+[; ;canlib/message/msg_gps.c: 49:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 5  ]
+"50
+[; ;canlib/message/msg_gps.c: 50: }
+[e :UE 5 ]
+}
+"52
+[; ;canlib/message/msg_gps.c: 52: _Bool build_gps_lon_msg(
+[v _build_gps_lon_msg `(a ~T0 @X0 1 ef7`E51`us`uc`uc`us`uc`*S2 ]
+"55
+[; ;canlib/message/msg_gps.c: 55: ) {
+{
+[e :U _build_gps_lon_msg ]
+"53
+[; ;canlib/message/msg_gps.c: 53:     can_msg_prio_t prio, uint16_t timestamp, uint8_t degrees, uint8_t minutes, uint16_t dminutes,
+[v _prio `E51 ~T0 @X0 1 r1 ]
+[v _timestamp `us ~T0 @X0 1 r2 ]
+[v _degrees `uc ~T0 @X0 1 r3 ]
+[v _minutes `uc ~T0 @X0 1 r4 ]
+[v _dminutes `us ~T0 @X0 1 r5 ]
+"54
+[; ;canlib/message/msg_gps.c: 54:     uint8_t direction, can_msg_t *output
+[v _direction `uc ~T0 @X0 1 r6 ]
+[v _output `*S2 ~T0 @X0 1 r7 ]
+"55
+[; ;canlib/message/msg_gps.c: 55: ) {
+[f ]
+"56
+[; ;canlib/message/msg_gps.c: 56:     if (!output) {
+[e $ ! ! != _output -> -> 0 `i `*S2 8  ]
+{
+"57
+[; ;canlib/message/msg_gps.c: 57:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 7  ]
+"58
+[; ;canlib/message/msg_gps.c: 58:     }
+}
+[e :U 8 ]
+"60
+[; ;canlib/message/msg_gps.c: 60:     output->sid = (((uint32_t)prio << 27) | ((uint32_t)MSG_GPS_LONGITUDE << 18) | ((uint32_t)BOARD_TYPE_ID_TELEMETRY << 8) | BOARD_INST_ID_GENERIC);
+[e = . *U _output 0 | | | << -> _prio `ul -> 27 `i << -> . `E57 21 `ul -> 18 `i << -> . `E86 7 `ul -> 8 `i -> -> . `E110 1 `l `ul ]
+"61
+[; ;canlib/message/msg_gps.c: 61:     write_timestamp_2bytes(timestamp, output);
+[e ( _write_timestamp_2bytes (2 , _timestamp _output ]
+"63
+[; ;canlib/message/msg_gps.c: 63:     output->data[2] = degrees;
+[e = *U + &U . *U _output 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _degrees ]
+"64
+[; ;canlib/message/msg_gps.c: 64:     output->data[3] = minutes;
+[e = *U + &U . *U _output 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _minutes ]
+"65
+[; ;canlib/message/msg_gps.c: 65:     output->data[4] = dminutes >> 8;
+[e = *U + &U . *U _output 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> >> -> _dminutes `ui -> 8 `i `uc ]
+"66
+[; ;canlib/message/msg_gps.c: 66:     output->data[5] = dminutes & 0xFF;
+[e = *U + &U . *U _output 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> & -> _dminutes `ui -> -> 255 `i `ui `uc ]
+"67
+[; ;canlib/message/msg_gps.c: 67:     output->data[6] = direction;
+[e = *U + &U . *U _output 2 * -> -> -> 6 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _direction ]
+"69
+[; ;canlib/message/msg_gps.c: 69:     output->data_len = 7;
+[e = . *U _output 1 -> -> 7 `i `uc ]
+"71
+[; ;canlib/message/msg_gps.c: 71:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 7  ]
+"72
+[; ;canlib/message/msg_gps.c: 72: }
+[e :UE 7 ]
+}
+"74
+[; ;canlib/message/msg_gps.c: 74: _Bool build_gps_alt_msg(
+[v _build_gps_alt_msg `(a ~T0 @X0 1 ef6`E51`us`us`uc`uc`*S2 ]
+"77
+[; ;canlib/message/msg_gps.c: 77: ) {
+{
+[e :U _build_gps_alt_msg ]
+"75
+[; ;canlib/message/msg_gps.c: 75:     can_msg_prio_t prio, uint16_t timestamp, uint16_t altitude, uint8_t daltitude, uint8_t units,
+[v _prio `E51 ~T0 @X0 1 r1 ]
+[v _timestamp `us ~T0 @X0 1 r2 ]
+[v _altitude `us ~T0 @X0 1 r3 ]
+[v _daltitude `uc ~T0 @X0 1 r4 ]
+[v _units `uc ~T0 @X0 1 r5 ]
+"76
+[; ;canlib/message/msg_gps.c: 76:     can_msg_t *output
+[v _output `*S2 ~T0 @X0 1 r6 ]
+"77
+[; ;canlib/message/msg_gps.c: 77: ) {
+[f ]
+"78
+[; ;canlib/message/msg_gps.c: 78:     if (!output) {
+[e $ ! ! != _output -> -> 0 `i `*S2 10  ]
+{
+"79
+[; ;canlib/message/msg_gps.c: 79:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 9  ]
+"80
+[; ;canlib/message/msg_gps.c: 80:     }
+}
+[e :U 10 ]
+"82
+[; ;canlib/message/msg_gps.c: 82:     output->sid = (((uint32_t)prio << 27) | ((uint32_t)MSG_GPS_ALTITUDE << 18) | ((uint32_t)BOARD_TYPE_ID_TELEMETRY << 8) | BOARD_INST_ID_GENERIC);
+[e = . *U _output 0 | | | << -> _prio `ul -> 27 `i << -> . `E57 22 `ul -> 18 `i << -> . `E86 7 `ul -> 8 `i -> -> . `E110 1 `l `ul ]
+"83
+[; ;canlib/message/msg_gps.c: 83:     write_timestamp_2bytes(timestamp, output);
+[e ( _write_timestamp_2bytes (2 , _timestamp _output ]
+"85
+[; ;canlib/message/msg_gps.c: 85:     output->data[2] = (altitude >> 8) & 0xff;
+[e = *U + &U . *U _output 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> & >> -> _altitude `ui -> 8 `i -> -> 255 `i `ui `uc ]
+"86
+[; ;canlib/message/msg_gps.c: 86:     output->data[3] = (altitude >> 0) & 0xff;
+[e = *U + &U . *U _output 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> & >> -> _altitude `ui -> 0 `i -> -> 255 `i `ui `uc ]
+"87
+[; ;canlib/message/msg_gps.c: 87:     output->data[4] = daltitude;
+[e = *U + &U . *U _output 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _daltitude ]
+"88
+[; ;canlib/message/msg_gps.c: 88:     output->data[5] = units;
+[e = *U + &U . *U _output 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _units ]
+"90
+[; ;canlib/message/msg_gps.c: 90:     output->data_len = 6;
+[e = . *U _output 1 -> -> 6 `i `uc ]
+"92
+[; ;canlib/message/msg_gps.c: 92:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 9  ]
+"93
+[; ;canlib/message/msg_gps.c: 93: }
+[e :UE 9 ]
+}
+"95
+[; ;canlib/message/msg_gps.c: 95: _Bool build_gps_info_msg(
+[v _build_gps_info_msg `(a ~T0 @X0 1 ef5`E51`us`uc`uc`*S2 ]
+"97
+[; ;canlib/message/msg_gps.c: 97: ) {
+{
+[e :U _build_gps_info_msg ]
+"96
+[; ;canlib/message/msg_gps.c: 96:     can_msg_prio_t prio, uint16_t timestamp, uint8_t num_sat, uint8_t quality, can_msg_t *output
+[v _prio `E51 ~T0 @X0 1 r1 ]
+[v _timestamp `us ~T0 @X0 1 r2 ]
+[v _num_sat `uc ~T0 @X0 1 r3 ]
+[v _quality `uc ~T0 @X0 1 r4 ]
+[v _output `*S2 ~T0 @X0 1 r5 ]
+"97
+[; ;canlib/message/msg_gps.c: 97: ) {
+[f ]
+"98
+[; ;canlib/message/msg_gps.c: 98:     if (!output) {
+[e $ ! ! != _output -> -> 0 `i `*S2 12  ]
+{
+"99
+[; ;canlib/message/msg_gps.c: 99:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 11  ]
+"100
+[; ;canlib/message/msg_gps.c: 100:     }
+}
+[e :U 12 ]
+"102
+[; ;canlib/message/msg_gps.c: 102:     output->sid = (((uint32_t)prio << 27) | ((uint32_t)MSG_GPS_INFO << 18) | ((uint32_t)BOARD_TYPE_ID_TELEMETRY << 8) | BOARD_INST_ID_GENERIC);
+[e = . *U _output 0 | | | << -> _prio `ul -> 27 `i << -> . `E57 23 `ul -> 18 `i << -> . `E86 7 `ul -> 8 `i -> -> . `E110 1 `l `ul ]
+"103
+[; ;canlib/message/msg_gps.c: 103:     write_timestamp_2bytes(timestamp, output);
+[e ( _write_timestamp_2bytes (2 , _timestamp _output ]
+"105
+[; ;canlib/message/msg_gps.c: 105:     output->data[2] = num_sat;
+[e = *U + &U . *U _output 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _num_sat ]
+"106
+[; ;canlib/message/msg_gps.c: 106:     output->data[3] = quality;
+[e = *U + &U . *U _output 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux _quality ]
+"108
+[; ;canlib/message/msg_gps.c: 108:     output->data_len = 4;
+[e = . *U _output 1 -> -> 4 `i `uc ]
+"110
+[; ;canlib/message/msg_gps.c: 110:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 11  ]
+"111
+[; ;canlib/message/msg_gps.c: 111: }
+[e :UE 11 ]
+}
+"113
+[; ;canlib/message/msg_gps.c: 113: _Bool get_gps_time(
+[v _get_gps_time `(a ~T0 @X0 1 ef5`*CS2`*uc`*uc`*uc`*uc ]
+"116
+[; ;canlib/message/msg_gps.c: 116: ) {
+{
+[e :U _get_gps_time ]
+"114
+[; ;canlib/message/msg_gps.c: 114:     const can_msg_t *msg, uint8_t *utc_hours, uint8_t *utc_mins, uint8_t *utc_secs,
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[v _utc_hours `*uc ~T0 @X0 1 r2 ]
+[v _utc_mins `*uc ~T0 @X0 1 r3 ]
+[v _utc_secs `*uc ~T0 @X0 1 r4 ]
+"115
+[; ;canlib/message/msg_gps.c: 115:     uint8_t *utc_dsecs
+[v _utc_dsecs `*uc ~T0 @X0 1 r5 ]
+"116
+[; ;canlib/message/msg_gps.c: 116: ) {
+[f ]
+"117
+[; ;canlib/message/msg_gps.c: 117:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 14  ]
+{
+"118
+[; ;canlib/message/msg_gps.c: 118:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 13  ]
+"119
+[; ;canlib/message/msg_gps.c: 119:     }
+}
+[e :U 14 ]
+"120
+[; ;canlib/message/msg_gps.c: 120:     if (!utc_hours) {
+[e $ ! ! != _utc_hours -> -> 0 `i `*uc 15  ]
+{
+"121
+[; ;canlib/message/msg_gps.c: 121:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 13  ]
+"122
+[; ;canlib/message/msg_gps.c: 122:     }
+}
+[e :U 15 ]
+"123
+[; ;canlib/message/msg_gps.c: 123:     if (!utc_mins) {
+[e $ ! ! != _utc_mins -> -> 0 `i `*uc 16  ]
+{
+"124
+[; ;canlib/message/msg_gps.c: 124:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 13  ]
+"125
+[; ;canlib/message/msg_gps.c: 125:     }
+}
+[e :U 16 ]
+"126
+[; ;canlib/message/msg_gps.c: 126:     if (!utc_secs) {
+[e $ ! ! != _utc_secs -> -> 0 `i `*uc 17  ]
+{
+"127
+[; ;canlib/message/msg_gps.c: 127:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 13  ]
+"128
+[; ;canlib/message/msg_gps.c: 128:     }
+}
+[e :U 17 ]
+"129
+[; ;canlib/message/msg_gps.c: 129:     if (!utc_dsecs) {
+[e $ ! ! != _utc_dsecs -> -> 0 `i `*uc 18  ]
+{
+"130
+[; ;canlib/message/msg_gps.c: 130:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 13  ]
+"131
+[; ;canlib/message/msg_gps.c: 131:     }
+}
+[e :U 18 ]
+"132
+[; ;canlib/message/msg_gps.c: 132:     if (get_message_type(msg) != MSG_GPS_TIMESTAMP) {
+[e $ ! != -> ( _get_message_type (1 _msg `ui -> . `E57 19 `ui 19  ]
+{
+"133
+[; ;canlib/message/msg_gps.c: 133:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 13  ]
+"134
+[; ;canlib/message/msg_gps.c: 134:     }
+}
+[e :U 19 ]
+"136
+[; ;canlib/message/msg_gps.c: 136:     *utc_hours = msg->data[2];
+[e = *U _utc_hours *U + &U . *U _msg 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"137
+[; ;canlib/message/msg_gps.c: 137:     *utc_mins = msg->data[3];
+[e = *U _utc_mins *U + &U . *U _msg 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"138
+[; ;canlib/message/msg_gps.c: 138:     *utc_secs = msg->data[4];
+[e = *U _utc_secs *U + &U . *U _msg 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"139
+[; ;canlib/message/msg_gps.c: 139:     *utc_dsecs = msg->data[5];
+[e = *U _utc_dsecs *U + &U . *U _msg 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"141
+[; ;canlib/message/msg_gps.c: 141:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 13  ]
+"142
+[; ;canlib/message/msg_gps.c: 142: }
+[e :UE 13 ]
+}
+"144
+[; ;canlib/message/msg_gps.c: 144: _Bool get_gps_lat(
+[v _get_gps_lat `(a ~T0 @X0 1 ef5`*CS2`*uc`*uc`*us`*uc ]
+"146
+[; ;canlib/message/msg_gps.c: 146: ) {
+{
+[e :U _get_gps_lat ]
+"145
+[; ;canlib/message/msg_gps.c: 145:     const can_msg_t *msg, uint8_t *degrees, uint8_t *minutes, uint16_t *dminutes, uint8_t *direction
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[v _degrees `*uc ~T0 @X0 1 r2 ]
+[v _minutes `*uc ~T0 @X0 1 r3 ]
+[v _dminutes `*us ~T0 @X0 1 r4 ]
+[v _direction `*uc ~T0 @X0 1 r5 ]
+"146
+[; ;canlib/message/msg_gps.c: 146: ) {
+[f ]
+"147
+[; ;canlib/message/msg_gps.c: 147:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 21  ]
+{
+"148
+[; ;canlib/message/msg_gps.c: 148:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 20  ]
+"149
+[; ;canlib/message/msg_gps.c: 149:     }
+}
+[e :U 21 ]
+"150
+[; ;canlib/message/msg_gps.c: 150:     if (!degrees) {
+[e $ ! ! != _degrees -> -> 0 `i `*uc 22  ]
+{
+"151
+[; ;canlib/message/msg_gps.c: 151:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 20  ]
+"152
+[; ;canlib/message/msg_gps.c: 152:     }
+}
+[e :U 22 ]
+"153
+[; ;canlib/message/msg_gps.c: 153:     if (!minutes) {
+[e $ ! ! != _minutes -> -> 0 `i `*uc 23  ]
+{
+"154
+[; ;canlib/message/msg_gps.c: 154:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 20  ]
+"155
+[; ;canlib/message/msg_gps.c: 155:     }
+}
+[e :U 23 ]
+"156
+[; ;canlib/message/msg_gps.c: 156:     if (!dminutes) {
+[e $ ! ! != _dminutes -> -> 0 `i `*us 24  ]
+{
+"157
+[; ;canlib/message/msg_gps.c: 157:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 20  ]
+"158
+[; ;canlib/message/msg_gps.c: 158:     }
+}
+[e :U 24 ]
+"159
+[; ;canlib/message/msg_gps.c: 159:     if (!direction) {
+[e $ ! ! != _direction -> -> 0 `i `*uc 25  ]
+{
+"160
+[; ;canlib/message/msg_gps.c: 160:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 20  ]
+"161
+[; ;canlib/message/msg_gps.c: 161:     }
+}
+[e :U 25 ]
+"162
+[; ;canlib/message/msg_gps.c: 162:     if (get_message_type(msg) != MSG_GPS_LATITUDE) {
+[e $ ! != -> ( _get_message_type (1 _msg `ui -> . `E57 20 `ui 26  ]
+{
+"163
+[; ;canlib/message/msg_gps.c: 163:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 20  ]
+"164
+[; ;canlib/message/msg_gps.c: 164:     }
+}
+[e :U 26 ]
+"166
+[; ;canlib/message/msg_gps.c: 166:     *degrees = msg->data[2];
+[e = *U _degrees *U + &U . *U _msg 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"167
+[; ;canlib/message/msg_gps.c: 167:     *minutes = msg->data[3];
+[e = *U _minutes *U + &U . *U _msg 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"168
+[; ;canlib/message/msg_gps.c: 168:     *dminutes = ((uint16_t)msg->data[4] << 8) | msg->data[5];
+[e = *U _dminutes -> | << -> -> *U + &U . *U _msg 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `us `ui -> 8 `i -> *U + &U . *U _msg 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `ui `us ]
+"169
+[; ;canlib/message/msg_gps.c: 169:     *direction = msg->data[6];
+[e = *U _direction *U + &U . *U _msg 2 * -> -> -> 6 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"171
+[; ;canlib/message/msg_gps.c: 171:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 20  ]
+"172
+[; ;canlib/message/msg_gps.c: 172: }
+[e :UE 20 ]
+}
+"174
+[; ;canlib/message/msg_gps.c: 174: _Bool get_gps_lon(
+[v _get_gps_lon `(a ~T0 @X0 1 ef5`*CS2`*uc`*uc`*us`*uc ]
+"176
+[; ;canlib/message/msg_gps.c: 176: ) {
+{
+[e :U _get_gps_lon ]
+"175
+[; ;canlib/message/msg_gps.c: 175:     const can_msg_t *msg, uint8_t *degrees, uint8_t *minutes, uint16_t *dminutes, uint8_t *direction
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[v _degrees `*uc ~T0 @X0 1 r2 ]
+[v _minutes `*uc ~T0 @X0 1 r3 ]
+[v _dminutes `*us ~T0 @X0 1 r4 ]
+[v _direction `*uc ~T0 @X0 1 r5 ]
+"176
+[; ;canlib/message/msg_gps.c: 176: ) {
+[f ]
+"177
+[; ;canlib/message/msg_gps.c: 177:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 28  ]
+{
+"178
+[; ;canlib/message/msg_gps.c: 178:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 27  ]
+"179
+[; ;canlib/message/msg_gps.c: 179:     }
+}
+[e :U 28 ]
+"180
+[; ;canlib/message/msg_gps.c: 180:     if (!degrees) {
+[e $ ! ! != _degrees -> -> 0 `i `*uc 29  ]
+{
+"181
+[; ;canlib/message/msg_gps.c: 181:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 27  ]
+"182
+[; ;canlib/message/msg_gps.c: 182:     }
+}
+[e :U 29 ]
+"183
+[; ;canlib/message/msg_gps.c: 183:     if (!minutes) {
+[e $ ! ! != _minutes -> -> 0 `i `*uc 30  ]
+{
+"184
+[; ;canlib/message/msg_gps.c: 184:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 27  ]
+"185
+[; ;canlib/message/msg_gps.c: 185:     }
+}
+[e :U 30 ]
+"186
+[; ;canlib/message/msg_gps.c: 186:     if (!dminutes) {
+[e $ ! ! != _dminutes -> -> 0 `i `*us 31  ]
+{
+"187
+[; ;canlib/message/msg_gps.c: 187:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 27  ]
+"188
+[; ;canlib/message/msg_gps.c: 188:     }
+}
+[e :U 31 ]
+"189
+[; ;canlib/message/msg_gps.c: 189:     if (!direction) {
+[e $ ! ! != _direction -> -> 0 `i `*uc 32  ]
+{
+"190
+[; ;canlib/message/msg_gps.c: 190:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 27  ]
+"191
+[; ;canlib/message/msg_gps.c: 191:     }
+}
+[e :U 32 ]
+"192
+[; ;canlib/message/msg_gps.c: 192:     if (get_message_type(msg) != MSG_GPS_LONGITUDE) {
+[e $ ! != -> ( _get_message_type (1 _msg `ui -> . `E57 21 `ui 33  ]
+{
+"193
+[; ;canlib/message/msg_gps.c: 193:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 27  ]
+"194
+[; ;canlib/message/msg_gps.c: 194:     }
+}
+[e :U 33 ]
+"196
+[; ;canlib/message/msg_gps.c: 196:     *degrees = msg->data[2];
+[e = *U _degrees *U + &U . *U _msg 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"197
+[; ;canlib/message/msg_gps.c: 197:     *minutes = msg->data[3];
+[e = *U _minutes *U + &U . *U _msg 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"198
+[; ;canlib/message/msg_gps.c: 198:     *dminutes = ((uint16_t)msg->data[4] << 8) | msg->data[5];
+[e = *U _dminutes -> | << -> -> *U + &U . *U _msg 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `us `ui -> 8 `i -> *U + &U . *U _msg 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `ui `us ]
+"199
+[; ;canlib/message/msg_gps.c: 199:     *direction = msg->data[6];
+[e = *U _direction *U + &U . *U _msg 2 * -> -> -> 6 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"201
+[; ;canlib/message/msg_gps.c: 201:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 27  ]
+"202
+[; ;canlib/message/msg_gps.c: 202: }
+[e :UE 27 ]
+}
+"204
+[; ;canlib/message/msg_gps.c: 204: _Bool get_gps_alt(const can_msg_t *msg, uint16_t *altitude, uint8_t *daltitude, uint8_t *units) {
+[v _get_gps_alt `(a ~T0 @X0 1 ef4`*CS2`*us`*uc`*uc ]
+{
+[e :U _get_gps_alt ]
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[v _altitude `*us ~T0 @X0 1 r2 ]
+[v _daltitude `*uc ~T0 @X0 1 r3 ]
+[v _units `*uc ~T0 @X0 1 r4 ]
+[f ]
+"205
+[; ;canlib/message/msg_gps.c: 205:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 35  ]
+{
+"206
+[; ;canlib/message/msg_gps.c: 206:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 34  ]
+"207
+[; ;canlib/message/msg_gps.c: 207:     }
+}
+[e :U 35 ]
+"208
+[; ;canlib/message/msg_gps.c: 208:     if (!altitude) {
+[e $ ! ! != _altitude -> -> 0 `i `*us 36  ]
+{
+"209
+[; ;canlib/message/msg_gps.c: 209:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 34  ]
+"210
+[; ;canlib/message/msg_gps.c: 210:     }
+}
+[e :U 36 ]
+"211
+[; ;canlib/message/msg_gps.c: 211:     if (!daltitude) {
+[e $ ! ! != _daltitude -> -> 0 `i `*uc 37  ]
+{
+"212
+[; ;canlib/message/msg_gps.c: 212:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 34  ]
+"213
+[; ;canlib/message/msg_gps.c: 213:     }
+}
+[e :U 37 ]
+"214
+[; ;canlib/message/msg_gps.c: 214:     if (!units) {
+[e $ ! ! != _units -> -> 0 `i `*uc 38  ]
+{
+"215
+[; ;canlib/message/msg_gps.c: 215:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 34  ]
+"216
+[; ;canlib/message/msg_gps.c: 216:     }
+}
+[e :U 38 ]
+"217
+[; ;canlib/message/msg_gps.c: 217:     if (get_message_type(msg) != MSG_GPS_ALTITUDE) {
+[e $ ! != -> ( _get_message_type (1 _msg `ui -> . `E57 22 `ui 39  ]
+{
+"218
+[; ;canlib/message/msg_gps.c: 218:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 34  ]
+"219
+[; ;canlib/message/msg_gps.c: 219:     }
+}
+[e :U 39 ]
+"221
+[; ;canlib/message/msg_gps.c: 221:     *altitude = ((uint16_t)msg->data[2] << 8) | msg->data[3];
+[e = *U _altitude -> | << -> -> *U + &U . *U _msg 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `us `ui -> 8 `i -> *U + &U . *U _msg 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `ui `us ]
+"222
+[; ;canlib/message/msg_gps.c: 222:     *daltitude = msg->data[4];
+[e = *U _daltitude *U + &U . *U _msg 2 * -> -> -> 4 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"223
+[; ;canlib/message/msg_gps.c: 223:     *units = msg->data[5];
+[e = *U _units *U + &U . *U _msg 2 * -> -> -> 5 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"225
+[; ;canlib/message/msg_gps.c: 225:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 34  ]
+"226
+[; ;canlib/message/msg_gps.c: 226: }
+[e :UE 34 ]
+}
+"228
+[; ;canlib/message/msg_gps.c: 228: _Bool get_gps_info(const can_msg_t *msg, uint8_t *num_sat, uint8_t *quality) {
+[v _get_gps_info `(a ~T0 @X0 1 ef3`*CS2`*uc`*uc ]
+{
+[e :U _get_gps_info ]
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[v _num_sat `*uc ~T0 @X0 1 r2 ]
+[v _quality `*uc ~T0 @X0 1 r3 ]
+[f ]
+"229
+[; ;canlib/message/msg_gps.c: 229:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 41  ]
+{
+"230
+[; ;canlib/message/msg_gps.c: 230:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 40  ]
+"231
+[; ;canlib/message/msg_gps.c: 231:     }
+}
+[e :U 41 ]
+"232
+[; ;canlib/message/msg_gps.c: 232:     if (!num_sat) {
+[e $ ! ! != _num_sat -> -> 0 `i `*uc 42  ]
+{
+"233
+[; ;canlib/message/msg_gps.c: 233:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 40  ]
+"234
+[; ;canlib/message/msg_gps.c: 234:     }
+}
+[e :U 42 ]
+"235
+[; ;canlib/message/msg_gps.c: 235:     if (!quality) {
+[e $ ! ! != _quality -> -> 0 `i `*uc 43  ]
+{
+"236
+[; ;canlib/message/msg_gps.c: 236:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 40  ]
+"237
+[; ;canlib/message/msg_gps.c: 237:     }
+}
+[e :U 43 ]
+"238
+[; ;canlib/message/msg_gps.c: 238:     if (get_message_type(msg) != MSG_GPS_INFO) {
+[e $ ! != -> ( _get_message_type (1 _msg `ui -> . `E57 23 `ui 44  ]
+{
+"239
+[; ;canlib/message/msg_gps.c: 239:         return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 40  ]
+"240
+[; ;canlib/message/msg_gps.c: 240:     }
+}
+[e :U 44 ]
+"242
+[; ;canlib/message/msg_gps.c: 242:     *num_sat = msg->data[2];
+[e = *U _num_sat *U + &U . *U _msg 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"243
+[; ;canlib/message/msg_gps.c: 243:     *quality = msg->data[3];
+[e = *U _quality *U + &U . *U _msg 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux ]
+"245
+[; ;canlib/message/msg_gps.c: 245:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 40  ]
+"246
+[; ;canlib/message/msg_gps.c: 246: }
+[e :UE 40 ]
+}

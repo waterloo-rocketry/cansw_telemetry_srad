@@ -2,3 +2,6 @@
 	path = LTT.X/canlib
 	url = https://github.com/waterloo-rocketry/canlib.git
 	branch = 2025-initial-canlib-update
+[submodule "LTT.X/rocketlib"]
+	path = LTT.X/rocketlib
+	url = https://github.com/waterloo-rocketry/rocketlib.git

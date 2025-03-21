@@ -1,0 +1,131 @@
+Version 4.0 HI-TECH Software Intermediate Code
+"38 canlib\can.h
+[; ;canlib\can.h: 38: typedef struct {
+[s S2 `ul 1 `uc 1 `uc -> 8 `i ]
+[n S2 . sid data_len data ]
+"9 canlib/message/msg_common.c
+[; ;canlib/message/msg_common.c: 9: void write_timestamp_2bytes(uint16_t timestamp, can_msg_t *output) {
+[v _write_timestamp_2bytes `(v ~T0 @X0 1 ef2`us`*S2 ]
+{
+[e :U _write_timestamp_2bytes ]
+[v _timestamp `us ~T0 @X0 1 r1 ]
+[v _output `*S2 ~T0 @X0 1 r2 ]
+[f ]
+"10
+[; ;canlib/message/msg_common.c: 10:     output->data[0] = (timestamp >> 8) & 0xff;
+[e = *U + &U . *U _output 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> & >> -> _timestamp `ui -> 8 `i -> -> 255 `i `ui `uc ]
+"11
+[; ;canlib/message/msg_common.c: 11:     output->data[1] = (timestamp >> 0) & 0xff;
+[e = *U + &U . *U _output 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . *U _output 2 `ui `ux -> & >> -> _timestamp `ui -> 0 `i -> -> 255 `i `ui `uc ]
+"12
+[; ;canlib/message/msg_common.c: 12: }
+[e :UE 3 ]
+}
+"14
+[; ;canlib/message/msg_common.c: 14: uint16_t get_message_type(const can_msg_t *msg) {
+[v _get_message_type `(us ~T0 @X0 1 ef1`*CS2 ]
+{
+[e :U _get_message_type ]
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[f ]
+"15
+[; ;canlib/message/msg_common.c: 15:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 5  ]
+{
+"16
+[; ;canlib/message/msg_common.c: 16:         return 0;
+[e ) -> -> 0 `i `us ]
+[e $UE 4  ]
+"17
+[; ;canlib/message/msg_common.c: 17:     }
+}
+[e :U 5 ]
+"19
+[; ;canlib/message/msg_common.c: 19:     return (uint16_t)((msg->sid >> 18) & 0x1FF);
+[e ) -> & >> . *U _msg 0 -> 18 `i -> -> -> 511 `i `l `ul `us ]
+[e $UE 4  ]
+"20
+[; ;canlib/message/msg_common.c: 20: }
+[e :UE 4 ]
+}
+"22
+[; ;canlib/message/msg_common.c: 22: uint8_t get_board_type_unique_id(const can_msg_t *msg) {
+[v _get_board_type_unique_id `(uc ~T0 @X0 1 ef1`*CS2 ]
+{
+[e :U _get_board_type_unique_id ]
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[f ]
+"23
+[; ;canlib/message/msg_common.c: 23:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 7  ]
+{
+"24
+[; ;canlib/message/msg_common.c: 24:         return 0;
+[e ) -> -> 0 `i `uc ]
+[e $UE 6  ]
+"25
+[; ;canlib/message/msg_common.c: 25:     }
+}
+[e :U 7 ]
+"27
+[; ;canlib/message/msg_common.c: 27:     return (uint8_t)((msg->sid >> 8) & 0xFF);
+[e ) -> & >> . *U _msg 0 -> 8 `i -> -> -> 255 `i `l `ul `uc ]
+[e $UE 6  ]
+"28
+[; ;canlib/message/msg_common.c: 28: }
+[e :UE 6 ]
+}
+"30
+[; ;canlib/message/msg_common.c: 30: uint8_t get_board_inst_unique_id(const can_msg_t *msg) {
+[v _get_board_inst_unique_id `(uc ~T0 @X0 1 ef1`*CS2 ]
+{
+[e :U _get_board_inst_unique_id ]
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[f ]
+"31
+[; ;canlib/message/msg_common.c: 31:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 9  ]
+{
+"32
+[; ;canlib/message/msg_common.c: 32:         return 0;
+[e ) -> -> 0 `i `uc ]
+[e $UE 8  ]
+"33
+[; ;canlib/message/msg_common.c: 33:     }
+}
+[e :U 9 ]
+"35
+[; ;canlib/message/msg_common.c: 35:     return (uint8_t)(msg->sid & 0xFF);
+[e ) -> & . *U _msg 0 -> -> -> 255 `i `l `ul `uc ]
+[e $UE 8  ]
+"36
+[; ;canlib/message/msg_common.c: 36: }
+[e :UE 8 ]
+}
+"38
+[; ;canlib/message/msg_common.c: 38: uint16_t get_timestamp(const can_msg_t *msg) {
+[v _get_timestamp `(us ~T0 @X0 1 ef1`*CS2 ]
+{
+[e :U _get_timestamp ]
+[v _msg `*CS2 ~T0 @X0 1 r1 ]
+[f ]
+"39
+[; ;canlib/message/msg_common.c: 39:     if (!msg) {
+[e $ ! ! != _msg -> -> 0 `i `*CS2 11  ]
+{
+"40
+[; ;canlib/message/msg_common.c: 40:         return 0;
+[e ) -> -> 0 `i `us ]
+[e $UE 10  ]
+"41
+[; ;canlib/message/msg_common.c: 41:     }
+}
+[e :U 11 ]
+"43
+[; ;canlib/message/msg_common.c: 43:     return ((uint16_t)msg->data[0] << 8) | msg->data[1];
+[e ) -> | << -> -> *U + &U . *U _msg 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `us `ui -> 8 `i -> *U + &U . *U _msg 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . *U _msg 2 `ui `ux `ui `us ]
+[e $UE 10  ]
+"44
+[; ;canlib/message/msg_common.c: 44: }
+[e :UE 10 ]
+}
