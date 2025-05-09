@@ -71,6 +71,20 @@ void Board_Init() {
     CAN_Init();
 }
 
+void SendCurrentReading() {
+    uint16_t val;
+    val = read_ADC();
+    val = val / 0.025; // Shunt resistor is 25mR
+    
+    uint16_t time = 0; // CHANGE LATER
+    can_msg_prio_t valPrio = PRIO_LOW;
+    can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
+    can_msg_t currMsg;
+    
+    build_analog_data_msg(valPrio, time, msgid, val, &currMsg);
+    can_send(&currMsg)
+}
+
 void main() {
     Board_Init();
 
@@ -89,14 +103,16 @@ void main() {
 
         __delay_ms(1000);
         
-        uint16_t curVal;
-        curVal = read_ADC();
+        //SendCurrentReading();
         
+        uint8_t ccRead;
+        ccRead = Read_CC1200(0x3D);
         uint16_t time = 0;
-        can_msg_t bob;
-        can_msg_prio_t bobPrio = PRIO_HIGH;
-        can_analog_sensor_id_t bobID = SENSOR_RA_BATT_CURR_1;
-        build_analog_data_msg(bobPrio, time, bobID, curVal, &bob);
-        can_send(&bob);
+        can_msg_prio_t prio = PRIO_HIGH;
+        can_msg_t debugMsg;
+        
+        build_debug_raw_msg(prio, time, ccRead, &debugMsg);
+        can_send(&debugMsg);
+        
     }
 }

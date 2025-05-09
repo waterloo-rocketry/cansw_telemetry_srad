@@ -7,7 +7,13 @@
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
 # 1 "main.c" 2
-# 106 "main.c"
+
+
+
+
+
+
+
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 1 3
 # 18 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -36631,7 +36637,7 @@ __attribute__((__unsupported__("The READTIMER" "0" "() macro is not available wi
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
-# 106 "main.c" 2
+# 8 "main.c" 2
 
 # 1 "./leds.h" 1
 # 13 "./leds.h"
@@ -36646,7 +36652,7 @@ void toggle_LED_Green(_Bool);
 void toggle_LED_Blue(_Bool);
 
 void toggle_LED_Red(_Bool);
-# 107 "main.c" 2
+# 9 "main.c" 2
 
 # 1 "./clockInit.h" 1
 
@@ -36655,14 +36661,14 @@ void toggle_LED_Red(_Bool);
 
 
 void Osc_Init(void);
-# 108 "main.c" 2
+# 10 "main.c" 2
 
 # 1 "./adc.h" 1
 # 13 "./adc.h"
 void ADC_Init(void);
 
 uint16_t read_ADC(void);
-# 109 "main.c" 2
+# 11 "main.c" 2
 
 
 # 1 "./canlib/canlib.h" 1
@@ -37326,7 +37332,7 @@ _Bool can_send_rdy(void);
 
 void can_handle_interrupt(void);
 # 25 "./canlib/canlib.h" 2
-# 111 "main.c" 2
+# 13 "main.c" 2
 
 
 
@@ -37388,6 +37394,20 @@ void Board_Init() {
     CAN_Init();
 }
 
+void SendCurrentReading() {
+    uint16_t val;
+    val = read_ADC();
+    val = val / 0.025;
+
+    uint16_t time = 0;
+    can_msg_prio_t valPrio = PRIO_LOW;
+    can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
+    can_msg_t currMsg;
+
+    build_analog_data_msg(valPrio, time, msgid, val, &currMsg);
+    can_send(&currMsg)
+}
+
 void main() {
     Board_Init();
 
@@ -37400,20 +37420,22 @@ void main() {
 
         _delay((unsigned long)((1000)*(12000000/4000.0)));
 
-
-
-
+        toggle_LED_Green(0);
+        toggle_LED_Blue(0);
+        toggle_LED_Red(0);
 
         _delay((unsigned long)((1000)*(12000000/4000.0)));
 
-        uint16_t curVal;
-        curVal = read_ADC();
 
+
+        uint8_t ccRead;
+        ccRead = Read_CC1200(0x3D);
         uint16_t time = 0;
-        can_msg_t bob;
-        can_msg_prio_t bobPrio = PRIO_HIGH;
-        can_analog_sensor_id_t bobID = SENSOR_RA_BATT_CURR_1;
-        build_analog_data_msg(bobPrio, time, bobID, curVal, &bob);
-        can_send(&bob);
+        can_msg_prio_t prio = PRIO_HIGH;
+        can_msg_t debugMsg;
+
+        build_debug_raw_msg(prio, time, ccRead, &debugMsg);
+        can_send(&debugMsg);
+
     }
 }
