@@ -20,8 +20,8 @@ void ADC_Init() {
 
 uint16_t read_ADC() {
     ADCON0bits.GO = 1; // Start conversation
-    while (ADCON0bits.GO); // Wait for conversation to be done
+    while (ADCON0bits.GO) {} // Wait for conversation to be done
     uint16_t result = ((uint16_t)ADRESH << 8) | ADRESL; // combine two registers into one integer
-    
+
     return result;
 }

@@ -6,9 +6,9 @@
  */
 
 #ifndef SPI_H
-#define	SPI_H
+#define SPI_H
 
-#include <xc.h>   
+#include <xc.h>
 
 #include "stdint.h"
 
