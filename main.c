@@ -10,8 +10,7 @@
 #include "clockInit.h"
 #include "adc.h"
 
-#include "canlib/canlib.h"
-#include "canlib/message_types.h"
+#include "canlib.h"
 
 #pragma config WDTE = OFF // Watchdog Timer disabled
 
@@ -24,11 +23,6 @@ uint8_t tx_pool[200];
 
 static void can_msg_handler(const can_msg_t *msg) {
     uint16_t msg_type = get_message_type(msg);
-
-    // ignore messages that were sent from this board
-    if (get_board_unique_id(msg) == BOARD_TYPE_UNIQUE_ID) {
-        return;
-    }
     
     switch (msg_type) {
         case MSG_LEDS_ON:
@@ -82,7 +76,7 @@ void SendCurrentReading() {
     can_msg_t currMsg;
     
     build_analog_data_msg(valPrio, time, msgid, val, &currMsg);
-    can_send(&currMsg)
+    can_send(&currMsg);
 }
 
 void main() {
@@ -106,12 +100,12 @@ void main() {
         //SendCurrentReading();
         
         uint8_t ccRead;
-        ccRead = Read_CC1200(0x3D);
+        //ccRead = Read_CC1200(0x3D);
         uint16_t time = 0;
         can_msg_prio_t prio = PRIO_HIGH;
         can_msg_t debugMsg;
         
-        build_debug_raw_msg(prio, time, ccRead, &debugMsg);
+        //build_debug_raw_msg(prio, time, ccRead, &debugMsg);
         can_send(&debugMsg);
         
     }
