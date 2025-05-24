@@ -8,6 +8,8 @@
 #include "adc.h"
 #include "clockInit.h"
 #include "leds.h"
+#include "spi.h"
+#include "cc1200.h"
 #include <xc.h>
 
 #include "canlib.h"
@@ -66,16 +68,16 @@ void Board_Init() {
 }
 
 void Send_Current_Reading() {
-    uint16_t val;
-    val = read_ADC();
-    val = val / 0.025; // Shunt resistor is 25mR
+    uint16_t current_sense_val;
+    current_sense_val = read_ADC();
+    current_sense_val = current_sense_val / 0.025; // Shunt resistor is 25mR
 
     uint16_t time = 0; // CHANGE LATER
     can_msg_prio_t current_reading_CAN_priority = PRIO_LOW;
     can_analog_sensor_id_t current_reading_CAN_msgid = SENSOR_12V_CURR;
     can_msg_t current_reading_msg;
 
-    build_analog_data_msg(current_reading_CAN_priority, time, current_reading_CAN_msgid, val, &current_reading_msg);
+    build_analog_data_msg(current_reading_CAN_priority, time, current_reading_CAN_msgid, current_sense_val, &current_reading_msg);
     can_send(&current_reading_msg);
 }
 
@@ -98,8 +100,9 @@ void main() {
         // Should be 0x20
         CC1200ReadResult cc12_read;
         cc12_read = Read_CC1200(0x8F);
+        uint8_t read_val = cc12_read.value; 
         
-        if (cc12_read.value == 0x20) {
+        if (read_val == 0x20) {
             toggle_LED_Green(1);
             toggle_LED_Blue(1);
             toggle_LED_Red(1);
@@ -109,7 +112,7 @@ void main() {
         can_msg_prio_t prio = PRIO_HIGH;
         can_msg_t debugMsg;
 
-        build_debug_raw_msg(prio, time, cc12_read.value, &debugMsg);
+        build_debug_raw_msg(prio, time, &read_val, &debugMsg);
         can_send(&debugMsg);
     }
 }
