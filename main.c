@@ -61,51 +61,55 @@ void Board_Init() {
     LEDs_Init();
     Osc_Init();
     ADC_Init();
-    // SPI_Init();
+    SPI_Init();
     CAN_Init();
 }
 
-void SendCurrentReading() {
+void Send_Current_Reading() {
     uint16_t val;
     val = read_ADC();
     val = val / 0.025; // Shunt resistor is 25mR
 
     uint16_t time = 0; // CHANGE LATER
-    can_msg_prio_t valPrio = PRIO_LOW;
-    can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
-    can_msg_t currMsg;
+    can_msg_prio_t current_reading_CAN_priority = PRIO_LOW;
+    can_analog_sensor_id_t current_reading_CAN_msgid = SENSOR_12V_CURR;
+    can_msg_t current_reading_msg;
 
-    build_analog_data_msg(valPrio, time, msgid, val, &currMsg);
-    can_send(&currMsg);
+    build_analog_data_msg(current_reading_CAN_priority, time, current_reading_CAN_msgid, val, &current_reading_msg);
+    can_send(&current_reading_msg);
 }
 
 void main() {
     Board_Init();
 
+    toggle_LED_Green(0);
+    toggle_LED_Blue(0);
+    toggle_LED_Red(0);
+    
     while (1) {
         CLRWDT();
 
-        toggle_LED_Green(1);
-        toggle_LED_Blue(1);
-        toggle_LED_Red(1);
-
         __delay_ms(1000);
 
-        toggle_LED_Green(0);
-        toggle_LED_Blue(0);
-        toggle_LED_Red(0);
+        Send_Current_Reading();
 
-        __delay_ms(1000);
-
-        // SendCurrentReading();
-
-        uint8_t ccRead;
-        // ccRead = Read_CC1200(0x3D);
+        // Confirm SPI Works
+        // Read part number register 0x8F
+        // Should be 0x20
+        CC1200ReadResult cc12_read;
+        cc12_read = Read_CC1200(0x8F);
+        
+        if (cc12_read.value == 0x20) {
+            toggle_LED_Green(1);
+            toggle_LED_Blue(1);
+            toggle_LED_Red(1);
+        }
+        
         uint16_t time = 0;
         can_msg_prio_t prio = PRIO_HIGH;
         can_msg_t debugMsg;
 
-        // build_debug_raw_msg(prio, time, ccRead, &debugMsg);
+        build_debug_raw_msg(prio, time, cc12_read.value, &debugMsg);
         can_send(&debugMsg);
     }
 }

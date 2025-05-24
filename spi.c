@@ -34,16 +34,16 @@ void SPI_Init() {
     SPI1CON0bits.EN = 1; // Enable SPI
 }
 
-uint8_t Read_SPI() {
-    uint8_t data;
-    // Wait for RX buffer to be full
-    while (!SPI1STATUSbits.RXBF) {}
-    data = SPI1RXB;
-    return data;
-}
+uint8_t SPI_Transfer(uint8_t data) {
+    // Wait for the transmit buffer to be empty
+    while (!SPI1STATUSbits.TXBE) {}
 
-void Write_SPI(uint8_t data) {
-    // Wait for TX buffer to be empty
-    while (SPI1STATUSbits.TXBE) {}
+    // Write data to transmit buffer
     SPI1TXB = data;
+
+    // Wait until data is received
+    while (!SPI1STATUSbits.RXBF) {}
+
+    // Read and return the received data
+    return SPI1RXB;
 }

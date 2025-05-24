@@ -14,9 +14,7 @@
 
 void SPI_Init(void);
 
-uint8_t Read_SPI(void);
-
-void Write_SPI(uint8_t);
+uint8_t SPI_Transfer(uint8_t data);
 
 #endif
 
