@@ -10,8 +10,14 @@
 void SPI_Init() {
     // Set Pins as outputs
     TRISCbits.TRISC3 = 0; // SCLK
-    TRISCbits.TRISC4 = 1; // MISO (input)
-    TRISCbits.TRISC5 = 0; // MOSI
+    // NOTE VERY IMPORTANT
+    // I am a silly goose and accidently swapped the MISO and MOSI lines 
+    // on the PCB, this configuration matches that
+    SPI1SDIPPS = 0b10101; // Set RC5 to MISO
+    RC4PPS = 0x1F // Set RC4 to MOSI
+    TRISCbits.TRISC4 = 0; // Output
+    TRISCbits.TRISC5 = 1; // Input
+    
     TRISAbits.TRISA5 = 0; // CS
 
     LATAbits.LATA5 = 1; // Set CS high
