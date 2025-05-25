@@ -13,6 +13,11 @@
 #include <xc.h>
 
 typedef struct {
+    uint8_t addr;
+    uint8_t value;
+} registerSetting_t;
+
+typedef struct {
     uint8_t status;
     uint8_t value;
 } CC1200ReadResult;
@@ -20,5 +25,7 @@ typedef struct {
 CC1200ReadResult Write_CC1200(uint8_t, uint8_t);
 
 CC1200ReadResult Read_CC1200(uint8_t);
+
+void CC1200_Init(void);
 
 #endif

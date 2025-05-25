@@ -14,7 +14,7 @@ void SPI_Init() {
     // I am a silly goose and accidently swapped the MISO and MOSI lines 
     // on the PCB, this configuration matches that
     SPI1SDIPPS = 0b10101; // Set RC5 to MISO
-    RC4PPS = 0x1F // Set RC4 to MOSI
+    RC4PPS = 0x1F; // Set RC4 to MOSI
     TRISCbits.TRISC4 = 0; // Output
     TRISCbits.TRISC5 = 1; // Input
     

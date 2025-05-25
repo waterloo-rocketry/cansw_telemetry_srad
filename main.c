@@ -65,6 +65,7 @@ void Board_Init() {
     ADC_Init();
     SPI_Init();
     CAN_Init();
+    //CC1200_Init();
 }
 
 void Send_Current_Reading() {
