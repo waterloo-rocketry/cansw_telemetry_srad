@@ -7,7 +7,8 @@
 
 #include "cc1200.h"
 
-// CC1200 register addresses
+// CC1200 register addresses 
+// This only includes registers which are configured through SmartRF Studio
 #define CC1200_IOCFG2 0x0001 // GPIO2 IO Pin Configuration
 #define CC1200_IOCFG0 0x0003 // GPIO0 IO Pin Configuration
 #define CC1200_SYNC_CFG1 0x0008 // Sync Word Detection Configuration Reg. 1
@@ -59,6 +60,10 @@
 #define CC1200_XOSC5 0x2F32 // Crystal Oscillator Configuration Reg. 5
 #define CC1200_XOSC1 0x2F36 // Crystal Oscillator Configuration Reg. 1
 #define CC1200_SERIAL_STATUS 0x2F91 // Serial Status
+
+// Other registers
+#define CC1200_IOCFG3 0x00 // GPIO3 Pin 3 Configuration
+#define CC1200_RFEND_CFG0 0x2A // RFEND Configuration Rg. 0
 
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
@@ -175,4 +180,11 @@ void CC1200_Init(void) {
     for (size_t i = 0; i < numSettings; i++) {
         Write_CC1200(preferredSettings[i].addr, preferredSettings[i].value);
     }
+    
+    // Overwrite GPIO pin configurations
+    Write_CC1200(CC1200_IOCFG0, 0b00100100); // 0=Digital | 0=Invert output disabled | 100100=Antenna_Select
+    Write_CC1200(CC1200_IOCFG3, 0b01011001); // 0=Digital | 1=Invert output disabled | 011000=PA_PD (Although we're using for external TRX switch))
+    
+    // Setup Antenna Switching 
+    Write_CC1200(CC1200_RFEND_CFG0, 0b00000011); // X | 0=CAL_END_WAKE_UP_EN | 00=TXOFF_MODE | 0=TERM_ON_BAD_PACKET_EN | 011=ANT_DIV_RX_TERM_CFG 
 }
