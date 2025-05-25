@@ -16,4 +16,4 @@ The board is part of the borader Waterloo Rocketry RocketCAN Bus. Like most avio
 The board operates on the 902-928 MHz band (centre frequency 915 MHz). The output power is aproximatly 33dBm. The device requires a ISED HAM licence (or equivilant) to operate in Canada.
 
 ## Register Configurations
-Registers can be configured using the SMARTRFTM-STUDIO [Windows only] application (https://www.ti.com/tool/SMARTRFTM-STUDIO). Once configured registers can be exported to a CSV. A python script will generate the C++ SPI transfer functions that can be flashed to the PIC18.
+Registers can be configured using the SMARTRFTM-STUDIO [Windows only] application (https://www.ti.com/tool/SMARTRFTM-STUDIO). Once configured registers can be exported to a CSV. A python script will generate the C++ SPI transfer functions that can be flashed to the PIC18. When exporting register settings, select the `TrxEB RF Settings Value Line` format, which should generate the `registerSetting_t` used in the `CC1200.c` file, copy over the new settings and build the code.
