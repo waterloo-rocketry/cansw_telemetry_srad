@@ -37,64 +37,186 @@ void CC1200_Transmit(void);
 
 CC1200ReadResult CC1200_Status(void);
 
-// CC1200 register addresses 
-// This only includes registers which are configured through SmartRF Studio
-#define CC1200_IOCFG2 0x0001 // GPIO2 IO Pin Configuration
-#define CC1200_IOCFG0 0x0003 // GPIO0 IO Pin Configuration
-#define CC1200_SYNC_CFG1 0x0008 // Sync Word Detection Configuration Reg. 1
-#define CC1200_SYNC_CFG0 0x0009 // Sync Word Detection Configuration Reg. 0
-#define CC1200_DEVIATION_M 0x000A // Frequency Deviation Configuration
-#define CC1200_MODCFG_DEV_E 0x000B // Modulation Format and Frequency Deviation Configur..
-#define CC1200_DCFILT_CFG 0x000C // Digital DC Removal Configuration
-#define CC1200_PREAMBLE_CFG1 0x000D // Preamble Length Configuration Reg. 1
-#define CC1200_PREAMBLE_CFG0 0x000E // Preamble Detection Configuration Reg. 0
-#define CC1200_IQIC 0x000F // Digital Image Channel Compensation Configuration
-#define CC1200_CHAN_BW 0x0010 // Channel Filter Configuration
-#define CC1200_MDMCFG1 0x0011 // General Modem Parameter Configuration Reg. 1
-#define CC1200_MDMCFG0 0x0012 // General Modem Parameter Configuration Reg. 0
-#define CC1200_SYMBOL_RATE2 0x0013 // Symbol Rate Configuration Exponent and Mantissa [1..
-#define CC1200_SYMBOL_RATE1 0x0014 // Symbol Rate Configuration Mantissa [15:8]
-#define CC1200_SYMBOL_RATE0 0x0015 // Symbol Rate Configuration Mantissa [7:0]
-#define CC1200_AGC_REF 0x0016 // AGC Reference Level Configuration
-#define CC1200_AGC_CS_THR 0x0017 // Carrier Sense Threshold Configuration
-#define CC1200_AGC_CFG1 0x001B // Automatic Gain Control Configuration Reg. 1
-#define CC1200_AGC_CFG0 0x001C // Automatic Gain Control Configuration Reg. 0
-#define CC1200_FIFO_CFG 0x001D // FIFO Configuration
-#define CC1200_FS_CFG 0x0020 // Frequency Synthesizer Configuration
-#define CC1200_PKT_CFG2 0x0026 // Packet Configuration Reg. 2
-#define CC1200_PKT_CFG1 0x0027 // Packet Configuration Reg. 1
-#define CC1200_PKT_CFG0 0x0028 // Packet Configuration Reg. 0
-#define CC1200_PA_CFG1 0x002B // Power Amplifier Configuration Reg. 1
-#define CC1200_PKT_LEN 0x002E // Packet Length Configuration
-#define CC1200_IF_MIX_CFG 0x2F00 // IF Mix Configuration
-#define CC1200_TOC_CFG 0x2F02 // Timing Offset Correction Configuration
-#define CC1200_MDMCFG2 0x2F05 // General Modem Parameter Configuration Reg. 2
-#define CC1200_FREQ2 0x2F0C // Frequency Configuration [23:16]
-#define CC1200_FREQ1 0x2F0D // Frequency Configuration [15:8]
-#define CC1200_FREQ0 0x2F0E // Frequency Configuration [7:0]
-#define CC1200_IF_ADC1 0x2F10 // Analog to Digital Converter Configuration Reg. 1
-#define CC1200_IF_ADC0 0x2F11 // Analog to Digital Converter Configuration Reg. 0
-#define CC1200_FS_DIG1 0x2F12 // Frequency Synthesizer Digital Reg. 1
-#define CC1200_FS_DIG0 0x2F13 // Frequency Synthesizer Digital Reg. 0
-#define CC1200_FS_CAL1 0x2F16 // Frequency Synthesizer Calibration Reg. 1
-#define CC1200_FS_CAL0 0x2F17 // Frequency Synthesizer Calibration Reg. 0
-#define CC1200_FS_DIVTWO 0x2F19 // Frequency Synthesizer Divide by 2
-#define CC1200_FS_DSM0 0x2F1B // FS Digital Synthesizer Module Configuration Reg. 0
-#define CC1200_FS_DVC0 0x2F1D // Frequency Synthesizer Divider Chain Configuration ..
-#define CC1200_FS_PFD 0x2F1F // Frequency Synthesizer Phase Frequency Detector Con..
-#define CC1200_FS_PRE 0x2F20 // Frequency Synthesizer Prescaler Configuration
-#define CC1200_FS_REG_DIV_CML 0x2F21 // Frequency Synthesizer Divider Regulator Configurat..
-#define CC1200_FS_SPARE 0x2F22 // Frequency Synthesizer Spare
-#define CC1200_FS_VCO0 0x2F27 // FS Voltage Controlled Oscillator Configuration Reg..
-#define CC1200_IFAMP 0x2F2F // Intermediate Frequency Amplifier Configuration
-#define CC1200_XOSC5 0x2F32 // Crystal Oscillator Configuration Reg. 5
-#define CC1200_XOSC1 0x2F36 // Crystal Oscillator Configuration Reg. 1
-#define CC1200_SERIAL_STATUS 0x2F91 // Serial Status
-
-// Other registers: See User manual Table 4/5
-#define CC1200_IOCFG3 0x00 // GPIO3 Pin 3 Configuration
-#define CC1200_RFEND_CFG0 0x2A // RFEND Configuration Rg. 0
-#define CC1200_PARTNUMBER 0x8F // Part number
+// Registers: See CC1200 User's Guide
+#define CC1200_IOCFG3 0x00  // R/W configuration registers, burst access possible
+#define CC1200_IOCFG2 0x01
+#define CC1200_IOCFG1 0x02
+#define CC1200_IOCFG0 0x03
+#define CC1200_SYNC3 0x04
+#define CC1200_SYNC2 0x05
+#define CC1200_SYNC1 0x06
+#define CC1200_SYNC0 0x07
+#define CC1200_SYNC_CFG1 0x08
+#define CC1200_SYNC_CFG0 0x09
+#define CC1200_DEVIATION_M 0x0A
+#define CC1200_MODCFG_DEV_E 0x0B
+#define CC1200_DCFILT_CFG 0x0C
+#define CC1200_PREAMBLE_CFG1 0x0D
+#define CC1200_PREAMBLE_CFG0 0x0E
+#define CC1200_IQIC 0x0F
+#define CC1200_CHAN_BW 0x10
+#define CC1200_MDMCFG1 0x11
+#define CC1200_MDMCFG0 0x12
+#define CC1200_SYMBOL_RATE2 0x13
+#define CC1200_SYMBOL_RATE1 0x14
+#define CC1200_SYMBOL_RATE0 0x15
+#define CC1200_AGC_REF 0x16
+#define CC1200_AGC_CS_THR 0x17
+#define CC1200_AGC_GAIN_ADJUST 0x18
+#define CC1200_AGC_CFG3 0x19
+#define CC1200_AGC_CFG2 0x1A
+#define CC1200_AGC_CFG1 0x1B
+#define CC1200_AGC_CFG0 0x1C
+#define CC1200_FIFO_CFG 0x1D
+#define CC1200_DEV_ADDR 0x1E
+#define CC1200_SETTLING_CFG 0x1F
+#define CC1200_FS_CFG 0x20
+#define CC1200_WOR_CFG1 0x21
+#define CC1200_WOR_CFG0 0x22
+#define CC1200_WOR_EVENT0_MSB 0x23
+#define CC1200_WOR_EVENT0_LSB 0x24
+#define CC1200_RXDCM_TIME 0x25
+#define CC1200_PKT_CFG2 0x26
+#define CC1200_PKT_CFG1 0x27
+#define CC1200_PKT_CFG0 0x28
+#define CC1200_RFEND_CFG1 0x29
+#define CC1200_RFEND_CFG0 0x2A
+#define CC1200_PA_CFG1 0x2B
+#define CC1200_PA_CFG0 0x2C
+#define CC1200_ASK_CFG 0x2D
+#define CC1200_PKT_LEN 0x2E
+#define CC1200_EXTENDED_REGISTER 0x2F
+// Extended Registers
+#define CC1200_IF_MIX_CFG 0x00
+#define CC1200_FREQOFF_CFG 0x01
+#define CC1200_TOC_CFG 0x02
+#define CC1200_MARC_SPARE 0x03
+#define CC1200_ECG_CFG 0x04
+#define CC1200_MDMCFG2 0x05
+#define CC1200_EXT_CTRL 0x06
+#define CC1200_RCCAL_FINE 0x07
+#define CC1200_RCCAL_COARSE 0x08
+#define CC1200_RCCAL_OFFSET 0x09
+#define CC1200_FREQOFF1 0x0A
+#define CC1200_FREQOFF0 0x0B
+#define CC1200_FREQ2 0x0C
+#define CC1200_FREQ1 0x0D
+#define CC1200_FREQ0 0x0E
+#define CC1200_IF_ADC2 0x0F
+#define CC1200_IF_ADC1 0x10
+#define CC1200_IF_ADC0 0x11
+#define CC1200_FS_DIG1 0x12
+#define CC1200_FS_DIG0 0x13
+#define CC1200_FS_CAL3 0x14
+#define CC1200_FS_CAL2 0x15
+#define CC1200_FS_CAL1 0x16
+#define CC1200_FS_CAL0 0x17
+#define CC1200_FS_CHP 0x18
+#define CC1200_FS_DIVTWO 0x19
+#define CC1200_FS_DSM1 0x1A
+#define CC1200_FS_DSM0 0x1B
+#define CC1200_FS_DVC1 0x1C
+#define CC1200_FS_DVC0 0x1D
+#define CC1200_FS_LBI 0x1E
+#define CC1200_FS_PFD 0x1F
+#define CC1200_FS_PRE 0x20
+#define CC1200_FS_REG_DIV_CML 0x21
+#define CC1200_FS_SPARE 0x22
+#define CC1200_FS_VCO4 0x23
+#define CC1200_FS_VCO3 0x24
+#define CC1200_FS_VCO2 0x25
+#define CC1200_FS_VCO1 0x26
+#define CC1200_FS_VCO0 0x27
+#define CC1200_GBIAS6 0x28
+#define CC1200_GBIAS5 0x29
+#define CC1200_GBIAS4 0x2A
+#define CC1200_GBIAS3 0x2B
+#define CC1200_GBIAS2 0x2C
+#define CC1200_GBIAS1 0x2D
+#define CC1200_GBIAS0 0x2E
+#define CC1200_IFAMP 0x2F
+#define CC1200_LNA 0x30
+#define CC1200_RXMIX 0x31
+#define CC1200_XOSC5 0x32
+#define CC1200_XOSC4 0x33
+#define CC1200_XOSC3 0x34
+#define CC1200_XOSC2 0x35
+#define CC1200_XOSC1 0x36
+#define CC1200_XOSC0 0x37
+#define CC1200_ANALOG_SPARE 0x38
+#define CC1200_PA_CFG3 0x39
+#define CC1200_WOR_TIME1 0x64
+#define CC1200_WOR_TIME0 0x65
+#define CC1200_WOR_CAPTURE1 0x66
+#define CC1200_WOR_CAPTURE0 0x67
+#define CC1200_BIST 0x68
+#define CC1200_DCFILTOFFSET_I1 0x69
+#define CC1200_DCFILTOFFSET_I0 0x6A
+#define CC1200_DCFILTOFFSET_Q1 0x6B
+#define CC1200_DCFILTOFFSET_Q0 0x6C
+#define CC1200_IQIE_I1 0x6D
+#define CC1200_IQIE_I0 0x6E
+#define CC1200_IQIE_Q1 0x6F
+#define CC1200_IQIE_Q0 0x70
+#define CC1200_RSSI1 0x71
+#define CC1200_RSSI0 0x72
+#define CC1200_MARCSTATE 0x73
+#define CC1200_LQI_VAL 0x74
+#define CC1200_PQT_SYNC_ERR 0x75
+#define CC1200_DEM_STATUS 0x76
+#define CC1200_FREQOFF_EST1 0x77
+#define CC1200_FREQOFF_EST0 0x78
+#define CC1200_AGC_GAIN3 0x79
+#define CC1200_AGC_GAIN2 0x7A
+#define CC1200_AGC_GAIN1 0x7B
+#define CC1200_AGC_GAIN0 0x7C
+#define CC1200_CFM_RX_DATA_OUT 0x7D
+#define CC1200_CFM_TX_D_ATA_IN 0x7E
+#define CC1200_ASK_SOFT_RX_DATA 0x7F
+#define CC1200_RNDGEN 0x80
+#define CC1200_MAGN2 0x81
+#define CC1200_MAGN1 0x82
+#define CC1200_MAGN0 0x83
+#define CC1200_ANG1 0x84
+#define CC1200_ANG0 0x85
+#define CC1200_CHFILT_I2 0x86
+#define CC1200_CHFILT_I1 0x87
+#define CC1200_CHFILT_I0 0x88
+#define CC1200_CHFILT_Q2 0x89
+#define CC1200_CHFILT_Q1 0x8A
+#define CC1200_CHFILT_Q0 0x8B
+#define CC1200_GPIO_STATUS 0x8C
+#define CC1200_FSCAL_CTRL 0x8D
+#define CC1200_PHASE_ADJUST 0x8E
+#define CC1200_PARTNUMBER 0x8F
+#define CC1200_PARTVERSION 0x90
+#define CC1200_SERIAL_STATUS 0x91
+#define CC1200_MODEM_STATUS1 0x92
+#define CC1200_MODEM_STATUS0 0x93
+#define CC1200_MARC_STATUS1 0x94
+#define CC1200_MARC_STATUS0 0x95
+#define CC1200_PA_IFAMP_TEST 0x96
+#define CC1200_FSRF_TEST 0x97
+#define CC1200_PRE_TEST 0x98
+#define CC1200_PRE_OVR 0x99
+#define CC1200_ADC_TEST 0x9A
+#define CC1200_DVC_TEST 0x9B
+#define CC1200_ATEST 0x9C
+#define CC1200_ATEST_LVDS 0x9D
+#define CC1200_ATEST_MODE 0x9E
+#define CC1200_XOSC_TEST1 0x9F
+#define CC1200_XOSC_TEST0 0xA0
+#define CC1200_AES 0xA1
+#define CC1200_MDM_TEST 0xA2
+#define CC1200_RXFIRST 0xD2
+#define CC1200_TXFIRST 0xD3
+#define CC1200_RXLAST 0xD4
+#define CC1200_TXLAST 0xD5
+#define CC1200_NUM_TXBYTES 0xD6
+#define CC1200_NUM_RXBYTES 0xD7
+#define CC1200_FIFO_NUM_TXBYTES 0xD8
+#define CC1200_FIFO_NUM_RXBYTES 0xD9
+#define CC1200_RXFIFO_PRE_BUF 0xDA
 
 // Command Strobes: See user guide section 3.2.2
 #define COMMAND_SOFT_RESET = 0x30
