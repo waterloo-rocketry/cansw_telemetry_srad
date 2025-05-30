@@ -23,7 +23,7 @@ typedef struct {
     uint8_t value;
 } CC1200ReadResult;
 
-CC1200ReadResult Write_CC1200(uint8_t, uint8_t);
+uint8_t Write_CC1200(uint8_t, uint8_t);
 
 CC1200ReadResult Read_CC1200(uint8_t);
 
@@ -33,7 +33,7 @@ void CC1200_Reset(void);
 
 void CC1200_RX(void);
 
-void CC1200_Transmit(void);
+void CC1200_Transmit(uint64_t, uint64_t);
 
 CC1200ReadResult CC1200_Status(void);
 

@@ -53,3 +53,11 @@ uint8_t SPI_Transfer(uint8_t data) {
     // Read and return the received data
     return SPI1RXB;
 }
+
+void SPI_Select(void) {
+    LATA5 = 0; // CS LOW
+}
+        
+void SPI_Deselect(void) {
+    LATA5 = 1; // CS HIGH
+}

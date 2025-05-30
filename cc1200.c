@@ -77,11 +77,11 @@ static const registerSetting_t preferredSettings[]=
 CC1200ReadResult Read_CC1200(uint8_t reg) {
     CC1200ReadResult result;
 
-    LATA5 = 0; // CS Low
+    SPI_Select();
     while (PORTCbits.RC4) {} // Wait for MISO to go low
     
     // If accessing extended registers
-    if (reg > 0x2F) {
+    if (reg > CC1200_EXTENDED_REGISTER) {
         // extended register access command
         SPI_Transfer(0xAF); // R/W=1 | 2F
         result.status = SPI_Transfer(reg);
@@ -90,29 +90,28 @@ CC1200ReadResult Read_CC1200(uint8_t reg) {
         result.status = SPI_Transfer(0x80 | reg); // R/W=1 | 0 | register address
         result.value = SPI_Transfer(0x00);
     }
-    LATA5 = 1; // CS High
+    SPI_Deselect();
     return result;
 };
 
-CC1200ReadResult Write_CC1200(uint8_t reg, uint8_t val) {
-    CC1200ReadResult result;
-    result.value = 0x00;
+uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
+    uint8_t status;
     
-    LATA5 = 0; // CS Low
+    SPI_Select();
     while(PORTCbits.RC4) {} // Wait for MISO to go low
     
     // If accessing extended registers
-    if (reg > 0x2F) {
+    if (reg > CC1200_EXTENDED_REGISTER) {
         // extended register access command
-        SPI_Transfer(0x2F);
+        SPI_Transfer(CC1200_EXTENDED_REGISTER);
         SPI_Transfer(reg);
-        result.status = SPI_Transfer(val);
+        status = SPI_Transfer(val);
     } else {
         SPI_Transfer(0x00 | reg);
-        result.status = SPI_Transfer(val);
+        status = SPI_Transfer(val);
     }
-    LATA5 = 1; // CS High
-    return result;
+    SPI_Deselect();
+    return status;
 };
 
 // Configure CC1200 Registers
@@ -142,16 +141,28 @@ void CC1200_Reset(void) {
     Read_CC1200(0x80 | 0x30);
 }
 
-void CC1200_RX(void) {
-    return;
+uint8_t CC1200_get_TX_FIFO_Len() {
+    CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_TXBYTES);
+    return FIFO_len.value;
 }
 
-void CC1200_Transmit(void) {
-    CC1200ReadResult result;
-    LATA5 = 0; // CS Low
-    SPI_Transfer(0x80 | 0x3E);
-    
-    LATA5 = 1; // CS High
+uint8_t CC1200_get_RX_FIFO_Len() {
+    CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_RXBYTES);
+    return FIFO_len.value;
+}
+
+void CC1200_Transmit(uint64_t data0, uint64_t data1) {
+    SPI_Select(); 
+    SPI_Transfer(0x3F | 1 << 6); // 3.2.4 FIFO access with burst
+    for (int i = 7; i >= 0; i--) {
+        uint8_t byte = (data0 >> (i * 8)) & 0xFF;
+        SPI_Transfer(byte);
+    }
+    for (int i = 7; i >= 0; i--) {
+        uint8_t byte = (data1 >> (i * 8)) & 0xFF;
+        SPI_Transfer(byte);
+    }
+    SPI_Deselect();
 }
 
 CC1200ReadResult CC1200_Status(void) {
