@@ -7,6 +7,21 @@
 
 #include "cc1200.h"
 
+// SPI commands to access data buffers
+#define CC1200_ENQUEUE_TX_FIFO 0x3F
+#define CC1200_DEQUEUE_RX_FIFO 0xBF
+
+// R/W bits
+#define CC1200_READ (1 << 7)
+#define CC1200_WRITE 0
+#define CC1200_BURST (1 << 6) // indicate burst access
+
+// SPI command to access FIFO memory (or several other areas depending on mode)
+#define CC1200_MEM_ACCESS 0x3E
+
+// RX and TX FIFOs are 128 bytes
+#define CC1200_MAX_PACKET_LEN 128
+
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
@@ -141,19 +156,34 @@ void CC1200_Reset(void) {
     Read_CC1200(0x80 | 0x30);
 }
 
-uint8_t CC1200_get_TX_FIFO_Len() {
+CC1200ReadResult CC1200_Status(void) {
+    CC1200ReadResult result;
+    result.value = 0x00;
+    LATA5 = 0; // CS Low
+    result.status = SPI_Transfer(0x80 | 0x3D);
+    LATA5 = 1; // CS High
+    return result;
+}
+
+void CC1200_Idle() {
+    SPI_Select();
+    SPI_Transfer(COMMAND_SIDLE);
+    SPI_Deselect();
+}
+
+uint8_t CC1200_get_TX_FIFO_len() {
     CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_TXBYTES);
     return FIFO_len.value;
 }
 
-uint8_t CC1200_get_RX_FIFO_Len() {
+uint8_t CC1200_get_RX_FIFO_len() {
     CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_RXBYTES);
     return FIFO_len.value;
 }
 
 void CC1200_Transmit(uint64_t data0, uint64_t data1) {
     SPI_Select(); 
-    SPI_Transfer(0x3F | 1 << 6); // 3.2.4 FIFO access with burst
+    SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     for (int i = 7; i >= 0; i--) {
         uint8_t byte = (data0 >> (i * 8)) & 0xFF;
         SPI_Transfer(byte);
@@ -163,13 +193,25 @@ void CC1200_Transmit(uint64_t data0, uint64_t data1) {
         SPI_Transfer(byte);
     }
     SPI_Deselect();
+    SPI_Select();
+    SPI_Transfer(COMMAND_STX); // Enter TX mode
+    SPI_Deselect();
 }
 
-CC1200ReadResult CC1200_Status(void) {
-    CC1200ReadResult result;
-    result.value = 0x00;
-    LATA5 = 0; // CS Low
-    result.status = SPI_Transfer(0x80 | 0x3D);
-    LATA5 = 1; // CS High
-    return result;
+bool CC1200_has_received_packet() {
+    uint8_t bytesReceived = CC1200_get_RX_FIFO_len();
+    if (bytesReceived < 1) {
+        return false;
+    }
+    
+    //return bytesReceived >= return false
+}
+
+size_t CC1200_receive_packet() {
+    SPI_Select();
+    SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
+    
+    
+    
+    SPI_Deselect();
 }

@@ -219,20 +219,20 @@ CC1200ReadResult CC1200_Status(void);
 #define CC1200_RXFIFO_PRE_BUF 0xDA
 
 // Command Strobes: See user guide section 3.2.2
-#define COMMAND_SOFT_RESET = 0x30
-#define COMMAND_FAST_TX_ON = 0x31
-#define COMMAND_OSC_OFF = 0x32
-#define COMMAND_CAL_FREQ_SYNTH = 0x33
-#define COMMAND_RX = 0x34
-#define COMMAND_TX = 0x35
-#define COMMAND_IDLE 0x36
-#define COMMAND_AUTO_FREQ_COMP = 0x37
-#define COMMAND_WAKE_ON_RADIO = 0x38
-#define COMMAND_SLEEP = 0x39
-#define COMMAND_FLUSH_RX = 0x3A
-#define COMMAND_FLUSH_TX = 0x3B
-#define COMMAND_WOR_RESET = 0x3C
-#define COMMAND_NOP = 0x3D
+#define COMMAND_SRES = 0x30
+#define COMMAND_SFSTXON = 0x31
+#define COMMAND_SXOFF = 0x32
+#define COMMAND_SCAL = 0x33
+#define COMMAND_SRX = 0x34
+#define COMMAND_STX = 0x35
+#define COMMAND_SIDLE 0x36
+#define COMMAND_SAFC = 0x37
+#define COMMAND_SWOR = 0x38
+#define COMMAND_SPWD = 0x39
+#define COMMAND_SFRX = 0x3A
+#define COMMAND_SFTX = 0x3B
+#define COMMAND_SWORRST = 0x3C
+#define COMMAND_SNOP = 0x3D
 
 // State of chip: See user guide Figure 2
 #define STATE_IDLE 0x00
