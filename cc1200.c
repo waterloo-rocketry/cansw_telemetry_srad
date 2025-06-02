@@ -3,6 +3,15 @@
  * Author: Manav
  *
  * Created on February 26, 2025, 10:34 AM
+ * 
+ * This code is very crude, a lot of functions provide write hard coded values 
+ * to registers that cannot be changed without modifying this file, in future
+ * versions I would like to change that, but for now, I just want to write the
+ * minimum viable code to have the board reliably function
+ * 
+ * Note a lot of register values are set using the TI SmartRF Studio application:
+ * https://www.ti.com/tool/SMARTRFTM-STUDIO and are subject to change as the board
+ * is tested and characterized
  */
 
 #include "cc1200.h"
@@ -20,74 +29,49 @@
 #define CC1200_MEM_ACCESS 0x3E
 
 // RX and TX FIFOs are 128 bytes
-#define CC1200_MAX_PACKET_LEN 128
+#define MAX_PACKET_LEN 128
+#define PACKET_LEN 0x20 // 32 bit
+// Call sign MUST be transmitted at start of every message
+#define CALLSIGN 0x564133555750 // 64-bit "VAEUWP"/Manav
 
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
 static const registerSetting_t preferredSettings[]= 
 {
-  {CC1200_IOCFG2,            0x08},
-  {CC1200_IOCFG0,            0x09},
-  {CC1200_SYNC_CFG1,         0xAB},
-  {CC1200_SYNC_CFG0,         0x13},
-  {CC1200_DEVIATION_M,       0x99},
-  {CC1200_MODCFG_DEV_E,      0x05},
-  {CC1200_DCFILT_CFG,        0x26},
-  {CC1200_PREAMBLE_CFG1,     0x00},
-  {CC1200_PREAMBLE_CFG0,     0x8A},
-  {CC1200_IQIC,              0x00},
-  {CC1200_CHAN_BW,           0x02},
-  {CC1200_MDMCFG1,           0x06},
+  {CC1200_SYNC_CFG1,         0x2B}, // 11-bit Sync Word
+  {CC1200_SYNC_CFG0,         0x13}, 
+  {CC1200_DEVIATION_M,       0x99}, // 124.8MHz deviation
+  {CC1200_MODCFG_DEV_E,      0x05}, // 2-FSK
+  {CC1200_DCFILT_CFG,        0x14}, // 3 preamble bytes: 0xAA
+  {CC1200_PREAMBLE_CFG0,     0x8A}, 
+  {CC1200_IQIC,              0x00}, // IQIC disabled
+  {CC1200_CHAN_BW,           0x02}, // RX Filter Bandwidth: 833.3kHz
+  {CC1200_MDMCFG2,           0x00},
+  {CC1200_MDMCFG1,           0x42},
   {CC1200_MDMCFG0,           0x05},
-  {CC1200_SYMBOL_RATE2,      0xC9},
+  {CC1200_SYMBOL_RATE2,      0xC9}, // Symbol rate: 500 ksp
   {CC1200_SYMBOL_RATE1,      0x99},
   {CC1200_SYMBOL_RATE0,      0x99},
   {CC1200_AGC_REF,           0x2F},
-  {CC1200_AGC_CS_THR,        0x01},
-  {CC1200_AGC_CFG1,          0x16},
-  {CC1200_AGC_CFG0,          0x84},
+  {CC1200_AGC_CS_THR,        0xF7},
+  {CC1200_AGC_CFG1,          0x00},
+  {CC1200_AGC_CFG0,          0x80},
   {CC1200_FIFO_CFG,          0x00},
-  {CC1200_FS_CFG,            0x12},
-  {CC1200_PKT_CFG2,          0x01},
-  {CC1200_PKT_CFG1,          0x40},
-  {CC1200_PKT_CFG0,          0x20},
-  {CC1200_PA_CFG1,           0x3F},
-  {CC1200_PKT_LEN,           0xFF},
+  {CC1200_SETTLING_CFG,      0x03},
+  {CC1200_FS_CFG,            0x12}, // 820.0 - 960.0 MHz band (LO divider = 4)
+  {CC1200_WOR_CFG0,          0x20},
+  {CC1200_WOR_EVENT0_LSB,    0x14},
+  
   {CC1200_IF_MIX_CFG,        0x18},
+  
   {CC1200_TOC_CFG,           0x03},
-  {CC1200_MDMCFG2,           0x01},
-  {CC1200_FREQ2,             0x5C},
-  {CC1200_FREQ1,             0x0F},
-  {CC1200_FREQ0,             0x5C},
-  {CC1200_IF_ADC1,           0xEE},
-  {CC1200_IF_ADC0,           0x10},
-  {CC1200_FS_DIG1,           0x04},
-  {CC1200_FS_DIG0,           0x55},
-  {CC1200_FS_CAL1,           0x40},
+  
+  {CC1200_FS_DIG0,           0x55}, // loop bandwidth 300kHz in RX and TX
   {CC1200_FS_CAL0,           0x0E},
-  {CC1200_FS_DIVTWO,         0x03},
-  {CC1200_FS_DSM0,           0x33},
-  {CC1200_FS_DVC0,           0x17},
-  {CC1200_FS_PFD,            0x00},
-  {CC1200_FS_PRE,            0x6E},
-  {CC1200_FS_REG_DIV_CML,    0x1C},
-  {CC1200_FS_SPARE,          0xAC},
-  {CC1200_FS_VCO0,           0xB5},
+
   {CC1200_IFAMP,             0x0D},
-  {CC1200_XOSC5,             0x0E},
-  {CC1200_XOSC1,             0x03},
-  {CC1200_SERIAL_STATUS,     0x08},
 };
-
-// Communicating to CC1200 via SPI
-// PIC pulls CC1200 LOW
-// PIC wait for MISO to go LOW (takes time to go low if chip was reset or in sleep mode))
-// PIC sens a [Command then Address] OR PIC sens an [Address]]
-// CC1200 has burst bits (for writing to buffers with consecutive addresses), it is not used)
-// Refer to CC1200 data sheet for more information:
-// https://www.ti.com/lit/ug/swru346b/swru346b.pdf?ts=1746854018299&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FCC1200
-
 
 CC1200ReadResult Read_CC1200(uint8_t reg) {
     CC1200ReadResult result;
@@ -129,8 +113,50 @@ uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     return status;
 };
 
+void CC1200_Frequency() {
+    // Values from SmartRF, ideally refer to Section 9.12 (Eqn 27/28, Table 34)
+    SPI_Select();
+    SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
+    SPI_Transfer(CC1200_FREQOFF1);
+    SPI_Transfer(0x00); // FREQOFF1
+    SPI_Transfer(0x00); // FREQOFF0
+    SPI_Transfer(0x5C); //FREQ2
+    SPI_Transfer(0x0F); // FREQ1
+    SPI_Transfer(0x5C); // FREQ0
+    SPI_Deselect();
+}
+
+void CC1200_XOSC_Config(){
+    Write_CC1200(CC1200_XOSC2, 0x05); // XOSC_CORE_PD_OVERRIDE=1
+    Write_CC1200(CC1200_XOSC1, 0x03); // XOSC_BUF_SEL=1
+}
+
+void CC1200_Packet_Config() {
+    SPI_Select();
+    SPI_Transfer(CC1200_PKT_CFG2 | CC1200_BURST);
+    // Standard packets in normal/FIFO mode
+    SPI_Transfer(0x00); // PKT_CFG2
+    // Whitening enabled, CRC_CFG=1
+    SPI_Transfer(0x43); // PKT_CFG1
+    // Fixed length packets, 
+    SPI_Transfer(0x04); // PKT_CFG0
+    SPI_Deselect();
+    // Packet length of 32 bits
+    Write_CC1200(CC1200_PKT_LEN, PACKET_LEN);
+}
+
+void CC1200_RF_Config() {
+    SPI_Select();
+    SPI_Transfer(CC1200_RFEND_CFG1 | CC1200_BURST);
+    // After receiving good packet enter RX
+    SPI_Transfer(0x3F); // RFEND_CFG1
+    // Terminate on bad packets, Antenna diversity, after transmit set to RX mode
+    SPI_Transfer(0x6B); // RFEND_CFG0
+    SPI_Deselect();
+}
+
 // Configure CC1200 Registers
-bool CC1200_Init(void) {
+bool CC1200_Init() {
     size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
 
     for (size_t i = 0; i < numSettings; i++) {
@@ -141,9 +167,11 @@ bool CC1200_Init(void) {
     Write_CC1200(CC1200_IOCFG0, 0b00100100); // 0=Digital | 0=Invert output disabled | 100100=Antenna_Select
     Write_CC1200(CC1200_IOCFG3, 0b01011001); // 0=Digital | 1=Invert output disabled | 011000=PA_PD (Although we're using for external TRX switch))
     
-    // Setup Antenna Switching 
-    Write_CC1200(CC1200_RFEND_CFG0, 0b00000011); // X | 0=CAL_END_WAKE_UP_EN | 00=TXOFF_MODE | 0=TERM_ON_BAD_PACKET_EN | 011=ANT_DIV_RX_TERM_CFG 
-
+    CC1200_Frequency();
+    CC1200_XOSC_Config();
+    CC1200_Packet_Config();
+    CC1200_RF_Config();
+    
     CC1200ReadResult part_number = Read_CC1200(CC1200_PARTNUMBER);
     if (part_number.value == 0x20) {
         return true;
@@ -152,11 +180,11 @@ bool CC1200_Init(void) {
     }
 }
 
-void CC1200_Reset(void) {
+void CC1200_Reset() {
     Read_CC1200(0x80 | 0x30);
 }
 
-CC1200ReadResult CC1200_Status(void) {
+CC1200ReadResult CC1200_Status() {
     CC1200ReadResult result;
     result.value = 0x00;
     LATA5 = 0; // CS Low
@@ -203,15 +231,16 @@ bool CC1200_has_received_packet() {
     if (bytesReceived < 1) {
         return false;
     }
-    
-    //return bytesReceived >= return false
+    // is entire packet received
+    return bytesReceived >= PACKET_LEN;
 }
 
-size_t CC1200_receive_packet() {
+void CC1200_Receive(uint8_t *rx) {
     SPI_Select();
     SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
-    
-    
-    
+    for (size_t byte_index = 0; byte_index < PACKET_LEN; ++byte_index) {
+        uint8_t cur_byte = SPI_Transfer(0x00);
+        rx[byte_index] = cur_byte;
+    }
     SPI_Deselect();
 }

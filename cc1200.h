@@ -27,15 +27,31 @@ uint8_t Write_CC1200(uint8_t, uint8_t);
 
 CC1200ReadResult Read_CC1200(uint8_t);
 
+void CC1200_Frequency(void);
+
+void CC1200_XOSC_Config(void);
+
+void CC1200_Packet_Config(void);
+
+void CC1200_RF_Config(void);
+
 bool CC1200_Init(void);
 
 void CC1200_Reset(void);
 
-void CC1200_RX(void);
+CC1200ReadResult CC1200_Status(void);
+
+void CC1200_Idle(void);
+
+uint8_t CC1200_get_TX_FIFO_len(void);
+
+uint8_t CC1200_get_RX_FIFO_len(void);
 
 void CC1200_Transmit(uint64_t, uint64_t);
 
-CC1200ReadResult CC1200_Status(void);
+bool CC1200_has_received_packet(void);
+
+void CC1200_Receive(uint8_t*);
 
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00  // R/W configuration registers, burst access possible
@@ -219,20 +235,20 @@ CC1200ReadResult CC1200_Status(void);
 #define CC1200_RXFIFO_PRE_BUF 0xDA
 
 // Command Strobes: See user guide section 3.2.2
-#define COMMAND_SRES = 0x30
-#define COMMAND_SFSTXON = 0x31
-#define COMMAND_SXOFF = 0x32
-#define COMMAND_SCAL = 0x33
-#define COMMAND_SRX = 0x34
-#define COMMAND_STX = 0x35
+#define COMMAND_SRES 0x30
+#define COMMAND_SFSTXON 0x31
+#define COMMAND_SXOFF 0x32
+#define COMMAND_SCAL 0x33
+#define COMMAND_SRX 0x34
+#define COMMAND_STX 0x35
 #define COMMAND_SIDLE 0x36
-#define COMMAND_SAFC = 0x37
-#define COMMAND_SWOR = 0x38
-#define COMMAND_SPWD = 0x39
-#define COMMAND_SFRX = 0x3A
-#define COMMAND_SFTX = 0x3B
-#define COMMAND_SWORRST = 0x3C
-#define COMMAND_SNOP = 0x3D
+#define COMMAND_SAFC 0x37
+#define COMMAND_SWOR 0x38
+#define COMMAND_SPWD 0x39
+#define COMMAND_SFRX 0x3A
+#define COMMAND_SFTX 0x3B
+#define COMMAND_SWORRST 0x3C
+#define COMMAND_SNOP 0x3D
 
 // State of chip: See user guide Figure 2
 #define STATE_IDLE 0x00
