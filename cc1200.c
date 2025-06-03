@@ -30,21 +30,21 @@
 
 // RX and TX FIFOs are 128 bytes
 #define MAX_PACKET_LEN 128
-#define PACKET_LEN 0x20 // 32 bit
+#define PACKET_LEN 0x15 // 21 bytes
 // Call sign MUST be transmitted at start of every message
-#define CALLSIGN 0x564133555750 // 64-bit "VAEUWP"/Manav
+const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
 static const registerSetting_t preferredSettings[]= 
 {
-  {CC1200_SYNC_CFG1,         0x2B}, // 11-bit Sync Word
+  {CC1200_SYNC_CFG1,         0x28}, // 11-bit Sync Word
   {CC1200_SYNC_CFG0,         0x13}, 
   {CC1200_DEVIATION_M,       0x99}, // 124.8MHz deviation
   {CC1200_MODCFG_DEV_E,      0x05}, // 2-FSK
-  {CC1200_DCFILT_CFG,        0x14}, // 3 preamble bytes: 0xAA
-  {CC1200_PREAMBLE_CFG0,     0x8A}, 
+  {CC1200_DCFILT_CFG,        0x26}, 
+  {CC1200_PREAMBLE_CFG0,     0x8A}, // 3 preamble bytes: 0xAA
   {CC1200_IQIC,              0x00}, // IQIC disabled
   {CC1200_CHAN_BW,           0x02}, // RX Filter Bandwidth: 833.3kHz
   {CC1200_MDMCFG2,           0x00},
@@ -73,7 +73,7 @@ static const registerSetting_t preferredSettings[]=
   {CC1200_IFAMP,             0x0D},
 };
 
-CC1200ReadResult Read_CC1200(uint8_t reg) {
+static CC1200ReadResult Read_CC1200(uint8_t reg) {
     CC1200ReadResult result;
 
     SPI_Select();
@@ -93,7 +93,7 @@ CC1200ReadResult Read_CC1200(uint8_t reg) {
     return result;
 };
 
-uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
+static uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     uint8_t status;
     
     SPI_Select();
@@ -141,7 +141,7 @@ void CC1200_Packet_Config() {
     // Fixed length packets, 
     SPI_Transfer(0x04); // PKT_CFG0
     SPI_Deselect();
-    // Packet length of 32 bits
+    // Packet length
     Write_CC1200(CC1200_PKT_LEN, PACKET_LEN);
 }
 
@@ -209,15 +209,20 @@ uint8_t CC1200_get_RX_FIFO_len() {
     return FIFO_len.value;
 }
 
-void CC1200_Transmit(uint64_t data0, uint64_t data1) {
+void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
     SPI_Select(); 
     SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     for (int i = 7; i >= 0; i--) {
-        uint8_t byte = (data0 >> (i * 8)) & 0xFF;
+        uint8_t byte = (CALLSIGN >> (i * 8)) & 0xFF;
         SPI_Transfer(byte);
     }
     for (int i = 7; i >= 0; i--) {
-        uint8_t byte = (data1 >> (i * 8)) & 0xFF;
+        uint8_t byte = (sid >> (i * 8)) & 0xFF;
+        SPI_Transfer(byte);
+    }
+    SPI_Transfer(len);
+    for (int i = 7; i >= 0; i--) {
+        uint8_t byte = (data >> (i * 8)) & 0xFF;
         SPI_Transfer(byte);
     }
     SPI_Deselect();
@@ -235,12 +240,30 @@ bool CC1200_has_received_packet() {
     return bytesReceived >= PACKET_LEN;
 }
 
-void CC1200_Receive(uint8_t *rx) {
+void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *data) {
+    uint8_t buffer[PACKET_LEN];
+    
     SPI_Select();
     SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
-    for (size_t byte_index = 0; byte_index < PACKET_LEN; ++byte_index) {
-        uint8_t cur_byte = SPI_Transfer(0x00);
-        rx[byte_index] = cur_byte;
+    for (int i = 0; i < PACKET_LEN; i++) {
+        buffer[i] = SPI_Transfer(0x00);
     }
     SPI_Deselect();
+    
+    *callsign = 0;
+    for (int i = 0; i < 8; i++) {
+        *callsign = (*callsign << 8) | buffer[i];
+    }
+    
+    *sid = 0;
+    for (int i =8; i < 12; i++) {
+        *sid = (*sid << 8) | buffer[i];
+    }
+    
+    *len = buffer[12];
+    
+    *data = 0;
+    for (int i=13; i <= PACKET_LEN; i++) {
+        *data = (*data << 8) | buffer[i];
+    }
 }

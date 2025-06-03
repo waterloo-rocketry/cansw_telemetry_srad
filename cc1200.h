@@ -23,9 +23,9 @@ typedef struct {
     uint8_t value;
 } CC1200ReadResult;
 
-uint8_t Write_CC1200(uint8_t, uint8_t);
+static uint8_t Write_CC1200(uint8_t, uint8_t);
 
-CC1200ReadResult Read_CC1200(uint8_t);
+static CC1200ReadResult Read_CC1200(uint8_t);
 
 void CC1200_Frequency(void);
 
@@ -47,11 +47,11 @@ uint8_t CC1200_get_TX_FIFO_len(void);
 
 uint8_t CC1200_get_RX_FIFO_len(void);
 
-void CC1200_Transmit(uint64_t, uint64_t);
+void CC1200_Transmit(uint32_t, uint8_t, uint64_t);
 
 bool CC1200_has_received_packet(void);
 
-void CC1200_Receive(uint8_t*);
+void CC1200_Receive(uint64_t*, uint32_t*, uint8_t*, uint64_t*);
 
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00  // R/W configuration registers, burst access possible

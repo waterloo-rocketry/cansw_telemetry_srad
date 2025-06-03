@@ -23,9 +23,22 @@ static void send_status_ok(void);
 // memory pool for the CAN tx buffer
 uint8_t tx_pool[200];
 
+// All messages received shall be transmitted
 static void can_msg_handler(const can_msg_t *msg) {
-    uint16_t msg_type = get_message_type(msg);
+    // For transmitting, we don't care what the message is or where it's from
+    uint32_t msg_SID = msg->sid;
+    uint8_t msg_len = msg->data_len;
+    uint64_t msg_data;
+    for (int i=0; i < 8; i++) {
+        msg_data = (msg_data << 8) | msg->data[i];
+    }
 
+    CC1200_Transmit(msg_SID, msg_len, msg_data);
+    
+    // For parsing commands to LTT board
+    uint16_t msg_type = get_message_type(msg);
+    
+    
     switch (msg_type) {
         case MSG_LEDS_ON:
             toggle_LED_Green(1);
@@ -38,6 +51,22 @@ static void can_msg_handler(const can_msg_t *msg) {
         default:
             break;
     }
+}
+
+static void rf_msg_handler(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *data) {
+    can_msg_t *msg;
+    msg->sid = *sid;
+    msg->data_len = *len;
+    uint8_t msg_data[8];
+    for (int i = 7; i >= 0; i--) {
+        msg_data[i] = *data & 0xff;
+        *data >>= 8;
+    }
+    for (int i=0; i < 8; i++) {
+        msg->data[i] = msg_data[i];
+    }
+    
+    can_send(msg);
 }
 
 void CAN_Init() {
@@ -95,25 +124,6 @@ void main() {
         __delay_ms(1000);
 
         Send_Current_Reading();
-
-        // Confirm SPI Works
-        // Read part number register 0x8F
-        // Should be 0x20
-        CC1200ReadResult cc12_read;
-        cc12_read = Read_CC1200(0x8F);
-        uint8_t read_val = cc12_read.value; 
         
-        if (read_val == 0x20) {
-            toggle_LED_Green(1);
-            toggle_LED_Blue(1);
-            toggle_LED_Red(1);
-        }
-        
-        uint16_t time = 0;
-        can_msg_prio_t prio = PRIO_HIGH;
-        can_msg_t debugMsg;
-
-        build_debug_raw_msg(prio, time, &read_val, &debugMsg);
-        can_send(&debugMsg);
     }
 }
