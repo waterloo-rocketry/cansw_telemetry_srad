@@ -18,6 +18,8 @@
 
 #define _XTAL_FREQ 12000000 // 12 MHz
 
+uint16_t timestamp = 0; // Figure out how to sync clocks
+
 static void can_msg_handler(const can_msg_t *msg);
 static void send_status_ok(void);
 // memory pool for the CAN tx buffer
@@ -97,18 +99,36 @@ void Board_Init() {
     //CC1200_Init();
 }
 
-void Send_Current_Reading() {
+void send_board_status() {
+    can_msg_prio_t prio = PRIO_LOW;
+    can_msg_type_t msg_type = MSG_GENERAL_BOARD_STATUS;
+    can_msg_t healthy_msg;
+    
+    // error bit fields are 0 for healthy message
+    build_general_board_status_msg(prio, timestamp, 0, 0, &healthy_msg);
+    can_send(&healthy_msg);
+}
+
+void send_current_reading() {
     uint16_t current_sense_val;
     current_sense_val = read_ADC();
-    current_sense_val = current_sense_val / 0.025; // Shunt resistor is 25mR
+    current_sense_val = (uint8_t)(1000 * (current_sense_val / 0.025)); // Shunt resistor is 25mR
 
-    uint16_t time = 0; // CHANGE LATER
-    can_msg_prio_t current_reading_CAN_priority = PRIO_LOW;
+    can_msg_prio_t prio = PRIO_LOW;
     can_analog_sensor_id_t current_reading_CAN_msgid = SENSOR_12V_CURR;
     can_msg_t current_reading_msg;
 
-    build_analog_data_msg(current_reading_CAN_priority, time, current_reading_CAN_msgid, current_sense_val, &current_reading_msg);
+    build_analog_data_msg(prio, timestamp, current_reading_CAN_msgid, current_sense_val, &current_reading_msg);
     can_send(&current_reading_msg);
+    
+    // Send overcurrent warning if current over 0.8A
+    if (current_sense_val >= 8000) {
+        can_msg_t over_curr_msg;
+        prio = PRIO_HIGH;
+        // Bit field for 12V_OVER_CUR = 0x03
+        build_general_board_status_msg(prio, timestamp, 0x03, 0xff, &over_curr_msg);
+        can_send(&over_curr_msg);
+    }
 }
 
 void main() {
@@ -126,7 +146,7 @@ void main() {
         toggle_LED_Red(0);
         __delay_ms(1000);
 
-        //Send_Current_Reading();
+        //send_current_reading();
         
         // This coe is to test SPI
         uint16_t time = 0; // CHANGE LATER
