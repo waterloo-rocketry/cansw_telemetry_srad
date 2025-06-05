@@ -184,6 +184,15 @@ void CC1200_Reset() {
     Read_CC1200(0x80 | 0x30);
 }
 
+bool is_CC1200() {
+    CC1200ReadResult part_number;
+    part_number = Read_CC1200(CC1200_PARTNUMBER);
+    if (part_number.value == 0x20) {
+        return true;
+    }
+    return false;
+}
+
 CC1200ReadResult CC1200_Status() {
     CC1200ReadResult result;
     result.value = 0x00;

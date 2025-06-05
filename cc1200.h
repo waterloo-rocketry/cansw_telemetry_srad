@@ -39,6 +39,8 @@ bool CC1200_Init(void);
 
 void CC1200_Reset(void);
 
+bool is_CC1200(void);
+
 CC1200ReadResult CC1200_Status(void);
 
 void CC1200_Idle(void);
