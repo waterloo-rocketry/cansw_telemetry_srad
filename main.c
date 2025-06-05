@@ -129,6 +129,11 @@ void main() {
         //Send_Current_Reading();
         
         // This coe is to test SPI
+        uint16_t time = 0; // CHANGE LATER
+        can_msg_prio_t priority = PRIO_HIGH;
+        can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
+        can_msg_t msg;
+            
         bool is_SPI_working = false;
         
         is_SPI_working = is_CC1200();
@@ -136,17 +141,13 @@ void main() {
         if (is_SPI_working == true) {
             toggle_LED_Green(1);
             toggle_LED_Red(1);
+            
+            build_analog_data_msg(priority, time, msgid, 0x20, &msg);
+            can_send(&msg);
         }
         
-        uint16_t time = 0; // CHANGE LATER
-        can_msg_prio_t priority = PRIO_HIGH;
-        can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
-        can_msg_t msg;
-        build_analog_data_msg(priority, time, msgid, 0x20, &msg);
-        can_send(&msg);
-        
         __delay_ms(500);
-        build_analog_data_msg(priority, time, 0x00, 0x20, &msg);
+        build_analog_data_msg(priority, time, msgid, 0x00, &msg);
         can_send(&msg);      
         
     }
