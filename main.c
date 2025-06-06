@@ -5,23 +5,23 @@
  * Created on February 22, 2025, 11:40 AM
  */
 
-#include "adc.h"
-#include "clockInit.h"
-#include "leds.h"
-#include "spi.h"
-#include "cc1200.h"
 #include <xc.h>
 
-#include "canlib.h"
+#include "adc.h" // interface with ADC
+#include "clockInit.h" // initialize XTAL
+#include "leds.h" // interface with LEDs
+#include "cc1200.h" // interface with CC1200
+
+// rocketlib and canlib
+#include "canlib.h" // interface with RocketCAN
+#include "timer.h" // import custom millis() function
 
 #pragma config WDTE = OFF // Watchdog Timer disabled
 
 #define _XTAL_FREQ 12000000 // 12 MHz
 
-uint16_t timestamp = 0; // Figure out how to sync clocks
+uint8_t board_status = 0; // board status flag
 
-static void can_msg_handler(const can_msg_t *msg);
-static void send_status_ok(void);
 // memory pool for the CAN tx buffer
 uint8_t tx_pool[200];
 
@@ -91,6 +91,7 @@ void CAN_Init() {
 }
 
 void Board_Init() {
+    timer0_init();
     LEDs_Init();
     Osc_Init();
     ADC_Init();
@@ -99,14 +100,26 @@ void Board_Init() {
     //CC1200_Init();
 }
 
-void send_board_status() {
-    can_msg_prio_t prio = PRIO_LOW;
+void send_board_status(uint8_t status) {
+    can_msg_prio_t prio;
     can_msg_type_t msg_type = MSG_GENERAL_BOARD_STATUS;
-    can_msg_t healthy_msg;
+    can_msg_t status_msg;
+    uint16_t error = (status != 0? 0xff:0);
+    uint32_t error_bitfield;
+    
+    // no error, set bit fields to 0
+    if (status == 0x00) {
+        prio = PRIO_LOW;
+        error_bitfield = 0x00;
+    } // Over current 
+    else if (status == 0x01) {
+        prio = PRIO_HIGH;
+        error_bitfield = 0x03; // 12V_OVER_CURRENT
+    }
     
     // error bit fields are 0 for healthy message
-    build_general_board_status_msg(prio, timestamp, 0, 0, &healthy_msg);
-    can_send(&healthy_msg);
+    build_general_board_status_msg(prio, millis(), error_bitfield, error, &status_msg);
+    can_send(&status_msg);
 }
 
 void send_current_reading() {
@@ -118,16 +131,12 @@ void send_current_reading() {
     can_analog_sensor_id_t current_reading_CAN_msgid = SENSOR_12V_CURR;
     can_msg_t current_reading_msg;
 
-    build_analog_data_msg(prio, timestamp, current_reading_CAN_msgid, current_sense_val, &current_reading_msg);
+    build_analog_data_msg(prio, millis(), current_reading_CAN_msgid, current_sense_val, &current_reading_msg);
     can_send(&current_reading_msg);
     
     // Send overcurrent warning if current over 0.8A
     if (current_sense_val >= 8000) {
-        can_msg_t over_curr_msg;
-        prio = PRIO_HIGH;
-        // Bit field for 12V_OVER_CUR = 0x03
-        build_general_board_status_msg(prio, timestamp, 0x03, 0xff, &over_curr_msg);
-        can_send(&over_curr_msg);
+        board_status = 0x01;
     }
 }
 
@@ -141,14 +150,14 @@ void main() {
     while (1) {
         CLRWDT();
 
+        //send_board_status();
+        //send_current_reading();
         
+        // This code is to test SPI
         toggle_LED_Green(0);
         toggle_LED_Red(0);
         __delay_ms(1000);
-
-        //send_current_reading();
-        
-        // This coe is to test SPI
+      
         uint16_t time = 0; // CHANGE LATER
         can_msg_prio_t priority = PRIO_HIGH;
         can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
