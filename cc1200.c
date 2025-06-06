@@ -3,12 +3,12 @@
  * Author: Manav
  *
  * Created on February 26, 2025, 10:34 AM
- * 
- * This code is very crude, a lot of functions provide write hard coded values 
+ *
+ * This code is very crude, a lot of functions provide write hard coded values
  * to registers that cannot be changed without modifying this file, in future
  * versions I would like to change that, but for now, I just want to write the
  * minimum viable code to have the board reliably function
- * 
+ *
  * Note a lot of register values are set using the TI SmartRF Studio application:
  * https://www.ti.com/tool/SMARTRFTM-STUDIO and are subject to change as the board
  * is tested and characterized
@@ -37,40 +37,30 @@ const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
-static const registerSetting_t preferredSettings[]= 
-{
-  {CC1200_SYNC_CFG1,         0x28}, // 11-bit Sync Word
-  {CC1200_SYNC_CFG0,         0x13}, 
-  {CC1200_DEVIATION_M,       0x99}, // 124.8MHz deviation
-  {CC1200_MODCFG_DEV_E,      0x05}, // 2-FSK
-  {CC1200_DCFILT_CFG,        0x26}, 
-  {CC1200_PREAMBLE_CFG0,     0x8A}, // 3 preamble bytes: 0xAA
-  {CC1200_IQIC,              0x00}, // IQIC disabled
-  {CC1200_CHAN_BW,           0x02}, // RX Filter Bandwidth: 833.3kHz
-  {CC1200_MDMCFG2,           0x00},
-  {CC1200_MDMCFG1,           0x42},
-  {CC1200_MDMCFG0,           0x05},
-  {CC1200_SYMBOL_RATE2,      0xC9}, // Symbol rate: 500 ksp
-  {CC1200_SYMBOL_RATE1,      0x99},
-  {CC1200_SYMBOL_RATE0,      0x99},
-  {CC1200_AGC_REF,           0x2F},
-  {CC1200_AGC_CS_THR,        0xF7},
-  {CC1200_AGC_CFG1,          0x00},
-  {CC1200_AGC_CFG0,          0x80},
-  {CC1200_FIFO_CFG,          0x00},
-  {CC1200_SETTLING_CFG,      0x03},
-  {CC1200_FS_CFG,            0x12}, // 820.0 - 960.0 MHz band (LO divider = 4)
-  {CC1200_WOR_CFG0,          0x20},
-  {CC1200_WOR_EVENT0_LSB,    0x14},
-  
-  {CC1200_IF_MIX_CFG,        0x18},
-  
-  {CC1200_TOC_CFG,           0x03},
-  
-  {CC1200_FS_DIG0,           0x55}, // loop bandwidth 300kHz in RX and TX
-  {CC1200_FS_CAL0,           0x0E},
+static const registerSetting_t preferredSettings[] = {
+    {CC1200_SYNC_CFG1, 0x28}, // 11-bit Sync Word
+    {CC1200_SYNC_CFG0, 0x13},    {CC1200_DEVIATION_M, 0x99}, // 124.8MHz deviation
+    {CC1200_MODCFG_DEV_E, 0x05}, // 2-FSK
+    {CC1200_DCFILT_CFG, 0x26},   {CC1200_PREAMBLE_CFG0, 0x8A}, // 3 preamble bytes: 0xAA
+    {CC1200_IQIC, 0x00}, // IQIC disabled
+    {CC1200_CHAN_BW, 0x02}, // RX Filter Bandwidth: 833.3kHz
+    {CC1200_MDMCFG2, 0x00},      {CC1200_MDMCFG1, 0x42},
+    {CC1200_MDMCFG0, 0x05},      {CC1200_SYMBOL_RATE2, 0xC9}, // Symbol rate: 500 ksp
+    {CC1200_SYMBOL_RATE1, 0x99}, {CC1200_SYMBOL_RATE0, 0x99},
+    {CC1200_AGC_REF, 0x2F},      {CC1200_AGC_CS_THR, 0xF7},
+    {CC1200_AGC_CFG1, 0x00},     {CC1200_AGC_CFG0, 0x80},
+    {CC1200_FIFO_CFG, 0x00},     {CC1200_SETTLING_CFG, 0x03},
+    {CC1200_FS_CFG, 0x12}, // 820.0 - 960.0 MHz band (LO divider = 4)
+    {CC1200_WOR_CFG0, 0x20},     {CC1200_WOR_EVENT0_LSB, 0x14},
 
-  {CC1200_IFAMP,             0x0D},
+    {CC1200_IF_MIX_CFG, 0x18},
+
+    {CC1200_TOC_CFG, 0x03},
+
+    {CC1200_FS_DIG0, 0x55}, // loop bandwidth 300kHz in RX and TX
+    {CC1200_FS_CAL0, 0x0E},
+
+    {CC1200_IFAMP, 0x0D},
 };
 
 static CC1200ReadResult Read_CC1200(uint8_t reg) {
@@ -78,7 +68,7 @@ static CC1200ReadResult Read_CC1200(uint8_t reg) {
 
     SPI_Select();
     while (PORTCbits.RC4) {} // Wait for MISO to go low
-    
+
     // If accessing extended registers
     if (reg > CC1200_EXTENDED_REGISTER) {
         // extended register access command
@@ -95,10 +85,10 @@ static CC1200ReadResult Read_CC1200(uint8_t reg) {
 
 static uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     uint8_t status;
-    
+
     SPI_Select();
-    while(PORTCbits.RC4) {} // Wait for MISO to go low
-    
+    while (PORTCbits.RC4) {} // Wait for MISO to go low
+
     // If accessing extended registers
     if (reg > CC1200_EXTENDED_REGISTER) {
         // extended register access command
@@ -120,13 +110,13 @@ void CC1200_Frequency() {
     SPI_Transfer(CC1200_FREQOFF1);
     SPI_Transfer(0x00); // FREQOFF1
     SPI_Transfer(0x00); // FREQOFF0
-    SPI_Transfer(0x5C); //FREQ2
+    SPI_Transfer(0x5C); // FREQ2
     SPI_Transfer(0x0F); // FREQ1
     SPI_Transfer(0x5C); // FREQ0
     SPI_Deselect();
 }
 
-void CC1200_XOSC_Config(){
+void CC1200_XOSC_Config() {
     Write_CC1200(CC1200_XOSC2, 0x05); // XOSC_CORE_PD_OVERRIDE=1
     Write_CC1200(CC1200_XOSC1, 0x03); // XOSC_BUF_SEL=1
 }
@@ -138,7 +128,7 @@ void CC1200_Packet_Config() {
     SPI_Transfer(0x00); // PKT_CFG2
     // Whitening enabled, CRC_CFG=1
     SPI_Transfer(0x43); // PKT_CFG1
-    // Fixed length packets, 
+    // Fixed length packets,
     SPI_Transfer(0x04); // PKT_CFG0
     SPI_Deselect();
     // Packet length
@@ -162,16 +152,19 @@ bool CC1200_Init() {
     for (size_t i = 0; i < numSettings; i++) {
         Write_CC1200(preferredSettings[i].addr, preferredSettings[i].value);
     }
-    
+
     // Overwrite GPIO pin configurations
-    Write_CC1200(CC1200_IOCFG0, 0b00100100); // 0=Digital | 0=Invert output disabled | 100100=Antenna_Select
-    Write_CC1200(CC1200_IOCFG3, 0b01011001); // 0=Digital | 1=Invert output disabled | 011000=PA_PD (Although we're using for external TRX switch))
-    
+    Write_CC1200(
+        CC1200_IOCFG0, 0b00100100
+    ); // 0=Digital | 0=Invert output disabled | 100100=Antenna_Select
+    Write_CC1200(CC1200_IOCFG3, 0b01011001); // 0=Digital | 1=Invert output disabled | 011000=PA_PD
+                                             // (Although we're using for external TRX switch))
+
     CC1200_Frequency();
     CC1200_XOSC_Config();
     CC1200_Packet_Config();
     CC1200_RF_Config();
-    
+
     CC1200ReadResult part_number = Read_CC1200(CC1200_PARTNUMBER);
     if (part_number.value == 0x20) {
         return true;
@@ -219,7 +212,7 @@ uint8_t CC1200_get_RX_FIFO_len() {
 }
 
 void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
-    SPI_Select(); 
+    SPI_Select();
     SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     for (int i = 7; i >= 0; i--) {
         uint8_t byte = (CALLSIGN >> (i * 8)) & 0xFF;
@@ -251,28 +244,28 @@ bool CC1200_has_received_packet() {
 
 void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *data) {
     uint8_t buffer[PACKET_LEN];
-    
+
     SPI_Select();
     SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
     for (int i = 0; i < PACKET_LEN; i++) {
         buffer[i] = SPI_Transfer(0x00);
     }
     SPI_Deselect();
-    
+
     *callsign = 0;
     for (int i = 0; i < 8; i++) {
         *callsign = (*callsign << 8) | buffer[i];
     }
-    
+
     *sid = 0;
-    for (int i =8; i < 12; i++) {
+    for (int i = 8; i < 12; i++) {
         *sid = (*sid << 8) | buffer[i];
     }
-    
+
     *len = buffer[12];
-    
+
     *data = 0;
-    for (int i=13; i <= PACKET_LEN; i++) {
+    for (int i = 13; i <= PACKET_LEN; i++) {
         *data = (*data << 8) | buffer[i];
     }
 }

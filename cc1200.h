@@ -9,8 +9,8 @@
 #define CC1200_H
 
 #include "spi.h"
-#include "stdint.h"
 #include "stdbool.h"
+#include "stdint.h"
 #include <xc.h>
 
 typedef struct {
@@ -53,10 +53,10 @@ void CC1200_Transmit(uint32_t, uint8_t, uint64_t);
 
 bool CC1200_has_received_packet(void);
 
-void CC1200_Receive(uint64_t*, uint32_t*, uint8_t*, uint64_t*);
+void CC1200_Receive(uint64_t *, uint32_t *, uint8_t *, uint64_t *);
 
 // Registers: See CC1200 User's Guide
-#define CC1200_IOCFG3 0x00  // R/W configuration registers, burst access possible
+#define CC1200_IOCFG3 0x00 // R/W configuration registers, burst access possible
 #define CC1200_IOCFG2 0x01
 #define CC1200_IOCFG1 0x02
 #define CC1200_IOCFG0 0x03
