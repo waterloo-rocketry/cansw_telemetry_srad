@@ -43,12 +43,25 @@ static void can_msg_handler(const can_msg_t *msg) {
     switch (msg_type) {
         case MSG_LEDS_ON:
             toggle_LED_Green(1);
+            toggle_LED_Red(1);
+            toggle_LED_Blue(1);
             break;
 
         case MSG_LEDS_OFF:
-            toggle_LED_Green(1);
+            toggle_LED_Green(0);
+            toggle_LED_Red(0);
+            toggle_LED_Blue(0);
             break;
-
+            
+        // DEBUG RAW Message will be used for power control
+        case MSG_DEBUG_RAW:
+            uint8_t *debug_data;
+            get_debug_raw_data(msg, debug_data);
+            //CC1200_Set_Power(*debug_data);
+            CC1200_Frequency(*debug_data);
+            break;
+            
+            
         default:
             break;
     }

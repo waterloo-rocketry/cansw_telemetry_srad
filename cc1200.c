@@ -103,16 +103,18 @@ static uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     return status;
 };
 
-void CC1200_Frequency() {
-    // Values from SmartRF, ideally refer to Section 9.12 (Eqn 27/28, Table 34)
+void CC1200_Frequency(uint8_t freq) {
+    // Refer to Section 9.12 (Eqn 27/28, Table 34)
+    uint24_t reg_value = (freq * 4 * 65536) / 40000000;
+    
     SPI_Select();
     SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
     SPI_Transfer(CC1200_FREQOFF1);
     SPI_Transfer(0x00); // FREQOFF1
     SPI_Transfer(0x00); // FREQOFF0
-    SPI_Transfer(0x5C); // FREQ2
-    SPI_Transfer(0x0F); // FREQ1
-    SPI_Transfer(0x5C); // FREQ0
+    SPI_Transfer((reg_value >> 16) & 0xFF); // FREQ2 - MSB
+    SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
+    SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
     SPI_Deselect();
 }
 
@@ -160,7 +162,7 @@ bool CC1200_Init() {
     Write_CC1200(CC1200_IOCFG3, 0b01011001); // 0=Digital | 1=Invert output disabled | 011000=PA_PD
                                              // (Although we're using for external TRX switch))
 
-    CC1200_Frequency();
+    CC1200_Frequency(6033244);
     CC1200_XOSC_Config();
     CC1200_Packet_Config();
     CC1200_RF_Config();
@@ -268,4 +270,15 @@ void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *d
     for (int i = 13; i <= PACKET_LEN; i++) {
         *data = (*data << 8) | buffer[i];
     }
+}
+
+void CC1200_Set_Power(uint8_t power) {
+    // User Guide 7.1 Equation 21
+    uint8_t reg_value = (2 * (power + 18)) - 1;
+    CC1200ReadResult cur_reg_val = Read_CC1200(CC1200_PA_CFG1);
+    
+    // Preserve bits 7:6, update bits 5:0 with new reg_value
+    uint8_t new_reg_value = (cur_reg_val.value & 0xC0) | (reg_value & 0x3F);
+    
+    Write_CC1200(CC1200_PA_CFG1, new_reg_value);
 }
