@@ -5,6 +5,7 @@
  * Created on February 22, 2025, 11:40 AM
  */
 
+#include "config.h"
 #include <xc.h>
 
 #include "adc.h" // interface with ADC
@@ -15,10 +16,6 @@
 // rocketlib and canlib
 #include "canlib.h" // interface with RocketCAN
 #include "timer.h" // import custom millis() function
-
-#pragma config WDTE = OFF // Watchdog Timer disabled
-
-#define _XTAL_FREQ 12000000 // 12 MHz
 
 uint8_t board_status = 0; // board status flag
 
@@ -35,7 +32,7 @@ static void can_msg_handler(const can_msg_t *msg) {
         msg_data = (msg_data << 8) | msg->data[i];
     }
 
-    CC1200_Transmit(msg_SID, msg_len, msg_data);
+    //CC1200_Transmit(msg_SID, msg_len, msg_data);
 
     // For parsing commands to LTT board
     uint16_t msg_type = get_message_type(msg);
@@ -54,13 +51,13 @@ static void can_msg_handler(const can_msg_t *msg) {
             break;
             
         // DEBUG RAW Message will be used for power control
-        case MSG_DEBUG_RAW:
-            uint8_t *debug_data;
+        case MSG_DEBUG_RAW: {
+            uint8_t debug_data[6];
             get_debug_raw_data(msg, debug_data);
-            //CC1200_Set_Power(*debug_data);
-            CC1200_Frequency(*debug_data);
+            //CC1200_Set_Power(((int8_t) debug_data[0]) - 16);
+            //CC1200_Frequency(debug_data[0]);
             break;
-            
+        }
             
         default:
             break;
@@ -109,7 +106,7 @@ void Board_Init() {
     ADC_Init();
     SPI_Init();
     CAN_Init();
-    // CC1200_Init();
+    //CC1200_Init();
 }
 
 void send_board_status(uint8_t status) {
@@ -161,6 +158,8 @@ void main() {
     toggle_LED_Blue(1);
     toggle_LED_Red(0);
 
+    uint32_t last_millis = millis();
+
     while (1) {
         CLRWDT();
 
@@ -168,29 +167,56 @@ void main() {
         // send_current_reading();
 
         // This code is to test SPI
-        toggle_LED_Green(0);
-        toggle_LED_Red(0);
-        __delay_ms(1000);
 
-        uint16_t time = 0; // CHANGE LATER
         can_msg_prio_t priority = PRIO_HIGH;
         can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
         can_msg_t msg;
 
-        bool is_SPI_working = false;
+        uint8_t status[6] = {0xFF};
 
-        is_SPI_working = is_CC1200();
+        //SPI_Select();
+        //SPI_Transfer(0xAF);
+        //SPI_Transfer(0x8F);
+        //SPI_Transfer(0x00);
+        //SPI_Deselect();
 
-        if (is_SPI_working == true) {
-            toggle_LED_Green(1);
+        bool is_SPI_working = is_CC1200(status);
+
+        if (is_SPI_working) {
             toggle_LED_Red(1);
+        } else {
+            toggle_LED_Red(0);
+        }
 
-            build_analog_data_msg(priority, time, msgid, 0x20, &msg);
+        //if (CC1200_has_signal()) {
+        //    toggle_LED_Green(1);
+        //} else {
+        //    toggle_LED_Green(0);
+        //}
+
+        if (millis() - last_millis > 500) {
+            last_millis = millis();
+            build_debug_raw_msg(priority, millis(), status, &msg);
             can_send(&msg);
         }
 
-        __delay_ms(500);
-        build_analog_data_msg(priority, time, msgid, 0x00, &msg);
-        can_send(&msg);
+        __delay_ms(1000);
+
+        //__delay_ms(500);
+        //build_analog_data_msg(priority, time, msgid, 0x00, &msg);
+        //can_send(&msg);
+    }
+}
+
+static void __interrupt() interrupt_handler(void) {
+    if (PIR5) {
+        can_handle_interrupt();
+    }
+
+    // Timer0 has overflowed - update millis() function
+    // This happens approximately every 500us
+    if (PIE3bits.TMR0IE == 1 && PIR3bits.TMR0IF == 1) {
+        timer0_handle_interrupt();
+        PIR3bits.TMR0IF = 0;
     }
 }

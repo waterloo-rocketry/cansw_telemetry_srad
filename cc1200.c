@@ -70,9 +70,10 @@ static CC1200ReadResult Read_CC1200(uint8_t reg) {
     while (PORTCbits.RC4) {} // Wait for MISO to go low
 
     // If accessing extended registers
-    if (reg > CC1200_EXTENDED_REGISTER) {
+    if (reg >= CC1200_EXTENDED_REGISTER) {
         // extended register access command
-        SPI_Transfer(0xAF); // R/W=1 | 2F
+        //SPI_Transfer(0xAF); // R/W=1 | 2F
+        SPI_Transfer(0x2F);
         result.status = SPI_Transfer(reg);
         result.value = SPI_Transfer(0x00);
     } else {
@@ -103,15 +104,15 @@ static uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     return status;
 };
 
-void CC1200_Frequency(uint8_t freq) {
+void CC1200_Frequency(uint32_t freq) {
     // Refer to Section 9.12 (Eqn 27/28, Table 34)
     uint24_t reg_value = (freq * 4 * 65536) / 40000000;
     
     SPI_Select();
     SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
     SPI_Transfer(CC1200_FREQOFF1);
-    SPI_Transfer(0x00); // FREQOFF1
-    SPI_Transfer(0x00); // FREQOFF0
+    SPI_Transfer(0x00); // FREQOFF1 - MSB
+    SPI_Transfer(0x00); // FREQOFF0 - LSB
     SPI_Transfer((reg_value >> 16) & 0xFF); // FREQ2 - MSB
     SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
     SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
@@ -137,18 +138,19 @@ void CC1200_Packet_Config() {
     Write_CC1200(CC1200_PKT_LEN, PACKET_LEN);
 }
 
-void CC1200_RF_Config() {
+void CC1200_RF_Config(void) {
     SPI_Select();
     SPI_Transfer(CC1200_RFEND_CFG1 | CC1200_BURST);
     // After receiving good packet enter RX
     SPI_Transfer(0x3F); // RFEND_CFG1
     // Terminate on bad packets, Antenna diversity, after transmit set to RX mode
-    SPI_Transfer(0x6B); // RFEND_CFG0
+    //SPI_Transfer(0x6B); // RFEND_CFG0
+    SPI_Transfer(0x18); // RFEND_CFG0
     SPI_Deselect();
 }
 
 // Configure CC1200 Registers
-bool CC1200_Init() {
+bool CC1200_Init(void) {
     size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
 
     for (size_t i = 0; i < numSettings; i++) {
@@ -162,7 +164,8 @@ bool CC1200_Init() {
     Write_CC1200(CC1200_IOCFG3, 0b01011001); // 0=Digital | 1=Invert output disabled | 011000=PA_PD
                                              // (Although we're using for external TRX switch))
 
-    CC1200_Frequency(6033244);
+    CC1200_Frequency(915000000);
+    CC1200_Set_Power(-16);
     CC1200_XOSC_Config();
     CC1200_Packet_Config();
     CC1200_RF_Config();
@@ -175,17 +178,23 @@ bool CC1200_Init() {
     }
 }
 
-void CC1200_Reset() {
+void CC1200_Reset(void) {
     Read_CC1200(0x80 | 0x30);
 }
 
-bool is_CC1200() {
-    CC1200ReadResult part_number;
-    part_number = Read_CC1200(CC1200_PARTNUMBER);
+bool is_CC1200(uint8_t *status) {
+    CC1200ReadResult part_number = Read_CC1200(CC1200_PARTNUMBER);
+    //*status = part_number.status;
+    *status = part_number.value;
     if (part_number.value == 0x20) {
         return true;
     }
     return false;
+}
+
+bool CC1200_has_signal(void) {
+    CC1200ReadResult modem_status = Read_CC1200(CC1200_MODEM_STATUS1);
+    return (modem_status.value & 0x2) != 0;
 }
 
 CC1200ReadResult CC1200_Status() {
@@ -197,18 +206,18 @@ CC1200ReadResult CC1200_Status() {
     return result;
 }
 
-void CC1200_Idle() {
+void CC1200_Idle(void) {
     SPI_Select();
     SPI_Transfer(COMMAND_SIDLE);
     SPI_Deselect();
 }
 
-uint8_t CC1200_get_TX_FIFO_len() {
+uint8_t CC1200_get_TX_FIFO_len(void) {
     CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_TXBYTES);
     return FIFO_len.value;
 }
 
-uint8_t CC1200_get_RX_FIFO_len() {
+uint8_t CC1200_get_RX_FIFO_len(void) {
     CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_RXBYTES);
     return FIFO_len.value;
 }
@@ -235,7 +244,7 @@ void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
     SPI_Deselect();
 }
 
-bool CC1200_has_received_packet() {
+bool CC1200_has_received_packet(void) {
     uint8_t bytesReceived = CC1200_get_RX_FIFO_len();
     if (bytesReceived < 1) {
         return false;
@@ -272,9 +281,10 @@ void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *d
     }
 }
 
-void CC1200_Set_Power(uint8_t power) {
+void CC1200_Set_Power(int8_t power) {
     // User Guide 7.1 Equation 21
-    uint8_t reg_value = (2 * (power + 18)) - 1;
+    if (power < -16) power = -16;
+    uint8_t reg_value = (uint8_t) (2 * (power + 18)) - 1;
     CC1200ReadResult cur_reg_val = Read_CC1200(CC1200_PA_CFG1);
     
     // Preserve bits 7:6, update bits 5:0 with new reg_value
