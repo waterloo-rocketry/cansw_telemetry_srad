@@ -66,41 +66,36 @@ static const registerSetting_t preferredSettings[] = {
 static CC1200ReadResult Read_CC1200(uint8_t reg) {
     CC1200ReadResult result;
 
-    SPI_Select();
-    while (PORTCbits.RC4) {} // Wait for MISO to go low
-
     // If accessing extended registers
     if (reg >= CC1200_EXTENDED_REGISTER) {
+        SPI_Select(3);
         // extended register access command
-        //SPI_Transfer(0xAF); // R/W=1 | 2F
-        SPI_Transfer(0x2F);
+        SPI_Transfer(0x80 | CC1200_EXTENDED_REGISTER);
         result.status = SPI_Transfer(reg);
         result.value = SPI_Transfer(0x00);
     } else {
+        SPI_Select(2);
         result.status = SPI_Transfer(0x80 | reg); // R/W=1 | 0 | register address
         result.value = SPI_Transfer(0x00);
     }
-    SPI_Deselect();
     return result;
 };
 
 static uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     uint8_t status;
 
-    SPI_Select();
-    while (PORTCbits.RC4) {} // Wait for MISO to go low
-
     // If accessing extended registers
-    if (reg > CC1200_EXTENDED_REGISTER) {
+    if (reg >= CC1200_EXTENDED_REGISTER) {
+        SPI_Select(3);
         // extended register access command
         SPI_Transfer(CC1200_EXTENDED_REGISTER);
         SPI_Transfer(reg);
         status = SPI_Transfer(val);
     } else {
+        SPI_Select(2);
         SPI_Transfer(0x00 | reg);
         status = SPI_Transfer(val);
     }
-    SPI_Deselect();
     return status;
 };
 
@@ -108,7 +103,7 @@ void CC1200_Frequency(uint32_t freq) {
     // Refer to Section 9.12 (Eqn 27/28, Table 34)
     uint24_t reg_value = (freq * 4 * 65536) / 40000000;
     
-    SPI_Select();
+    SPI_Select(7);
     SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
     SPI_Transfer(CC1200_FREQOFF1);
     SPI_Transfer(0x00); // FREQOFF1 - MSB
@@ -116,7 +111,6 @@ void CC1200_Frequency(uint32_t freq) {
     SPI_Transfer((reg_value >> 16) & 0xFF); // FREQ2 - MSB
     SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
     SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
-    SPI_Deselect();
 }
 
 void CC1200_XOSC_Config() {
@@ -125,7 +119,7 @@ void CC1200_XOSC_Config() {
 }
 
 void CC1200_Packet_Config() {
-    SPI_Select();
+    SPI_Select(4);
     SPI_Transfer(CC1200_PKT_CFG2 | CC1200_BURST);
     // Standard packets in normal/FIFO mode
     SPI_Transfer(0x00); // PKT_CFG2
@@ -133,20 +127,18 @@ void CC1200_Packet_Config() {
     SPI_Transfer(0x43); // PKT_CFG1
     // Fixed length packets,
     SPI_Transfer(0x04); // PKT_CFG0
-    SPI_Deselect();
     // Packet length
     Write_CC1200(CC1200_PKT_LEN, PACKET_LEN);
 }
 
 void CC1200_RF_Config(void) {
-    SPI_Select();
+    SPI_Select(3);
     SPI_Transfer(CC1200_RFEND_CFG1 | CC1200_BURST);
     // After receiving good packet enter RX
     SPI_Transfer(0x3F); // RFEND_CFG1
     // Terminate on bad packets, Antenna diversity, after transmit set to RX mode
     //SPI_Transfer(0x6B); // RFEND_CFG0
     SPI_Transfer(0x18); // RFEND_CFG0
-    SPI_Deselect();
 }
 
 // Configure CC1200 Registers
@@ -207,9 +199,8 @@ CC1200ReadResult CC1200_Status() {
 }
 
 void CC1200_Idle(void) {
-    SPI_Select();
+    SPI_Select(1);
     SPI_Transfer(COMMAND_SIDLE);
-    SPI_Deselect();
 }
 
 uint8_t CC1200_get_TX_FIFO_len(void) {
@@ -223,7 +214,7 @@ uint8_t CC1200_get_RX_FIFO_len(void) {
 }
 
 void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
-    SPI_Select();
+    SPI_Select(26);
     SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     for (int i = 7; i >= 0; i--) {
         uint8_t byte = (CALLSIGN >> (i * 8)) & 0xFF;
@@ -238,10 +229,9 @@ void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
         uint8_t byte = (data >> (i * 8)) & 0xFF;
         SPI_Transfer(byte);
     }
-    SPI_Deselect();
-    SPI_Select();
+
+    SPI_Select(1);
     SPI_Transfer(COMMAND_STX); // Enter TX mode
-    SPI_Deselect();
 }
 
 bool CC1200_has_received_packet(void) {
@@ -256,12 +246,11 @@ bool CC1200_has_received_packet(void) {
 void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *data) {
     uint8_t buffer[PACKET_LEN];
 
-    SPI_Select();
+    SPI_Select(PACKET_LEN+1);
     SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
     for (int i = 0; i < PACKET_LEN; i++) {
         buffer[i] = SPI_Transfer(0x00);
     }
-    SPI_Deselect();
 
     *callsign = 0;
     for (int i = 0; i < 8; i++) {
