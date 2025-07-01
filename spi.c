@@ -4,18 +4,20 @@
 #include "spi.h"
 
 void SPI_Init(void) {
-    RA5PPS = 0x20;
-    RC3PPS = 0x1E;
-    RC4PPS = 0x1F; // Set RC4 to MOSI
-    SPI1SDIPPS = 0b10101; // Set RC5 to MISO
-
     TRISA5 = 0;
     TRISC3 = 0;
     TRISC4 = 0;
     TRISC5 = 1;
+    ANSELC5 = 0;
 
-    SPI1CLKbits.CLKSEL = 0;
-    SPI1BAUD = 0x22;
+    RA5PPS = 0x20;
+    RC3PPS = 0x1E;
+    RC4PPS = 0x1F; // Set RC4 to MOSI
+
+    SPI1SDIPPS = 0b10101; // Set RC5 to MISO
+
+    SPI1CLKbits.CLKSEL = 0; // Fosc as clock
+    SPI1BAUD = 0x05; // 1MHz baud, 1000000 / (2 * 1000000) - 1
 
     SPI1CON0bits.MST = 1; // set mode to master
     SPI1CON0bits.BMODE = 1; // sets bit mode to constant width
@@ -37,12 +39,16 @@ void SPI_Init(void) {
 
 /**/
 uint8_t SPI_Transfer(uint8_t data) {
+    while (!PIR2bits.SPI1TXIF);
     SPI1TXB = data;
-    while (SPI1CON2bits.BUSY) { }
+    while (!PIR2bits.SPI1RXIF);
     data = SPI1RXB;
-    return data; // reading should remove top most byte
+    return data;
 }
 
 void SPI_Select(uint8_t byte_count) {
+    SPI1CON2bits.SSET = 1; // manually set cs
+    while (PORTCbits.RC5); // wait for MISO to go low, TODO add a timeout and return failure
     SPI1TCNT = byte_count;
+    SPI1CON2bits.SSET = 0; // automatically set cs
 }

@@ -45,8 +45,6 @@ bool CC1200_has_signal(void);
 
 CC1200ReadResult CC1200_Status(void);
 
-void CC1200_Idle(void);
-
 uint8_t CC1200_get_TX_FIFO_len(void);
 
 uint8_t CC1200_get_RX_FIFO_len(void);
@@ -265,5 +263,17 @@ void CC1200_Set_Power(int8_t);
 #define STATE_SETTLING 0x05
 #define STATE_RX_FIFO_ERROR 0x06
 #define STATE_TX_FIFO_ERROR 0x07
+
+// SPI commands to access data buffers
+#define CC1200_ENQUEUE_TX_FIFO 0x3F
+#define CC1200_DEQUEUE_RX_FIFO 0xBF
+
+// R/W bits
+#define CC1200_READ (1 << 7)
+#define CC1200_WRITE 0
+#define CC1200_BURST (1 << 6) // indicate burst access
+
+// SPI command to access FIFO memory (or several other areas depending on mode)
+#define CC1200_MEM_ACCESS 0x3E
 
 #endif

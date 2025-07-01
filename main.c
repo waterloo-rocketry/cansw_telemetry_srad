@@ -106,7 +106,7 @@ void Board_Init() {
     ADC_Init();
     SPI_Init();
     CAN_Init();
-    //CC1200_Init();
+    CC1200_Init();
 }
 
 void send_board_status(uint8_t status) {
@@ -188,11 +188,11 @@ void main() {
             toggle_LED_Red(0);
         }
 
-        //if (CC1200_has_signal()) {
-        //    toggle_LED_Green(1);
-        //} else {
-        //    toggle_LED_Green(0);
-        //}
+        if (CC1200_has_signal()) {
+            toggle_LED_Green(1);
+        } else {
+            toggle_LED_Green(0);
+        }
 
         if (millis() - last_millis > 500) {
             last_millis = millis();

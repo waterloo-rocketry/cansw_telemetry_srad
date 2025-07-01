@@ -19,4 +19,3 @@ uint8_t SPI_Transfer(uint8_t data);
 void SPI_Select(uint8_t byte_count);
 
 #endif
-

@@ -69,7 +69,7 @@ static CC1200ReadResult Read_CC1200(uint8_t reg) {
     // If accessing extended registers
     if (reg >= CC1200_EXTENDED_REGISTER) {
         SPI_Select(3);
-        // extended register access command
+        // extended register read command
         SPI_Transfer(0x80 | CC1200_EXTENDED_REGISTER);
         result.status = SPI_Transfer(reg);
         result.value = SPI_Transfer(0x00);
@@ -87,7 +87,7 @@ static uint8_t Write_CC1200(uint8_t reg, uint8_t val) {
     // If accessing extended registers
     if (reg >= CC1200_EXTENDED_REGISTER) {
         SPI_Select(3);
-        // extended register access command
+        // extended register write command
         SPI_Transfer(CC1200_EXTENDED_REGISTER);
         SPI_Transfer(reg);
         status = SPI_Transfer(val);
@@ -143,6 +143,10 @@ void CC1200_RF_Config(void) {
 
 // Configure CC1200 Registers
 bool CC1200_Init(void) {
+    // RESET_n pin
+    TRISC7 = 0;
+    LATC7 = 1;
+
     size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
 
     for (size_t i = 0; i < numSettings; i++) {
@@ -171,13 +175,12 @@ bool CC1200_Init(void) {
 }
 
 void CC1200_Reset(void) {
-    Read_CC1200(0x80 | 0x30);
+    Read_CC1200(0x80 | COMMAND_SRES);
 }
 
 bool is_CC1200(uint8_t *status) {
     CC1200ReadResult part_number = Read_CC1200(CC1200_PARTNUMBER);
-    //*status = part_number.status;
-    *status = part_number.value;
+    *status = part_number.status;
     if (part_number.value == 0x20) {
         return true;
     }
@@ -186,7 +189,7 @@ bool is_CC1200(uint8_t *status) {
 
 bool CC1200_has_signal(void) {
     CC1200ReadResult modem_status = Read_CC1200(CC1200_MODEM_STATUS1);
-    return (modem_status.value & 0x2) != 0;
+    return modem_status.value == 0x8;
 }
 
 CC1200ReadResult CC1200_Status() {
@@ -214,7 +217,7 @@ uint8_t CC1200_get_RX_FIFO_len(void) {
 }
 
 void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
-    SPI_Select(26);
+    SPI_Select(len + 27);
     SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     for (int i = 7; i >= 0; i--) {
         uint8_t byte = (CALLSIGN >> (i * 8)) & 0xFF;
@@ -224,13 +227,10 @@ void CC1200_Transmit(uint32_t sid, uint8_t len, uint64_t data) {
         uint8_t byte = (sid >> (i * 8)) & 0xFF;
         SPI_Transfer(byte);
     }
-    SPI_Transfer(len);
     for (int i = 7; i >= 0; i--) {
         uint8_t byte = (data >> (i * 8)) & 0xFF;
         SPI_Transfer(byte);
     }
-
-    SPI_Select(1);
     SPI_Transfer(COMMAND_STX); // Enter TX mode
 }
 
