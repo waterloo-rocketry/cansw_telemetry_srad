@@ -10,9 +10,9 @@ void SPI_Init(void) {
     TRISC5 = 1;
     ANSELC5 = 0;
 
-    RA5PPS = 0x20;
-    RC3PPS = 0x1E;
-    RC4PPS = 0x1F; // Set RC4 to MOSI
+    //RA5PPS = 0x20; // RA5 to CS
+    RC3PPS = 0x1E; // RC3 to SCLK
+    RC4PPS = 0x1F; // RC4 to MOSI
 
     SPI1SDIPPS = 0b10101; // Set RC5 to MISO
 
@@ -28,7 +28,6 @@ void SPI_Init(void) {
     SPI1CON1bits.SDOP = 0;
     SPI1CON1bits.SDIP = 0;
 
-    SPI1CON2bits.SSET = 0; // cs controlled by transfer counter
     SPI1CON2bits.TXR = 1; // transmit required for transfer
     SPI1CON2bits.RXR = 1; // receive data in FIFO
     SPI1TWIDTH = 0; // 8 bits
@@ -46,9 +45,14 @@ uint8_t SPI_Transfer(uint8_t data) {
     return data;
 }
 
-void SPI_Select(uint8_t byte_count) {
-    SPI1CON2bits.SSET = 1; // manually set cs
+void SPI_Select(void) {
+    //SPI1CON2bits.SSET = 1; // manually set cs
+    //SPI1TCNT = byte_count;
+    LATA5 = 0;
     while (PORTCbits.RC5); // wait for MISO to go low, TODO add a timeout and return failure
-    SPI1TCNT = byte_count;
-    SPI1CON2bits.SSET = 0; // automatically set cs
+}
+
+void SPI_Deselect(void) {
+    LATA5 = 1;
+    //SPI1CON2bits.SSET = 0; // automatically set cs
 }
