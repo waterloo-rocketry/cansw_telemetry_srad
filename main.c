@@ -174,11 +174,6 @@ void main() {
 
         uint8_t status[6] = {0xFF};
 
-        //SPI_Select();
-        //SPI_Transfer(0xAF);
-        //SPI_Transfer(0x8F);
-        //SPI_Transfer(0x00);
-        //SPI_Deselect();
 
         bool is_SPI_working = is_CC1200(status);
 
@@ -194,10 +189,17 @@ void main() {
             toggle_LED_Green(0);
         }
 
-        if (millis() - last_millis > 500) {
+        uint8_t len = CC1200_get_TX_FIFO_len();
+        status[1] = len;
+
+        if (millis() - last_millis > 100) {
             last_millis = millis();
             build_debug_raw_msg(priority, millis(), status, &msg);
             can_send(&msg);
+        }
+
+        if(CC1200_get_TX_FIFO_len() == 0) {
+            CC1200_Transmit(0xAAAAAAAA, 8, 0xBBBBBBBBBBBBBBBB);
         }
 
         __delay_ms(1000);
