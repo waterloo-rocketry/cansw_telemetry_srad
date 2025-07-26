@@ -44,42 +44,39 @@ const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG3,            0x57}, // GPIO3 IO Pin Configuration
     {CC1200_IOCFG0,            0x73}, // GPIO0 IO Pin Configuration
-    {CC1200_SYNC_CFG1,         0xA8}, // Sync Word Detection Configuration Reg. 1
-    {CC1200_SYNC_CFG0,         0x13}, // Sync Word Detection Configuration Reg. 0
-    {CC1200_DEVIATION_M,       0x99}, // Frequency Deviation Configuration
-    {CC1200_MODCFG_DEV_E,      0x2D}, // Modulation Format and Frequency Deviation Configur..
-    {CC1200_DCFILT_CFG,        0x26}, // Digital DC Removal Configuration
-    {CC1200_PREAMBLE_CFG0,     0x8A}, // Preamble Detection Configuration Reg. 0
+    {CC1200_SYNC_CFG1,         0xAC}, // Sync Word Detection Configuration Reg. 1
+    {CC1200_DEVIATION_M,       0xD7}, // Frequency Deviation Configuration
+    {CC1200_MODCFG_DEV_E,      0x1A}, // Modulation Format and Frequency Deviation Configur..
+    {CC1200_DCFILT_CFG,        0x13}, // Digital DC Removal Configuration
+    {CC1200_PREAMBLE_CFG0,     0xE3}, // Preamble Detection Configuration Reg. 0
     {CC1200_IQIC,              0x00}, // Digital Image Channel Compensation Configuration
-    {CC1200_CHAN_BW,           0x02}, // Channel Filter Configuration
-    {CC1200_MDMCFG1,           0x42}, // General Modem Parameter Configuration Reg. 1
-    {CC1200_MDMCFG0,           0x05}, // General Modem Parameter Configuration Reg. 0
-    {CC1200_SYMBOL_RATE2,      0xA9}, // Symbol Rate Configuration Exponent and Mantissa [1..
-    {CC1200_SYMBOL_RATE1,      0x99}, // Symbol Rate Configuration Mantissa [15:8]
-    {CC1200_SYMBOL_RATE0,      0x9A}, // Symbol Rate Configuration Mantissa [7:0]
-    {CC1200_AGC_REF,           0x2F}, // AGC Reference Level Configuration
-    {CC1200_AGC_CS_THR,        0x01}, // Carrier Sense Threshold Configuration
-    {CC1200_AGC_CFG1,          0x16}, // Automatic Gain Control Configuration Reg. 1
-    {CC1200_AGC_CFG0,          0x84}, // Automatic Gain Control Configuration Reg. 0
+    {CC1200_CHAN_BW,           0x0D}, // Channel Filter Configuration
+    {CC1200_MDMCFG0,           0x02}, // General Modem Parameter Configuration Reg. 0
+    {CC1200_SYMBOL_RATE2,      0x5F}, // Symbol Rate Configuration Exponent and Mantissa [1..
+    {CC1200_SYMBOL_RATE1,      0x75}, // Symbol Rate Configuration Mantissa [15:8]
+    {CC1200_SYMBOL_RATE0,      0x10}, // Symbol Rate Configuration Mantissa [7:0]
+    {CC1200_AGC_REF,           0x35}, // AGC Reference Level Configuration
+    {CC1200_AGC_CS_THR,        0xEC}, // Carrier Sense Threshold Configuration
+    {CC1200_AGC_CFG3,          0x31}, // Automatic Gain Control Configuration Reg. 3
+    {CC1200_AGC_CFG1,          0x24}, // Automatic Gain Control Configuration Reg. 1
+    {CC1200_AGC_CFG0,          0x9F}, // Automatic Gain Control Configuration Reg. 0
     {CC1200_FIFO_CFG,          0x00}, // FIFO Configuration
     {CC1200_FS_CFG,            0x12}, // Frequency Synthesizer Configuration
-    {CC1200_PKT_CFG2,          0x00}, // Packet Configuration Reg. 2
-    {CC1200_PKT_CFG0,          0x20}, // Packet Configuration Reg. 0
-    {CC1200_PA_CFG1,           0x42}, // Power Amplifier Configuration Reg. 1
-    {CC1200_PA_CFG0,           0x52}, // Power Amplifier Configuration Reg. 0
-    {CC1200_ASK_CFG,           0x02}, // ASK Configuration
-    {CC1200_PKT_LEN,           0xFF}, // Packet Length Configuration
-    {CC1200_IF_MIX_CFG,        0x18}, // IF Mix Configuration
-    {CC1200_TOC_CFG,           0x03}, // Timing Offset Correction Configuration
-    {CC1200_MDMCFG2,           0x00}, // General Modem Parameter Configuration Reg. 2
     {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
+    {CC1200_PKT_CFG2,          0x00}, // Packet Configuration Reg. 2
+    {CC1200_PKT_CFG0,          0x20}, // Packet Configuration Reg. 0
+    {CC1200_ASK_CFG,           0xBF}, // ASK Configuration
+    {CC1200_PKT_LEN,           0xFF}, // Packet Length Configuration
+    {CC1200_IF_MIX_CFG,        0x1C}, // IF Mix Configuration
+    {CC1200_FREQOFF_CFG,       0x00}, // Frequency Offset Correction Configuration
+    {CC1200_MDMCFG2,           0xFC}, // General Modem Parameter Configuration Reg. 2
     {CC1200_FREQ2,             0x5B}, // Frequency Configuration [23:16]
     {CC1200_FREQ1,             0x80}, // Frequency Configuration [15:8]
     {CC1200_IF_ADC1,           0xEE}, // Analog to Digital Converter Configuration Reg. 1
     {CC1200_IF_ADC0,           0x10}, // Analog to Digital Converter Configuration Reg. 0
-    {CC1200_FS_DIG1,           0x04}, // Frequency Synthesizer Digital Reg. 1
-    {CC1200_FS_DIG0,           0x55}, // Frequency Synthesizer Digital Reg. 0
+    {CC1200_FS_DIG1,           0x07}, // Frequency Synthesizer Digital Reg. 1
+    {CC1200_FS_DIG0,           0xA0}, // Frequency Synthesizer Digital Reg. 0
     {CC1200_FS_CAL1,           0x40}, // Frequency Synthesizer Calibration Reg. 1
     {CC1200_FS_CAL0,           0x0E}, // Frequency Synthesizer Calibration Reg. 0
     {CC1200_FS_DIVTWO,         0x03}, // Frequency Synthesizer Divide by 2
@@ -90,7 +87,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_FS_REG_DIV_CML,    0x1C}, // Frequency Synthesizer Divider Regulator Configurat..
     {CC1200_FS_SPARE,          0xAC}, // Frequency Synthesizer Spare
     {CC1200_FS_VCO0,           0xB5}, // FS Voltage Controlled Oscillator Configuration Reg..
-    {CC1200_IFAMP,             0x0D}, // Intermediate Frequency Amplifier Configuration
+    {CC1200_IFAMP,             0x09}, // Intermediate Frequency Amplifier Configuration
     {CC1200_XOSC5,             0x0E}, // Crystal Oscillator Configuration Reg. 5
     {CC1200_XOSC1,             0x03}, // Crystal Oscillator Configuration Reg. 1
 };
@@ -204,7 +201,7 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
     Command_CC1200(COMMAND_STX);
 }
 
-void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *data) {
+uint8_t CC1200_Receive(uint8_t *data, uint8_t max_len) {
     uint8_t buffer[PACKET_LEN];
 
     SPI_Select();
@@ -214,22 +211,7 @@ void CC1200_Receive(uint64_t *callsign, uint32_t *sid, uint8_t *len, uint64_t *d
     }
     SPI_Deselect();
 
-    *callsign = 0;
-    for (int i = 0; i < 8; i++) {
-        *callsign = (*callsign << 8) | buffer[i];
-    }
-
-    *sid = 0;
-    for (int i = 8; i < 12; i++) {
-        *sid = (*sid << 8) | buffer[i];
-    }
-
-    *len = buffer[12];
-
-    *data = 0;
-    for (int i = 13; i <= PACKET_LEN; i++) {
-        *data = (*data << 8) | buffer[i];
-    }
+    return 0;
 }
 
 void CC1200_Set_Power(int8_t power) {

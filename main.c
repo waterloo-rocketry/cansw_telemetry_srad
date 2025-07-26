@@ -188,22 +188,25 @@ void main() {
         result = Read_CC1200(CC1200_MODEM_STATUS1);
         status[2] = result.value;
 
+        status[3] = CC1200_get_RX_FIFO_len();
+
         if (status[0] >> 4 == STATE_RX) {
             toggle_LED_Green(1);
         } else {
             toggle_LED_Green(0);
         }
 
-        if (status[0] == 0) {
-            uint8_t data[129] = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little bo";
-            CC1200_Transmit(data, 128);
-        }
-
-        if (millis() - last_millis > 1000) {
-            //Command_CC1200(COMMAND_SFRX);
+        if (millis() - last_millis > 100) {
+            Command_CC1200(COMMAND_SFRX);
             last_millis = millis();
             build_debug_raw_msg(priority, millis(), status, &msg);
             can_send(&msg);
+
+            static int i = 0;
+            if(i++ % 10 == 0) {
+                uint8_t data[129] = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little bo";
+                //CC1200_Transmit(data, 128);
+            }
         }
     }
 }
