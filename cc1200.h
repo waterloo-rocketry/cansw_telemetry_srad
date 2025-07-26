@@ -23,25 +23,15 @@ typedef struct {
     uint8_t value;
 } CC1200ReadResult;
 
-static uint8_t Write_CC1200(uint16_t, uint8_t);
+uint8_t Write_CC1200(uint16_t, uint8_t);
 
-static CC1200ReadResult Read_CC1200(uint16_t);
+uint8_t Command_CC1200(uint8_t);
+
+CC1200ReadResult Read_CC1200(uint16_t);
 
 void CC1200_Frequency(uint32_t);
 
-void CC1200_XOSC_Config(void);
-
-void CC1200_Packet_Config(void);
-
-void CC1200_RF_Config(void);
-
-bool CC1200_Init(void);
-
-void CC1200_Reset(void);
-
-bool is_CC1200(uint8_t*);
-
-bool CC1200_has_signal(void);
+void CC1200_Init(void);
 
 CC1200ReadResult CC1200_Status(void);
 
@@ -49,9 +39,7 @@ uint8_t CC1200_get_TX_FIFO_len(void);
 
 uint8_t CC1200_get_RX_FIFO_len(void);
 
-void CC1200_Transmit(uint32_t, uint8_t, uint64_t);
-
-bool CC1200_has_received_packet(void);
+void CC1200_Transmit(uint8_t *, uint8_t);
 
 void CC1200_Receive(uint64_t *, uint32_t *, uint8_t *, uint64_t *);
 

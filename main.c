@@ -172,41 +172,39 @@ void main() {
         can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
         can_msg_t msg;
 
-        uint8_t status[6] = {0xFF};
+        uint8_t status[6] = {0};
 
-
-        bool is_SPI_working = is_CC1200(status);
-
-        if (is_SPI_working) {
+        CC1200ReadResult result = Read_CC1200(CC1200_PARTNUMBER);
+        status[0] = result.status;
+        if (result.value == 0x20) {
             toggle_LED_Red(1);
         } else {
             toggle_LED_Red(0);
         }
 
-        if (CC1200_has_signal()) {
+        result = Read_CC1200(CC1200_MODEM_STATUS0);
+        status[1] = result.value;
+
+        result = Read_CC1200(CC1200_MODEM_STATUS1);
+        status[2] = result.value;
+
+        if (status[0] >> 4 == STATE_RX) {
             toggle_LED_Green(1);
         } else {
             toggle_LED_Green(0);
         }
 
-        uint8_t len = CC1200_get_TX_FIFO_len();
-        status[1] = len;
+        if (status[0] == 0) {
+            uint8_t data[129] = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little bo";
+            CC1200_Transmit(data, 128);
+        }
 
-        if (millis() - last_millis > 100) {
+        if (millis() - last_millis > 1000) {
+            //Command_CC1200(COMMAND_SFRX);
             last_millis = millis();
             build_debug_raw_msg(priority, millis(), status, &msg);
             can_send(&msg);
         }
-
-        if(CC1200_get_TX_FIFO_len() == 0) {
-            CC1200_Transmit(0xAAAAAAAA, 8, 0xBBBBBBBBBBBBBBBB);
-        }
-
-        __delay_ms(1000);
-
-        //__delay_ms(500);
-        //build_analog_data_msg(priority, time, msgid, 0x00, &msg);
-        //can_send(&msg);
     }
 }
 
