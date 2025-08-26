@@ -15,13 +15,13 @@ void LEDs_Init() {
 }
 
 void toggle_LED_Green(bool LED_On) {
-    LATA2 = LED_On;
+    LATA2 = !LED_On;
 }
 
 void toggle_LED_Blue(bool LED_On) {
-    LATA3 = LED_On;
+    LATA3 = !LED_On;
 }
 
 void toggle_LED_Red(bool LED_On) {
-    LATA4 = LED_On;
+    LATA4 = !LED_On;
 }
