@@ -18,7 +18,7 @@
 
 // SPI commands to access data buffers
 #define CC1200_ENQUEUE_TX_FIFO 0x3F
-#define CC1200_DEQUEUE_RX_FIFO 0xBF
+#define CC1200_DEQUEUE_RX_FIFO 0xBF // 0x3F |= CC1200_READ
 
 // R/W bits
 #define CC1200_READ (1 << 7)
@@ -165,7 +165,7 @@ void CC1200_Init(void) {
     }
 
     CC1200_Frequency(915000);
-    CC1200_Set_Power(0);
+    CC1200_Set_Power(-40);
 }
 
 CC1200ReadResult CC1200_Status() {
@@ -187,6 +187,8 @@ uint8_t CC1200_get_RX_FIFO_len(void) {
     return FIFO_len.value;
 }
 
+
+
 void CC1200_Transmit(uint8_t *data, uint8_t len) {
     Command_CC1200(COMMAND_SFTX);
 
@@ -201,15 +203,30 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
     Command_CC1200(COMMAND_STX);
 }
 
-uint8_t CC1200_Receive(uint8_t *data, uint8_t max_len) {
-    uint8_t buffer[PACKET_LEN];
+void CC1200_RX_mode(){
+    Command_CC1200(COMMAND_SRX);
+    
+}
 
+uint8_t CC1200_Read_RX_FIFO(uint8_t *buffer) {
+    // check if ready to poll
+    if (Read_CC1200(CC1200_MARC_STATUS1).value == 0X80){
+        return 1;
+    }
+    
     SPI_Select();
     SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
     for (int i = 0; i < PACKET_LEN; i++) {
         buffer[i] = SPI_Transfer(0x00);
     }
     SPI_Deselect();
+
+    // reading from an empty FIFO
+    if (Read_CC1200(CC1200_MODEM_STATUS1).value & (1 << 2)){
+        return 1;
+    }
+    
+    //Command_CC1200(COMMAND_SFRX); // Flush FIFO
 
     return 0;
 }

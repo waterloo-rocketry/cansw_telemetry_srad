@@ -159,6 +159,8 @@ void main() {
     toggle_LED_Red(0);
 
     uint32_t last_millis = millis();
+    
+    CC1200_RX_mode(); // set board to RX mode
 
     while (1) {
         CLRWDT();
@@ -171,35 +173,33 @@ void main() {
         can_msg_prio_t priority = PRIO_HIGH;
         can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
         can_msg_t msg;
+        
+        uint8_t data_in_buff[0x15];
 
         uint8_t status[6] = {0};
 
-        CC1200ReadResult result = Read_CC1200(CC1200_PARTNUMBER);
-        status[0] = result.status;
+        // verify SPI connection
+        CC1200ReadResult result = Read_CC1200(CC1200_PARTNUMBER);        
         if (result.value == 0x20) {
             toggle_LED_Red(1);
         } else {
             toggle_LED_Red(0);
-        }
-
-        result = Read_CC1200(CC1200_MODEM_STATUS0);
-        status[1] = result.value;
-
-        result = Read_CC1200(CC1200_MODEM_STATUS1);
-        status[2] = result.value;
-
-        status[3] = CC1200_get_RX_FIFO_len();
-
-        if (status[0] >> 4 == STATE_RX) {
+        }    
+        
+        // Receive data
+        //CC1200_Read_RX_FIFO(data_in_buff);
+        
+        if (CC1200_get_RX_FIFO_len() != 0) {
             toggle_LED_Green(1);
         } else {
             toggle_LED_Green(0);
         }
 
-        if (millis() - last_millis > 100) {
-            Command_CC1200(COMMAND_SFRX);
+        if (!CC1200_Read_RX_FIFO(data_in_buff)) { // 0 if no error
+        //if (millis() - last_millis > 100) {
+            
             last_millis = millis();
-            build_debug_raw_msg(priority, millis(), status, &msg);
+            build_debug_raw_msg(priority, millis(), data_in_buff, &msg);
             can_send(&msg);
 
             static int i = 0;

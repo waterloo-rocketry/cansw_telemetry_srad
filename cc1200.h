@@ -41,7 +41,9 @@ uint8_t CC1200_get_RX_FIFO_len(void);
 
 void CC1200_Transmit(uint8_t *, uint8_t);
 
-uint8_t CC1200_Receive(uint8_t *, uint8_t);
+void CC1200_RX_mode(void);
+
+uint8_t CC1200_Read_RX_FIFO(uint8_t *);
 
 void CC1200_Set_Power(int8_t);
 
