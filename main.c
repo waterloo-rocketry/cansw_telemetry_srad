@@ -49,7 +49,7 @@ static void can_msg_handler(const can_msg_t *msg) {
             toggle_LED_Red(0);
             toggle_LED_Blue(0);
             break;
-            
+
         // DEBUG RAW Message will be used for power control
         case MSG_DEBUG_RAW: {
             uint8_t debug_data[6];
@@ -58,7 +58,7 @@ static void can_msg_handler(const can_msg_t *msg) {
             //CC1200_Frequency(debug_data[0]);
             break;
         }
-            
+
         default:
             break;
     }
@@ -159,8 +159,8 @@ void main() {
     toggle_LED_Red(0);
 
     uint32_t last_millis = millis();
-    
-    CC1200_RX_mode(); // set board to RX mode
+
+    uint8_t status[6] = {0};
 
     while (1) {
         CLRWDT();
@@ -173,39 +173,41 @@ void main() {
         can_msg_prio_t priority = PRIO_HIGH;
         can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
         can_msg_t msg;
-        
+
         uint8_t data_in_buff[0x15];
 
-        uint8_t status[6] = {0};
-
         // verify SPI connection
-        CC1200ReadResult result = Read_CC1200(CC1200_PARTNUMBER);        
+        CC1200ReadResult result = Read_CC1200(CC1200_PARTNUMBER);
         if (result.value == 0x20) {
             toggle_LED_Red(1);
         } else {
             toggle_LED_Red(0);
-        }    
-        
+        }
+
+        uint8_t state = CC1200_State_Transition();
+        status[0] = state;
+        status[1] = CC1200_get_TX_FIFO_len();
+        status[2] = CC1200_get_RX_FIFO_len();
+        status[3] = Read_CC1200(CC1200_RSSI0).value;
+        status[4] = Read_CC1200(CC1200_RSSI1).value;
+
         // Receive data
-        //CC1200_Read_RX_FIFO(data_in_buff);
-        
-        if (CC1200_get_RX_FIFO_len() != 0) {
+        if (CC1200_get_RX_FIFO_len()) {
             toggle_LED_Green(1);
+            status[5] = Read_CC1200(0x3F).value;
         } else {
             toggle_LED_Green(0);
         }
 
-        if (!CC1200_Read_RX_FIFO(data_in_buff)) { // 0 if no error
-        //if (millis() - last_millis > 100) {
-            
+        if (millis() - last_millis > 100) {
             last_millis = millis();
-            build_debug_raw_msg(priority, millis(), data_in_buff, &msg);
+            build_debug_raw_msg(priority, millis(), status, &msg);
             can_send(&msg);
 
             static int i = 0;
             if(i++ % 10 == 0) {
                 uint8_t data[129] = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little bo";
-                //CC1200_Transmit(data, 128);
+                //CC1200_Transmit(data, 1);
             }
         }
     }

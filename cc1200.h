@@ -33,17 +33,19 @@ void CC1200_Frequency(uint32_t);
 
 void CC1200_Init(void);
 
-CC1200ReadResult CC1200_Status(void);
+//int CC1200_TX_FIFO_Empty(void);
 
+//int CC1200_RX_FIFO_Empty(void);
+ 
 uint8_t CC1200_get_TX_FIFO_len(void);
 
 uint8_t CC1200_get_RX_FIFO_len(void);
 
 void CC1200_Transmit(uint8_t *, uint8_t);
 
-void CC1200_RX_mode(void);
+uint8_t CC1200_State_Transition(void);
 
-uint8_t CC1200_Read_RX_FIFO(uint8_t *);
+uint8_t CC1200_Read_RX_FIFO(uint8_t *, uint8_t);
 
 void CC1200_Set_Power(int8_t);
 

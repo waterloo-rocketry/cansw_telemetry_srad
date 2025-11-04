@@ -30,7 +30,6 @@
 
 // RX and TX FIFOs are 128 bytes
 #define MAX_PACKET_LEN 128
-#define PACKET_LEN 0x15 // 21 bytes
 
 #define _XTAL_FREQ 12000000
 
@@ -55,17 +54,18 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_SYMBOL_RATE2,      0x5F}, // Symbol Rate Configuration Exponent and Mantissa [1..
     {CC1200_SYMBOL_RATE1,      0x75}, // Symbol Rate Configuration Mantissa [15:8]
     {CC1200_SYMBOL_RATE0,      0x10}, // Symbol Rate Configuration Mantissa [7:0]
-    {CC1200_AGC_REF,           0x35}, // AGC Reference Level Configuration
-    {CC1200_AGC_CS_THR,        0xEC}, // Carrier Sense Threshold Configuration
-    {CC1200_AGC_CFG3,          0x31}, // Automatic Gain Control Configuration Reg. 3
-    {CC1200_AGC_CFG1,          0x24}, // Automatic Gain Control Configuration Reg. 1
-    {CC1200_AGC_CFG0,          0x9F}, // Automatic Gain Control Configuration Reg. 0
+    {CC1200_AGC_REF,           0x27}, // AGC Reference Level Configuration
+    {CC1200_AGC_CS_THR,        0x01}, // Carrier Sense Threshold Configuration
+    {CC1200_AGC_CFG1,          0x11}, // Automatic Gain Control Configuration Reg. 1
+    {CC1200_AGC_CFG0,          0x94}, // Automatic Gain Control Configuration Reg. 0
     {CC1200_FIFO_CFG,          0x00}, // FIFO Configuration
     {CC1200_FS_CFG,            0x12}, // Frequency Synthesizer Configuration
     {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
     {CC1200_PKT_CFG2,          0x00}, // Packet Configuration Reg. 2
+    {CC1200_PKT_CFG1,          0x00}, // Packet Configuration Reg. 1
     {CC1200_PKT_CFG0,          0x20}, // Packet Configuration Reg. 0
+    {CC1200_RFEND_CFG1,        0x3F}, // FEND Configuration Reg. 1
     {CC1200_ASK_CFG,           0xBF}, // ASK Configuration
     {CC1200_PKT_LEN,           0xFF}, // Packet Length Configuration
     {CC1200_IF_MIX_CFG,        0x1C}, // IF Mix Configuration
@@ -143,7 +143,7 @@ void CC1200_Frequency(uint32_t freq) {
     // freq in kHz
     // Refer to Section 9.12 (Eqn 27/28, Table 34)
     uint32_t reg_value = freq * 4096 / 625; // 4096 / 625 = 1000 * 4 * 65536 / 40000;
-    
+
     SPI_Select();
     SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
     SPI_Transfer(CC1200_FREQ2 & 0xFF);
@@ -153,10 +153,20 @@ void CC1200_Frequency(uint32_t freq) {
     SPI_Deselect();
 }
 
+uint8_t CC1200_get_TX_FIFO_len(void) {
+    return 0; // TODO
+}
+
+uint8_t CC1200_get_RX_FIFO_len(void) {
+    return Read_CC1200(CC1200_NUM_RXBYTES).value;
+}
+
 // Configure CC1200 Registers
 void CC1200_Init(void) {
     // configure RESET_n pin
     TRISC7 = 0;
+    LATC7 = 0;
+    __delay_ms(100);
     LATC7 = 1;
 
     size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
@@ -165,33 +175,13 @@ void CC1200_Init(void) {
     }
 
     CC1200_Frequency(915000);
-    CC1200_Set_Power(-40);
+    CC1200_Set_Power(0);
 }
-
-CC1200ReadResult CC1200_Status() {
-    CC1200ReadResult result;
-    result.value = 0x00;
-    LATA5 = 0; // CS Low
-    result.status = SPI_Transfer(0x80 | 0x3D);
-    LATA5 = 1; // CS High
-    return result;
-}
-
-uint8_t CC1200_get_TX_FIFO_len(void) {
-    CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_TXBYTES);
-    return FIFO_len.value;
-}
-
-uint8_t CC1200_get_RX_FIFO_len(void) {
-    CC1200ReadResult FIFO_len = Read_CC1200(CC1200_NUM_RXBYTES);
-    return FIFO_len.value;
-}
-
-
 
 void CC1200_Transmit(uint8_t *data, uint8_t len) {
+    // TODO check space in FIFO
+    // TODO integrate this into CC1200_State_Transition so we can utilize the fifo more
     Command_CC1200(COMMAND_SFTX);
-
     SPI_Select();
     uint8_t status = SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     SPI_Transfer(len);
@@ -199,36 +189,43 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
         SPI_Transfer(data[i]);
     }
     SPI_Deselect();
-
     Command_CC1200(COMMAND_STX);
 }
 
-void CC1200_RX_mode(){
-    Command_CC1200(COMMAND_SRX);
-    
+uint8_t CC1200_State_Transition(void){
+    uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
+    switch (state) {
+        case STATE_IDLE:
+            Command_CC1200(COMMAND_SRX);
+            break;
+        case STATE_RX_FIFO_ERROR:
+            Command_CC1200(COMMAND_SFRX);
+            break;
+        case STATE_TX_FIFO_ERROR:
+            Command_CC1200(COMMAND_SFTX);
+            break;
+    }
+    return state;
 }
 
-uint8_t CC1200_Read_RX_FIFO(uint8_t *buffer) {
-    // check if ready to poll
-    if (Read_CC1200(CC1200_MARC_STATUS1).value == 0X80){
-        return 1;
-    }
-    
+uint8_t CC1200_Read_RX_FIFO(uint8_t *buffer, uint8_t len) {
+    //uint8_t fifo_len = CC1200_get_RX_FIFO_len();
+    //if (fifo_len > len) {
+    //    fifo_len = len;
+    //}
+
+    //if (fifo_len == 0) {
+    //    return 0;
+    //}
+
     SPI_Select();
     SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
-    for (int i = 0; i < PACKET_LEN; i++) {
+    for (int i = 0; i < len; i++) {
         buffer[i] = SPI_Transfer(0x00);
     }
     SPI_Deselect();
 
-    // reading from an empty FIFO
-    if (Read_CC1200(CC1200_MODEM_STATUS1).value & (1 << 2)){
-        return 1;
-    }
-    
-    //Command_CC1200(COMMAND_SFRX); // Flush FIFO
-
-    return 0;
+    return 0; //fifo_len;
 }
 
 void CC1200_Set_Power(int8_t power) {
@@ -238,7 +235,7 @@ void CC1200_Set_Power(int8_t power) {
 
     uint8_t reg_value = 0;
 
-    // special low powe modes https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/448235/cc1200--38dbm-tx-power-output
+    // special low power modes https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/448235/cc1200--38dbm-tx-power-output
     if (power <= -70) {
         reg_value = 0x00;
     } else if (power <= -32) {
