@@ -16,10 +16,6 @@
 
 #include "cc1200.h"
 
-// SPI commands to access data buffers
-#define CC1200_ENQUEUE_TX_FIFO 0x3F
-#define CC1200_DEQUEUE_RX_FIFO 0xBF // 0x3F |= CC1200_READ
-
 // R/W bits
 #define CC1200_READ (1 << 7)
 #define CC1200_WRITE 0
@@ -43,40 +39,42 @@ const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG3,            0x57}, // GPIO3 IO Pin Configuration
     {CC1200_IOCFG0,            0x73}, // GPIO0 IO Pin Configuration
-    {CC1200_SYNC_CFG1,         0xAC}, // Sync Word Detection Configuration Reg. 1
-    {CC1200_DEVIATION_M,       0xD7}, // Frequency Deviation Configuration
-    {CC1200_MODCFG_DEV_E,      0x1A}, // Modulation Format and Frequency Deviation Configur..
-    {CC1200_DCFILT_CFG,        0x13}, // Digital DC Removal Configuration
-    {CC1200_PREAMBLE_CFG0,     0xE3}, // Preamble Detection Configuration Reg. 0
-    {CC1200_IQIC,              0x00}, // Digital Image Channel Compensation Configuration
-    {CC1200_CHAN_BW,           0x0D}, // Channel Filter Configuration
-    {CC1200_MDMCFG0,           0x02}, // General Modem Parameter Configuration Reg. 0
-    {CC1200_SYMBOL_RATE2,      0x5F}, // Symbol Rate Configuration Exponent and Mantissa [1..
-    {CC1200_SYMBOL_RATE1,      0x75}, // Symbol Rate Configuration Mantissa [15:8]
-    {CC1200_SYMBOL_RATE0,      0x10}, // Symbol Rate Configuration Mantissa [7:0]
-    {CC1200_AGC_REF,           0x27}, // AGC Reference Level Configuration
+    {CC1200_SYNC_CFG1,         0xA8}, // Sync Word Detection Configuration Reg. 1
+    {CC1200_SYNC_CFG0,         0x23}, // Sync Word Detection Configuration Reg. 0
+    {CC1200_DEVIATION_M,       0x47}, // Frequency Deviation Configuration
+    {CC1200_MODCFG_DEV_E,      0x0C}, // Modulation Format and Frequency Deviation Configur..
+    {CC1200_DCFILT_CFG,        0x4B}, // Digital DC Removal Configuration
+    {CC1200_PREAMBLE_CFG0,     0x8A}, // Preamble Detection Configuration Reg. 0
+    {CC1200_IQIC,              0xD8}, // Digital Image Channel Compensation Configuration
+    {CC1200_CHAN_BW,           0x08}, // Channel Filter Configuration
+    {CC1200_MDMCFG1,           0x42}, // General Modem Parameter Configuration Reg. 1
+    {CC1200_MDMCFG0,           0x05}, // General Modem Parameter Configuration Reg. 0
+    {CC1200_SYMBOL_RATE2,      0xA4}, // Symbol Rate Configuration Exponent and Mantissa [1..
+    {CC1200_SYMBOL_RATE1,      0x7A}, // Symbol Rate Configuration Mantissa [15:8]
+    {CC1200_SYMBOL_RATE0,      0xE1}, // Symbol Rate Configuration Mantissa [7:0]
+    {CC1200_AGC_REF,           0x2A}, // AGC Reference Level Configuration
     {CC1200_AGC_CS_THR,        0x01}, // Carrier Sense Threshold Configuration
-    {CC1200_AGC_CFG1,          0x11}, // Automatic Gain Control Configuration Reg. 1
-    {CC1200_AGC_CFG0,          0x94}, // Automatic Gain Control Configuration Reg. 0
+    {CC1200_AGC_CFG1,          0x12}, // Automatic Gain Control Configuration Reg. 1
+    {CC1200_AGC_CFG0,          0x80}, // Automatic Gain Control Configuration Reg. 0
     {CC1200_FIFO_CFG,          0x00}, // FIFO Configuration
     {CC1200_FS_CFG,            0x12}, // Frequency Synthesizer Configuration
-    {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
-    {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
     {CC1200_PKT_CFG2,          0x00}, // Packet Configuration Reg. 2
-    {CC1200_PKT_CFG1,          0x00}, // Packet Configuration Reg. 1
     {CC1200_PKT_CFG0,          0x20}, // Packet Configuration Reg. 0
     {CC1200_RFEND_CFG1,        0x3F}, // FEND Configuration Reg. 1
-    {CC1200_ASK_CFG,           0xBF}, // ASK Configuration
+    {CC1200_RFEND_CFG0,        0x30}, // FEND Configuration Reg. 0
+    {CC1200_PA_CFG1,           0x5F}, // Power Amplifier Configuration Reg. 1
     {CC1200_PKT_LEN,           0xFF}, // Packet Length Configuration
     {CC1200_IF_MIX_CFG,        0x1C}, // IF Mix Configuration
-    {CC1200_FREQOFF_CFG,       0x00}, // Frequency Offset Correction Configuration
-    {CC1200_MDMCFG2,           0xFC}, // General Modem Parameter Configuration Reg. 2
+    {CC1200_TOC_CFG,           0x03}, // Timing Offset Correction Configuration
+    {CC1200_MDMCFG2,           0x02}, // General Modem Parameter Configuration Reg. 2
+    {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
+    {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
     {CC1200_FREQ2,             0x5B}, // Frequency Configuration [23:16]
     {CC1200_FREQ1,             0x80}, // Frequency Configuration [15:8]
     {CC1200_IF_ADC1,           0xEE}, // Analog to Digital Converter Configuration Reg. 1
     {CC1200_IF_ADC0,           0x10}, // Analog to Digital Converter Configuration Reg. 0
-    {CC1200_FS_DIG1,           0x07}, // Frequency Synthesizer Digital Reg. 1
-    {CC1200_FS_DIG0,           0xA0}, // Frequency Synthesizer Digital Reg. 0
+    {CC1200_FS_DIG1,           0x04}, // Frequency Synthesizer Digital Reg. 1
+    {CC1200_FS_DIG0,           0x55}, // Frequency Synthesizer Digital Reg. 0
     {CC1200_FS_CAL1,           0x40}, // Frequency Synthesizer Calibration Reg. 1
     {CC1200_FS_CAL0,           0x0E}, // Frequency Synthesizer Calibration Reg. 0
     {CC1200_FS_DIVTWO,         0x03}, // Frequency Synthesizer Divide by 2
@@ -153,14 +151,6 @@ void CC1200_Frequency(uint32_t freq) {
     SPI_Deselect();
 }
 
-uint8_t CC1200_get_TX_FIFO_len(void) {
-    return 0; // TODO
-}
-
-uint8_t CC1200_get_RX_FIFO_len(void) {
-    return Read_CC1200(CC1200_NUM_RXBYTES).value;
-}
-
 // Configure CC1200 Registers
 void CC1200_Init(void) {
     // configure RESET_n pin
@@ -180,16 +170,31 @@ void CC1200_Init(void) {
 
 void CC1200_Transmit(uint8_t *data, uint8_t len) {
     // TODO check space in FIFO
-    // TODO integrate this into CC1200_State_Transition so we can utilize the fifo more
-    Command_CC1200(COMMAND_SFTX);
     SPI_Select();
-    uint8_t status = SPI_Transfer(CC1200_ENQUEUE_TX_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
+    uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     SPI_Transfer(len);
     for (int i = 0; i < len; i++) {
         SPI_Transfer(data[i]);
     }
     SPI_Deselect();
     Command_CC1200(COMMAND_STX);
+}
+
+uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
+    uint8_t fifo_len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    if (len > fifo_len) {
+        len = fifo_len;
+    }
+
+    SPI_Select();
+    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+    for (int i = 0; i < len; i++) {
+        // read the whole packet even if buffer isn't big enough
+        data[i] = SPI_Transfer(0);
+    }
+    SPI_Deselect();
+
+    return len;
 }
 
 uint8_t CC1200_State_Transition(void){
@@ -206,26 +211,6 @@ uint8_t CC1200_State_Transition(void){
             break;
     }
     return state;
-}
-
-uint8_t CC1200_Read_RX_FIFO(uint8_t *buffer, uint8_t len) {
-    //uint8_t fifo_len = CC1200_get_RX_FIFO_len();
-    //if (fifo_len > len) {
-    //    fifo_len = len;
-    //}
-
-    //if (fifo_len == 0) {
-    //    return 0;
-    //}
-
-    SPI_Select();
-    SPI_Transfer(CC1200_DEQUEUE_RX_FIFO | CC1200_BURST);
-    for (int i = 0; i < len; i++) {
-        buffer[i] = SPI_Transfer(0x00);
-    }
-    SPI_Deselect();
-
-    return 0; //fifo_len;
 }
 
 void CC1200_Set_Power(int8_t power) {

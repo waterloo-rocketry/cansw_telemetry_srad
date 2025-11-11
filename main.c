@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include <xc.h>
+#include <string.h>
 
 #include "adc.h" // interface with ADC
 #include "cc1200.h" // interface with CC1200
@@ -151,6 +152,7 @@ void send_current_reading() {
     }
 }
 
+
 void main() {
     Board_Init();
 
@@ -161,6 +163,8 @@ void main() {
     uint32_t last_millis = millis();
 
     uint8_t status[6] = {0};
+    uint8_t last_status[6] = {0};
+    uint8_t data[6] = {0};
 
     while (1) {
         CLRWDT();
@@ -186,29 +190,31 @@ void main() {
 
         uint8_t state = CC1200_State_Transition();
         status[0] = state;
-        status[1] = CC1200_get_TX_FIFO_len();
-        status[2] = CC1200_get_RX_FIFO_len();
-        status[3] = Read_CC1200(CC1200_RSSI0).value;
-        status[4] = Read_CC1200(CC1200_RSSI1).value;
+        status[1] = Read_CC1200(CC1200_NUM_TXBYTES).value;
+        status[2] = Read_CC1200(CC1200_NUM_RXBYTES).value;
+        status[3] = CC1200_Receive(data, sizeof(data));
 
         // Receive data
-        if (CC1200_get_RX_FIFO_len()) {
+        if (status[3]) {
             toggle_LED_Green(1);
-            status[5] = Read_CC1200(0x3F).value;
+            build_debug_raw_msg(priority, millis(), data, &msg);
+            can_send(&msg);
         } else {
             toggle_LED_Green(0);
         }
 
-        if (millis() - last_millis > 100) {
-            last_millis = millis();
+        if (0&memcmp(last_status, status, sizeof(status)) != 0) {
+            memcpy(last_status, status, sizeof(status));
             build_debug_raw_msg(priority, millis(), status, &msg);
             can_send(&msg);
+        }
 
-            static int i = 0;
-            if(i++ % 10 == 0) {
-                uint8_t data[129] = "According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little bo";
-                //CC1200_Transmit(data, 1);
-            }
+        if (0&millis() - last_millis > 1000) {
+            build_debug_raw_msg(priority, millis(), status, &msg);
+            can_send(&msg);
+            uint8_t data[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            CC1200_Transmit(data, 64);
+            last_millis = millis();
         }
     }
 }
