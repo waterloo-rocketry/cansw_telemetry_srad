@@ -18,7 +18,7 @@
 #include "cc1200.h"
 #include <string.h>
 
-#define MAX_PACKET_LEN 64 // max rocket can packet size
+#define MAX_PACKET_LEN 64
 
 // Call sign MUST be transmitted at start of every message
 const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
