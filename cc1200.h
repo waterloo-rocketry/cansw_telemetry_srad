@@ -9,7 +9,6 @@
 #define CC1200_H
 
 #include "spi.h"
-#include "stdbool.h"
 #include "stdint.h"
 #include <xc.h>
 
