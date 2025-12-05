@@ -14,31 +14,40 @@
  * is tested and characterized
  */
 
+#include "config.h"
 #include "cc1200.h"
+#include <string.h>
 
-// R/W bits
-#define CC1200_READ (1 << 7)
-#define CC1200_WRITE 0
-#define CC1200_BURST (1 << 6) // indicate burst access
-
-// SPI command to access FIFO memory (or several other areas depending on mode)
-#define CC1200_MEM_ACCESS 0x3E
-
-// RX and TX FIFOs are 128 bytes
-#define MAX_PACKET_LEN 128
-
-#define _XTAL_FREQ 12000000
+#define MAX_PACKET_LEN 64 // max rocket can packet size
 
 // Call sign MUST be transmitted at start of every message
 const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 
+/* RX flow:
+ *
+ * In RX state, CC1200 transitions to IDLE when a packet is received
+ * (configured by RFEND_CFGx). CC1200_State_Transition would attempt to read a
+ * packet from fifo when CC1200 is in idle, flush the FIFO, then go back to RX
+ * state.
+ *
+ * Packet is prepended with length, appeneded with RSSI, CRC, and LQI. See user
+ * guide section 8.7.3
+ */
+
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
-
+// frequency and power has helper function for runtime configuration
 static const registerSetting_t preferredSettings[] = {
+    // manual configs
     {CC1200_IOCFG3,            0x57}, // GPIO3 IO Pin Configuration
     {CC1200_IOCFG0,            0x73}, // GPIO0 IO Pin Configuration
+    {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
+    {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
+    {CC1200_RFEND_CFG1,        0x0F}, // FEND Configuration Reg. 1
+    {CC1200_RFEND_CFG0,        0x38}, // FEND Configuration Reg. 0
+
+    // automatic configs
     {CC1200_SYNC_CFG1,         0xA8}, // Sync Word Detection Configuration Reg. 1
     {CC1200_SYNC_CFG0,         0x23}, // Sync Word Detection Configuration Reg. 0
     {CC1200_DEVIATION_M,       0x47}, // Frequency Deviation Configuration
@@ -60,15 +69,11 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_FS_CFG,            0x12}, // Frequency Synthesizer Configuration
     {CC1200_PKT_CFG2,          0x00}, // Packet Configuration Reg. 2
     {CC1200_PKT_CFG0,          0x20}, // Packet Configuration Reg. 0
-    {CC1200_RFEND_CFG1,        0x3F}, // FEND Configuration Reg. 1
-    {CC1200_RFEND_CFG0,        0x30}, // FEND Configuration Reg. 0
     {CC1200_PA_CFG1,           0x5F}, // Power Amplifier Configuration Reg. 1
     {CC1200_PKT_LEN,           0xFF}, // Packet Length Configuration
     {CC1200_IF_MIX_CFG,        0x1C}, // IF Mix Configuration
     {CC1200_TOC_CFG,           0x03}, // Timing Offset Correction Configuration
     {CC1200_MDMCFG2,           0x02}, // General Modem Parameter Configuration Reg. 2
-    {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
-    {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
     {CC1200_FREQ2,             0x5B}, // Frequency Configuration [23:16]
     {CC1200_FREQ1,             0x80}, // Frequency Configuration [15:8]
     {CC1200_IF_ADC1,           0xEE}, // Analog to Digital Converter Configuration Reg. 1
@@ -89,6 +94,30 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_XOSC5,             0x0E}, // Crystal Oscillator Configuration Reg. 5
     {CC1200_XOSC1,             0x03}, // Crystal Oscillator Configuration Reg. 1
 };
+
+// read one packet from fifo
+static uint8_t packet[MAX_PACKET_LEN] = {0};
+static uint8_t packet_len = 0;
+static void Receive_Packet(void) {
+    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    if (!len) {
+        return;
+    }
+
+    SPI_Select();
+    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+    for (int i = 0; i < len; i++) {
+        // read the whole packet even if buffer isn't big enough
+        uint8_t data = SPI_Transfer(0);
+        if (i < MAX_PACKET_LEN) {
+            packet[i] = data;
+        }
+    }
+    SPI_Deselect();
+    Command_CC1200(COMMAND_SFRX);
+
+    packet_len = len;
+}
 
 CC1200ReadResult Read_CC1200(uint16_t reg) {
     CC1200ReadResult result;
@@ -159,6 +188,10 @@ void CC1200_Init(void) {
     __delay_ms(100);
     LATC7 = 1;
 
+    // variables
+    packet_len = 0;
+
+    // registers
     size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
     for (size_t i = 0; i < numSettings; i++) {
         Write_CC1200(preferredSettings[i].addr, preferredSettings[i].value);
@@ -181,19 +214,11 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
 }
 
 uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
-    uint8_t fifo_len = Read_CC1200(CC1200_NUM_RXBYTES).value;
-    if (len > fifo_len) {
-        len = fifo_len;
+    if (len > packet_len) {
+        len = packet_len;
     }
-
-    SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    for (int i = 0; i < len; i++) {
-        // read the whole packet even if buffer isn't big enough
-        data[i] = SPI_Transfer(0);
-    }
-    SPI_Deselect();
-
+    memcpy(data, packet, len);
+    packet_len = 0;
     return len;
 }
 
@@ -201,6 +226,7 @@ uint8_t CC1200_State_Transition(void){
     uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
     switch (state) {
         case STATE_IDLE:
+            Receive_Packet();
             Command_CC1200(COMMAND_SRX);
             break;
         case STATE_RX_FIFO_ERROR:

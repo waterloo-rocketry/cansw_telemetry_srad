@@ -4,7 +4,6 @@
  *
  * Created on February 22, 2025, 11:40 AM
  */
-
 #include "config.h"
 #include <xc.h>
 #include <string.h>
@@ -178,8 +177,6 @@ void main() {
         can_analog_sensor_id_t msgid = SENSOR_12V_CURR;
         can_msg_t msg;
 
-        uint8_t data_in_buff[0x15];
-
         // verify SPI connection
         CC1200ReadResult result = Read_CC1200(CC1200_PARTNUMBER);
         if (result.value == 0x20) {
@@ -192,6 +189,8 @@ void main() {
         status[0] = state;
         status[1] = Read_CC1200(CC1200_NUM_TXBYTES).value;
         status[2] = Read_CC1200(CC1200_NUM_RXBYTES).value;
+
+        memset(data, 0xFF, sizeof(data));
         status[3] = CC1200_Receive(data, sizeof(data));
 
         // Receive data
