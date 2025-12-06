@@ -200,7 +200,7 @@ void CC1200_Init(void) {
     }
 
     CC1200_Frequency(915000);
-    CC1200_Set_Power(0);
+    CC1200_Set_Power(10);
 }
 
 void CC1200_Transmit(uint8_t *data, uint8_t len) {

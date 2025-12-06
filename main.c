@@ -52,12 +52,12 @@ static void can_msg_handler(const can_msg_t *msg) {
             toggle_LED_Blue(0);
             break;
 
-        // DEBUG RAW Message will be used for power control
-        case MSG_DEBUG_RAW: {
-            uint8_t debug_data[6];
-            get_debug_raw_data(msg, debug_data);
-            //CC1200_Set_Power(((int8_t) debug_data[0]) - 16);
-            //CC1200_Frequency(debug_data[0]);
+        case MSG_ACTUATOR_ANALOG_CMD: {
+            if (get_actuator_id(msg) == ACTUATOR_TELEMETRY) {
+                uint16_t command = get_cmd_actuator_state_analog(msg);
+                int8_t power = command - 100;
+                CC1200_Set_Power(power);
+            }
             break;
         }
 
@@ -157,8 +157,8 @@ void main() {
     Board_Init();
 
     toggle_LED_Green(0);
-    toggle_LED_Blue(1);
-    toggle_LED_Red(0);
+    toggle_LED_Blue(0);
+    toggle_LED_Red(1);
 
     uint32_t last_millis = millis();
 
@@ -184,21 +184,33 @@ void main() {
         uint8_t rx_len = CC1200_Receive(data, sizeof(data));
         static uint8_t test_count = 0;
         static uint16_t error_count = 0;
+        static uint16_t drop_count = 0;
         static uint16_t total_count = 0;
         static uint16_t bit_count;
+        static uint8_t rssi = 0;
+        static uint8_t lqi = 0;
 
         if (rx_len) {
             // counter increments by one and crc check passes
-            if (/*data[1] - test_count != 1 || */!(data[rx_len-1] & 0x80)) {
+            if (!(data[rx_len-1] & 0x80)) {
                 error_count++;
             }
+
+            drop_count = data[1] - test_count;
+            test_count = data[1];
+
             total_count++;
             bit_count += (rx_len-3)*8;
 
             // overflow
             if (total_count == 0) {
                 error_count = 0;
+                drop_count = 0;
             }
+
+            // other stats
+            rssi = data[rx_len-2];
+            lqi = data[rx_len-1] & 0x7F;
 
             //build_debug_raw_msg(priority, millis(), data+rx_len-6, &msg);
             //pic18f26k83_can_send(&msg);
@@ -218,17 +230,28 @@ void main() {
 #endif
 
         // Status report
-        if (millis() - last_millis > 100) {
-            build_analog_data_msg(priority, millis(), SENSOR_FPS, bit_count*10, &msg);
-            pic18f26k83_can_send(&msg);
-            bit_count = 0;
-
-            if (total_count > 0) {
-                build_analog_data_msg(priority, millis(), SENSOR_CANARD_ENCODER_1, 1000L * error_count / total_count, &msg);
+        static uint8_t count = 0;
+        if (millis() - last_millis > 20) {
+            if (count % 5 == 0) {
+                build_analog_data_msg(priority, millis(), SENSOR_FPS, bit_count*10, &msg);
+                pic18f26k83_can_send(&msg);
+                bit_count = 0;
+            } else if (count % 5 == 1) {
+                build_analog_data_msg(priority, millis(), SENSOR_PT_CHANNEL_1, rssi, &msg);
+                pic18f26k83_can_send(&msg);
+            } else if (count % 5 == 2) {
+                build_analog_data_msg(priority, millis(), SENSOR_PT_CHANNEL_2, lqi, &msg);
+                pic18f26k83_can_send(&msg);
+            } else if (count % 5 == 3) {
+                build_analog_data_msg(priority, millis(), SENSOR_PT_CHANNEL_3, 1000L * drop_count / total_count, &msg);
+                pic18f26k83_can_send(&msg);
+            } else if (total_count > 0) {
+                build_analog_data_msg(priority, millis(), SENSOR_PT_CHANNEL_4, 1000L * error_count / total_count, &msg);
                 pic18f26k83_can_send(&msg);
             }
 
             last_millis = millis();
+            count++;
         }
 
         // led things
