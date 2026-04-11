@@ -6,15 +6,15 @@
 void SPI_Init(void) {
     TRISA5 = 0;
     TRISC3 = 0;
-    TRISC4 = 0;
-    TRISC5 = 1;
-    ANSELC5 = 0;
+    TRISC4 = 1;
+    TRISC5 = 0;
+    ANSELC4 = 0;
 
     //RA5PPS = 0x20; // RA5 to CS
     RC3PPS = 0x1E; // RC3 to SCLK
-    RC4PPS = 0x1F; // RC4 to MOSI
+    RC5PPS = 0x1F; // RC5 to MOSI
 
-    SPI1SDIPPS = 0b10101; // Set RC5 to MISO
+    SPI1SDIPPS = 0b10100; // Set RC4 to MISO
 
     SPI1CLKbits.CLKSEL = 0; // Fosc as clock
     SPI1BAUD = 0x05; // 1MHz baud, 1000000 / (2 * 1000000) - 1
@@ -49,7 +49,7 @@ void SPI_Select(void) {
     //SPI1CON2bits.SSET = 1; // manually set cs
     //SPI1TCNT = byte_count;
     LATA5 = 0;
-    while (PORTCbits.RC5); // wait for MISO to go low, TODO add a timeout and return failure
+    while (PORTCbits.RC4); // wait for MISO to go low, TODO add a timeout and return failure
 }
 
 void SPI_Deselect(void) {
