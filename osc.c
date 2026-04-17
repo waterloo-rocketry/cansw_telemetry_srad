@@ -5,7 +5,7 @@
  * Created on March 21, 2025, 4:34 PM
  */
 
-#include "clockInit.h"
+#include "osc.h"
 
 void Osc_Init(void) {
 #pragma config FEXTOSC = HS // External Oscillator Selection (HS (crystal oscillator) above 8 MHz;

@@ -2,6 +2,14 @@
 
 #define _XTAL_FREQ 12000000
 
+#define BOARD_MODE_ROCKET 0
+#define BOARD_MODE_GROUND 1
+#define BOARD_MODE_TEST_TX 2
+#define BOARD_MODE_TEST_RX 3
+
+// THIS DEFINES WHAT MODE LTT OPERATES AT
+#define BOARD_MODE BOARD_MODE_GROUND
+
 // 'C' source line config statements
 
 // CONFIG1L

@@ -1,16 +1,16 @@
-/*
- * File:   cc1200.h
- * Author: Manav
- *
- * Created on February 26, 2025, 10:31 AM
+/* 
+ * File:   
+ * Author: Manav Toor
+ * Comments:
+ * Revision history: 
  */
 
-#ifndef CC1200_H
-#define CC1200_H
+// This is a guard condition so that contents of this file are not included
+// more than once.  
+#ifndef XC_HEADER_TEMPLATE_H
+#define	XC_HEADER_TEMPLATE_H
 
-#include "spi.h"
-#include "stdint.h"
-#include <xc.h>
+#include <xc.h> 
 
 typedef struct {
     uint16_t addr;
@@ -28,13 +28,9 @@ uint8_t Command_CC1200(uint8_t);
 
 CC1200ReadResult Read_CC1200(uint16_t);
 
-void CC1200_Init(void);
-
-void CC1200_Transmit(uint8_t *, uint8_t);
-
-uint8_t CC1200_Receive(uint8_t *, uint8_t);
-
-uint8_t CC1200_State_Transition(void);
+static uint8_t packet[MAX_PACKET_LEN];
+static uint8_t packet_len;
+static void Receive_Packet(void);
 
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00 // R/W configuration registers, burst access possible
@@ -254,4 +250,6 @@ uint8_t CC1200_State_Transition(void);
 // SPI command to access FIFO memory (or several other areas depending on mode)
 #define CC1200_MEM_ACCESS 0x3E
 
-#endif
+
+#endif	/* XC_HEADER_TEMPLATE_H */
+

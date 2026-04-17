@@ -1,38 +1,16 @@
 /*
- * File:   cc1200.c
+ * File:   T_cc1200_internal.c
  * Author: Manav
  *
- * Created on February 26, 2025, 10:34 AM
- *
- * This code is very crude, a lot of functions provide write hard coded values
- * to registers that cannot be changed without modifying this file, in future
- * versions I would like to change that, but for now, I just want to write the
- * minimum viable code to have the board reliably function
- *
- * Note a lot of register values are set using the TI SmartRF Studio application:
- * https://www.ti.com/tool/SMARTRFTM-STUDIO and are subject to change as the board
- * is tested and characterized
+ * Created on April 14, 2026, 4:35 PM
+ * 
+ * Private functions for communicating with the cc1200 that should not be called
+ * from main.c
  */
 
-#include "config.h"
-#include "cc1200.h"
-#include <string.h>
 
-#define MAX_PACKET_LEN 64
-
-// Call sign MUST be transmitted at start of every message
-const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
-
-/* RX flow:
- *
- * In RX state, CC1200 transitions to IDLE when a packet is received
- * (configured by RFEND_CFGx). CC1200_State_Transition would attempt to read a
- * packet from fifo when CC1200 is in idle, flush the FIFO, then go back to RX
- * state.
- *
- * Packet is prepended with length, appeneded with RSSI, CRC, and LQI. See user
- * guide section 8.7.3
- */
+#include "T_cc1200_internal.h"
+#include "T_cc1200.h"
 
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
@@ -97,30 +75,6 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_XOSC1,             0x03},
 };
 
-// read one packet from fifo
-static uint8_t packet[MAX_PACKET_LEN] = {0};
-static uint8_t packet_len = 0;
-static void Receive_Packet(void) {
-    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
-    if (!len) {
-        return;
-    }
-
-    SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    for (int i = 0; i < len; i++) {
-        // read the whole packet even if buffer isn't big enough
-        uint8_t data = SPI_Transfer(0);
-        if (i < MAX_PACKET_LEN) {
-            packet[i] = data;
-        }
-    }
-    SPI_Deselect();
-    Command_CC1200(COMMAND_SFRX);
-
-    packet_len = len;
-}
-
 CC1200ReadResult Read_CC1200(uint16_t reg) {
     CC1200ReadResult result;
 
@@ -168,59 +122,26 @@ uint8_t Command_CC1200(uint8_t command) {
     return status;
 };
 
-// Configure CC1200 Registers
-void CC1200_Init(void) {
-    // configure RESET_n pin
-    TRISC7 = 0;
-    LATC7 = 0;
-    __delay_ms(100);
-    LATC7 = 1;
-
-    // variables
-    packet_len = 0;
-
-    // registers
-    size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
-    for (size_t i = 0; i < numSettings; i++) {
-        Write_CC1200(preferredSettings[i].addr, preferredSettings[i].value);
+// read one packet from fifo
+static uint8_t packet[MAX_PACKET_LEN] = {0};
+static uint8_t packet_len = 0;
+static void Receive_Packet(void) {
+    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    if (!len) {
+        return;
     }
-}
 
-void CC1200_Transmit(uint8_t *data, uint8_t len) {
-    // TODO check space in FIFO
     SPI_Select();
-    uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
-    SPI_Transfer(len);
+    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
     for (int i = 0; i < len; i++) {
-        SPI_Transfer(data[i]);
+        // read the whole packet even if buffer isn't big enough
+        uint8_t data = SPI_Transfer(0);
+        if (i < MAX_PACKET_LEN) {
+            packet[i] = data;
+        }
     }
     SPI_Deselect();
-    Command_CC1200(COMMAND_STX);
-}
+    Command_CC1200(COMMAND_SFRX);
 
-uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
-    if (len > packet_len) {
-        len = packet_len;
-    }
-    memcpy(data, packet, len);
-    packet_len = 0;
-    return len;
+    packet_len = len;
 }
-
-uint8_t CC1200_State_Transition(void){
-    uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
-    switch (state) {
-        case STATE_IDLE:
-            Receive_Packet();
-            Command_CC1200(COMMAND_SRX);
-            break;
-        case STATE_RX_FIFO_ERROR:
-            Command_CC1200(COMMAND_SFRX);
-            break;
-        case STATE_TX_FIFO_ERROR:
-            Command_CC1200(COMMAND_SFTX);
-            break;
-    }
-    return state;
-}
-
