@@ -95,7 +95,7 @@ void main() {
             //load messages into CC1200 if they are available
             //CC1200_Transmit();
 
-            if (CC1200_TX_Buffer_Space() == 0 || millis() - time_to >= TRANSMIT_TIME) {
+            if (CC1200_TX_Buffer_Bytes() == 0 || millis() - time_to >= TRANSMIT_TIME) {
                 tstate = RX;
             }
         } else if (tstate == RX) {
@@ -187,6 +187,9 @@ void main() {
             toggle_LED_Green(0);
         }
     }
+#elif BOARD_MODE == PRANAV_TEST
+    CC1200_Transmit()
+    
 #endif
 }
 }
