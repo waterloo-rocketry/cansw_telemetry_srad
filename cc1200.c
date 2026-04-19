@@ -207,6 +207,21 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     return len;
 }
 
+uint8_t CC1200_TX_Buffer_Space()
+{
+    CC1200ReadResult tx_last = Read_CC1200(CC1200_TXLAST);
+    CC1200ReadResult tx_first = Read_CC1200(CC1200_TXFIRST);
+    return tx_last.value-tx_first.value;
+}
+
+uint8_t CC1200_RX_Buffer_Space()
+{
+    SPI_Select();
+    CC1200ReadResult rx_last = Read_CC1200(CC1200_RXFIRST);
+    CC1200ReadResult rx_first = Read_CC1200(CC1200_RXFIRST);
+    return rx_last.value-rx_first.value;
+}
+
 uint8_t CC1200_State_Transition(void){
     uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
     switch (state) {

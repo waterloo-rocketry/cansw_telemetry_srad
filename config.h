@@ -10,6 +10,15 @@
 // THIS DEFINES WHAT MODE LTT OPERATES AT
 #define BOARD_MODE BOARD_MODE_GROUND
 
+enum Transciever_State{
+    TX,
+    RX,
+};
+
+#define TRANSMIT_TIME 100
+#define RECIEVE_TIME 10
+#define END_FRAME 10
+
 // 'C' source line config statements
 
 // CONFIG1L
