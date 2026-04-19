@@ -49,8 +49,8 @@ void main() {
     toggle_LED_Red(1);
 
     uint32_t last_millis = millis();
-    uint32_t time_to = millis(); //used to track
-    uint32_t time_rx = millis();
+    uint32_t time_to = millis(); //tracks the time for overall timeout of the state
+    uint32_t time_rx = millis(); //tracks time since last received message for RX check
 
     uint8_t state = CC1200_State_Transition();
 
@@ -63,17 +63,18 @@ void main() {
 
 #if BOARD_MODE == BOARD_MODE_ROCKET
         if (tstate == TX) {
+            Command_CC1200(COMMAND_STX); //command to TX state
             //transmit messages into buffer if available
-            
             //CC1200_Transmit();
             
-            if (time_to >= 200) {
+            if (time_to >= TRANSMIT_TIME2) {
                 tstate = RX;
                 time_to = millis();
                 time_rx = millis();
                 //send ending frame to queue other side
             }
         } else if (tstate == RX) {
+            Command_CC1200(COMMAND_SRX); //command to RX state
             uint8_t data[64] = {0};
             uint8_t length=CC1200_Receive(data, sizeof(data));
             // receive messages
@@ -92,6 +93,7 @@ void main() {
 
 #elif BOARD_MODE == BOARD_MODE_GROUND
         if (tstate == TX) {
+            Command_CC1200(COMMAND_STX); //command to TX state
             //load messages into CC1200 if they are available
             //CC1200_Transmit();
 
@@ -99,6 +101,7 @@ void main() {
                 tstate = RX;
             }
         } else if (tstate == RX) {
+            Command_CC1200(COMMAND_SRX); //command to RX state
             uint8_t data[64] = {0};
             uint8_t length=CC1200_Receive(data, sizeof(data));
             if(data[length-1]==END_FRAME)

@@ -16,6 +16,7 @@ enum Transciever_State{
 };
 
 #define TRANSMIT_TIME 100
+#define TRANSMIT_TIME2 100
 #define RECIEVE_TIME 10
 #define END_FRAME 10
 
