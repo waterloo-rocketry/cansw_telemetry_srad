@@ -207,13 +207,13 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     return len;
 }
 
-uint8_t CC1200_TX_Buffer_Space()
+uint8_t CC1200_TX_Buffer_Bytes()
 {
     CC1200ReadResult tx_bytes=Read_CC1200(CC1200_NUM_TXBYTES);
     return tx_bytes.value;
 }
 
-uint8_t CC1200_RX_Buffer_Space()
+uint8_t CC1200_RX_Buffer_Bytes()
 {
     CC1200ReadResult rx_bytes=Read_CC1200(CC1200_NUM_RXBYTES);
     return rx_bytes.value;

@@ -34,9 +34,9 @@ void CC1200_Transmit(uint8_t *, uint8_t);
 
 uint8_t CC1200_Receive(uint8_t *, uint8_t);
 
-uint8_t CC1200_TX_Buffer_Space();
+uint8_t CC1200_TX_Buffer_Bytes();
 
-uint8_t CC1200_RX_Buffer_Space();
+uint8_t CC1200_RX_Buffer_Bytes();
 
 uint8_t CC1200_State_Transition(void);
 

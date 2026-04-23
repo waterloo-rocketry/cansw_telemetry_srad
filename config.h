@@ -8,17 +8,24 @@
 #define BOARD_MODE_TEST_RX 3
 
 // THIS DEFINES WHAT MODE LTT OPERATES AT
-#define BOARD_MODE BOARD_MODE_GROUND
+#define BOARD_MODE BOARD_MODE_ROCKET
 
-enum Transciever_State{
+enum Transceiver_State{
     TX,
     RX,
+};
+
+enum Ground_Transceiver_Sel{
+    Trans1,
+    Trans2,
+    Trans3,    
+    Number_Of_Trans,
 };
 
 #define TRANSMIT_TIME 100
 #define TRANSMIT_TIME2 100
 #define RECIEVE_TIME 10
-#define END_FRAME 10
+#define END_FRAME 10 //need to change this based on protocol decided. 
 
 // 'C' source line config statements
 

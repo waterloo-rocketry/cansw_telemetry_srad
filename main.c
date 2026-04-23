@@ -23,7 +23,8 @@
 #define TEST_SIZE 32
 
 uint8_t board_status = 0; // board status flag
-enum Transciever_State tstate = RX; // this also needs to vary based on rocket or ground
+enum Ground_Transceiver_Sel sel_trans = Trans1;
+enum Transceiver_State tstate = RX; // this also needs to vary based on rocket or ground
 
 void delay_ms(unsigned int ms) {
     unsigned int i, j;
@@ -59,7 +60,7 @@ void main() {
 
         send_board_status(board_status);
         send_current_reading(&board_status);
-        delay_ms(1000);
+        //delay_ms(1000);
 
 #if BOARD_MODE == BOARD_MODE_ROCKET
         if (tstate == TX) {
@@ -71,7 +72,11 @@ void main() {
                 tstate = RX;
                 time_to = millis();
                 time_rx = millis();
-                //send ending frame to queue other side
+                
+                sel_trans = (sel_trans + 1) % Number_Of_Trans;
+                //send ending frame to queue other side with transceiver
+                //make it so that the frame is orred with transsel to send address
+                
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
@@ -79,7 +84,7 @@ void main() {
             uint8_t length=CC1200_Receive(data, sizeof(data));
             // receive messages
 
-            if (length>0)
+            if (length>0) //message received
             {
                 time_rx=millis();
             }
@@ -99,6 +104,7 @@ void main() {
 
             if (CC1200_TX_Buffer_Bytes() == 0 || millis() - time_to >= TRANSMIT_TIME) {
                 tstate = RX;
+                //send ending frame
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
