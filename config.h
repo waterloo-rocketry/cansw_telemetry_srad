@@ -24,7 +24,7 @@ enum Ground_Transceiver_Sel{
 
 #define TRANSMIT_TIME 100
 #define TRANSMIT_TIME2 100
-#define RECIEVE_TIME 10
+#define RECEIVE_TIME 10
 #define END_FRAME 10 //need to change this based on protocol decided. 
 
 // 'C' source line config statements

@@ -88,7 +88,7 @@ void main() {
             {
                 time_rx=millis();
             }
-            if (millis() - time_rx >= RECIEVE_TIME || millis() - time_to >= TRANSMIT_TIME) {
+            if (millis() - time_rx >= RECEIVE_TIME || millis() - time_to >= TRANSMIT_TIME) { //need to add check for end frame 
                 tstate = TX;
                 time_to = millis();
             }
@@ -196,8 +196,6 @@ void main() {
             toggle_LED_Green(0);
         }
     }
-#elif BOARD_MODE == PRANAV_TEST
-    CC1200_Transmit()
     
 #endif
 }

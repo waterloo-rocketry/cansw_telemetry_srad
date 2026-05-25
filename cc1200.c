@@ -44,7 +44,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG0,            0x73}, // GPIO0 IO Pin Configuration
     {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
-    {CC1200_RFEND_CFG1,        0x0F}, // FEND Configuration Reg. 1
+    {CC1200_RFEND_CFG1,        0x3F}, // FEND Configuration Reg. 1 //keep in RX if good packet recieved.RX timeout change using 3:1
     {CC1200_RFEND_CFG0,        0x38}, // FEND Configuration Reg. 0
 
     // automatic configs
