@@ -20,11 +20,13 @@
 #include "canlib.h" // interface with RocketCAN
 #include "timer.h" // import custom millis() function
 
+#include "priority_queue.h"
 #define TEST_SIZE 32
 
 uint8_t board_status = 0; // board status flag
 enum Ground_Transceiver_Sel sel_trans = Trans1;
 enum Transceiver_State tstate = RX; // this also needs to vary based on rocket or ground
+can_msg_t msg_hold;
 
 void delay_ms(unsigned int ms) {
     unsigned int i, j;
@@ -40,6 +42,7 @@ void Board_Init() {
     SPI_Init();
     CAN_Init();
     RF_Init();
+    pq_init(&tx_queue);
 }
 
 void main() {
@@ -60,13 +63,19 @@ void main() {
 
         send_board_status(board_status);
         send_current_reading(&board_status);
-        //delay_ms(1000);
 
 #if BOARD_MODE == BOARD_MODE_ROCKET
         if (tstate == TX) {
-            Command_CC1200(COMMAND_STX); //command to TX state
-            //transmit messages into buffer if available
-            //CC1200_Transmit();
+            Command_CC1200(COMMAND_STX);
+            
+            if(pq_pop(&tx_queue,&msg_hold)==0)
+            {
+                uint8_t result=CC1200_Load_TX_FIFO(&msg_hold);
+                if(result==1)
+                {
+                    pq_push(&tx_queue,&msg_hold); //what about if queue fills up between dequeue to send and requeue action?
+                }
+            }
             
             if (time_to >= TRANSMIT_TIME2) {
                 tstate = RX;
@@ -99,10 +108,16 @@ void main() {
 #elif BOARD_MODE == BOARD_MODE_GROUND
         if (tstate == TX) {
             Command_CC1200(COMMAND_STX); //command to TX state
-            //load messages into CC1200 if they are available
-            //CC1200_Transmit();
+            if(pq_pop(&tx_queue,&msg_hold)==0)
+            {
+                uint8_t result=CC1200_Load_TX_FIFO(&msg_hold);
+                if(result==1)
+                {
+                    pq_push(&tx_queue,&msg_hold); //what about if queue fills up between dequeue to send and requeue action?
+                }
+            }
 
-            if (CC1200_TX_Buffer_Bytes() == 0 || millis() - time_to >= TRANSMIT_TIME) {
+            if (pq_empty(&tx_queue) || millis() - time_to >= TRANSMIT_TIME) {
                 tstate = RX;
                 //send ending frame
             }

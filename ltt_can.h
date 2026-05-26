@@ -9,6 +9,8 @@
 // more than once.  
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
+#include "priority_queue.h"
+extern CAN_PriorityQueue tx_queue;
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 

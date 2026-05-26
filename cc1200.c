@@ -17,6 +17,7 @@
 #include "config.h"
 #include "cc1200.h"
 #include <string.h>
+#include "canlib/can.h"
 
 #define MAX_PACKET_LEN 64
 
@@ -40,66 +41,67 @@ const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 // frequency and power has helper function for runtime configuration
 static const registerSetting_t preferredSettings[] = {
     // manual configs
-    {CC1200_IOCFG3,            0x57}, // GPIO3 IO Pin Configuration
-    {CC1200_IOCFG0,            0x73}, // GPIO0 IO Pin Configuration
-    {CC1200_FREQOFF1,          0x02}, // Frequency Offset MSB
-    {CC1200_FREQOFF0,          0xB6}, // Frequency Offset LSB
-    {CC1200_RFEND_CFG1,        0x3F}, // FEND Configuration Reg. 1 //keep in RX if good packet recieved.RX timeout change using 3:1
-    {CC1200_RFEND_CFG0,        0x38}, // FEND Configuration Reg. 0
+    {CC1200_IOCFG3, 0x57}, // GPIO3 IO Pin Configuration
+    {CC1200_IOCFG0, 0x73}, // GPIO0 IO Pin Configuration
+    {CC1200_FREQOFF1, 0x02}, // Frequency Offset MSB
+    {CC1200_FREQOFF0, 0xB6}, // Frequency Offset LSB
+    {CC1200_RFEND_CFG1, 0x3F}, // FEND Configuration Reg. 1 //keep in RX if good packet recieved.RX timeout change using 3:1
+    {CC1200_RFEND_CFG0, 0x38}, // FEND Configuration Reg. 0
 
     // automatic configs
-    {CC1200_SYNC_CFG1,         0xA8},
-    {CC1200_SYNC_CFG0,         0x13},
-    {CC1200_DEVIATION_M,       0x99},
-    {CC1200_MODCFG_DEV_E,      0x85},
-    {CC1200_DCFILT_CFG,        0x26},
-    {CC1200_PREAMBLE_CFG0,     0x8A},
-    {CC1200_IQIC,              0x00},
-    {CC1200_CHAN_BW,           0x02},
-    {CC1200_MDMCFG1,           0xC2},
-    {CC1200_MDMCFG0,           0x05},
-    {CC1200_SYMBOL_RATE2,      0xC9},
-    {CC1200_SYMBOL_RATE1,      0x99},
-    {CC1200_SYMBOL_RATE0,      0x99},
-    {CC1200_AGC_REF,           0x2F},
-    {CC1200_AGC_CS_THR,        0x01},
-    {CC1200_AGC_CFG1,          0x16},
-    {CC1200_AGC_CFG0,          0x84},
-    {CC1200_FIFO_CFG,          0x00},
-    {CC1200_FS_CFG,            0x12},
-    {CC1200_PKT_CFG2,          0x00},
-    {CC1200_PKT_CFG1,          0x43},
-    {CC1200_PKT_CFG0,          0x20},
-    {CC1200_PA_CFG1,           0x5F},
-    {CC1200_PKT_LEN,           0xFF},
-    {CC1200_IF_MIX_CFG,        0x18},
-    {CC1200_FREQOFF_CFG,       0x30},
-    {CC1200_TOC_CFG,           0xC0},
-    {CC1200_MDMCFG2,           0x00},
-    {CC1200_FREQ2,             0x5B},
-    {CC1200_FREQ1,             0x80},
-    {CC1200_IF_ADC1,           0xEE},
-    {CC1200_IF_ADC0,           0x10},
-    {CC1200_FS_DIG1,           0x04},
-    {CC1200_FS_DIG0,           0x55},
-    {CC1200_FS_CAL1,           0x40},
-    {CC1200_FS_CAL0,           0x0E},
-    {CC1200_FS_DIVTWO,         0x03},
-    {CC1200_FS_DSM0,           0x33},
-    {CC1200_FS_DVC0,           0x17},
-    {CC1200_FS_PFD,            0x00},
-    {CC1200_FS_PRE,            0x6E},
-    {CC1200_FS_REG_DIV_CML,    0x1C},
-    {CC1200_FS_SPARE,          0xAC},
-    {CC1200_FS_VCO0,           0xB5},
-    {CC1200_IFAMP,             0x0D},
-    {CC1200_XOSC5,             0x0E},
-    {CC1200_XOSC1,             0x03},
+    {CC1200_SYNC_CFG1, 0xA8},
+    {CC1200_SYNC_CFG0, 0x13},
+    {CC1200_DEVIATION_M, 0x99},
+    {CC1200_MODCFG_DEV_E, 0x85},
+    {CC1200_DCFILT_CFG, 0x26},
+    {CC1200_PREAMBLE_CFG0, 0x8A},
+    {CC1200_IQIC, 0x00},
+    {CC1200_CHAN_BW, 0x02},
+    {CC1200_MDMCFG1, 0xC2},
+    {CC1200_MDMCFG0, 0x05},
+    {CC1200_SYMBOL_RATE2, 0xC9},
+    {CC1200_SYMBOL_RATE1, 0x99},
+    {CC1200_SYMBOL_RATE0, 0x99},
+    {CC1200_AGC_REF, 0x2F},
+    {CC1200_AGC_CS_THR, 0x01},
+    {CC1200_AGC_CFG1, 0x16},
+    {CC1200_AGC_CFG0, 0x84},
+    {CC1200_FIFO_CFG, 0x00},
+    {CC1200_FS_CFG, 0x12},
+    {CC1200_PKT_CFG2, 0x00},
+    {CC1200_PKT_CFG1, 0x43},
+    {CC1200_PKT_CFG0, 0x20},
+    {CC1200_PA_CFG1, 0x5F},
+    {CC1200_PKT_LEN, 0xFF},
+    {CC1200_IF_MIX_CFG, 0x18},
+    {CC1200_FREQOFF_CFG, 0x30},
+    {CC1200_TOC_CFG, 0xC0},
+    {CC1200_MDMCFG2, 0x00},
+    {CC1200_FREQ2, 0x5B},
+    {CC1200_FREQ1, 0x80},
+    {CC1200_IF_ADC1, 0xEE},
+    {CC1200_IF_ADC0, 0x10},
+    {CC1200_FS_DIG1, 0x04},
+    {CC1200_FS_DIG0, 0x55},
+    {CC1200_FS_CAL1, 0x40},
+    {CC1200_FS_CAL0, 0x0E},
+    {CC1200_FS_DIVTWO, 0x03},
+    {CC1200_FS_DSM0, 0x33},
+    {CC1200_FS_DVC0, 0x17},
+    {CC1200_FS_PFD, 0x00},
+    {CC1200_FS_PRE, 0x6E},
+    {CC1200_FS_REG_DIV_CML, 0x1C},
+    {CC1200_FS_SPARE, 0xAC},
+    {CC1200_FS_VCO0, 0xB5},
+    {CC1200_IFAMP, 0x0D},
+    {CC1200_XOSC5, 0x0E},
+    {CC1200_XOSC1, 0x03},
 };
 
 // read one packet from fifo
 static uint8_t packet[MAX_PACKET_LEN] = {0};
 static uint8_t packet_len = 0;
+
 static void Receive_Packet(void) {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     if (!len) {
@@ -169,6 +171,7 @@ uint8_t Command_CC1200(uint8_t command) {
 };
 
 // Configure CC1200 Registers
+
 void CC1200_Init(void) {
     // configure RESET_n pin
     TRISC7 = 0;
@@ -180,7 +183,7 @@ void CC1200_Init(void) {
     packet_len = 0;
 
     // registers
-    size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
+    size_t numSettings = sizeof (preferredSettings) / sizeof (preferredSettings[0]);
     for (size_t i = 0; i < numSettings; i++) {
         Write_CC1200(preferredSettings[i].addr, preferredSettings[i].value);
     }
@@ -198,6 +201,29 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
     Command_CC1200(COMMAND_STX);
 }
 
+uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg) {
+    if (msg->data_len + 6 >= CC1200_TX_Buffer_Bytes())//4 bytes of sid and 2 of length
+    {
+        uint8_t buffer[14];//max size of can message
+        for(int i=0; i<4;i++)
+        {
+            buffer[i] = (msg->sid >> (3-i)*8) & 0xFF; 
+        }
+        
+        buffer[4] = msg->data_len;
+
+        // Data
+        for (int i = 0; i < msg->data_len; i++) {
+            buffer[5 + i] = msg->data[i];
+        }
+        CC1200_Transmit(&buffer,msg->data_len + 6);
+        return 0;
+    }
+    else{
+        return 1;
+    }
+}
+
 uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     if (len > packet_len) {
         len = packet_len;
@@ -207,19 +233,17 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     return len;
 }
 
-uint8_t CC1200_TX_Buffer_Bytes()
-{
-    CC1200ReadResult tx_bytes=Read_CC1200(CC1200_NUM_TXBYTES);
+uint8_t CC1200_TX_Buffer_Bytes() {
+    CC1200ReadResult tx_bytes = Read_CC1200(CC1200_NUM_TXBYTES);
     return tx_bytes.value;
 }
 
-uint8_t CC1200_RX_Buffer_Bytes()
-{
-    CC1200ReadResult rx_bytes=Read_CC1200(CC1200_NUM_RXBYTES);
+uint8_t CC1200_RX_Buffer_Bytes() {
+    CC1200ReadResult rx_bytes = Read_CC1200(CC1200_NUM_RXBYTES);
     return rx_bytes.value;
 }
 
-uint8_t CC1200_State_Transition(void){
+uint8_t CC1200_State_Transition(void) {
     uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
     switch (state) {
         case STATE_IDLE:
