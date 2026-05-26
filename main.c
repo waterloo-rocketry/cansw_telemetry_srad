@@ -110,8 +110,7 @@ void main() {
             Command_CC1200(COMMAND_STX); //command to TX state
             if(pq_pop(&tx_queue,&msg_hold)==0)
             {
-                uint8_t result=CC1200_Load_TX_FIFO(&msg_hold);
-                if(result==1)
+                if(CC1200_Load_TX_FIFO(&msg_hold)==1)
                 {
                     pq_push(&tx_queue,&msg_hold); //what about if queue fills up between dequeue to send and requeue action?
                 }
@@ -123,13 +122,13 @@ void main() {
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
-            uint8_t data[64] = {0};
-            uint8_t length=CC1200_Receive(data, sizeof(data));
-            if(data[length-1]==END_FRAME)
-            {
-                tstate=TX;
-                time_to=millis();
-            }
+//            
+//            //uint8_t length=CC1200_Receive_Packet(data, sizeof(data));
+//            if(data[length-1]==END_FRAME)
+//            {
+//                tstate=TX;
+//                time_to=millis();
+//            }
 
         }
 

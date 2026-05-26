@@ -102,26 +102,26 @@ static const registerSetting_t preferredSettings[] = {
 static uint8_t packet[MAX_PACKET_LEN] = {0};
 static uint8_t packet_len = 0;
 
-static void Receive_Packet(void) {
-    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
-    if (!len) {
-        return;
-    }
-
-    SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    for (int i = 0; i < len; i++) {
-        // read the whole packet even if buffer isn't big enough
-        uint8_t data = SPI_Transfer(0);
-        if (i < MAX_PACKET_LEN) {
-            packet[i] = data;
-        }
-    }
-    SPI_Deselect();
-    Command_CC1200(COMMAND_SFRX);
-
-    packet_len = len;
-}
+//static void Receive_Packet(void) {
+//    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+//    if (!len) {
+//        return;
+//    }
+//
+//    SPI_Select();
+//    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+//    for (int i = 0; i < len; i++) {
+//        // read the whole packet even if buffer isn't big enough
+//        uint8_t data = SPI_Transfer(0);
+//        if (i < MAX_PACKET_LEN) {
+//            packet[i] = data;
+//        }
+//    }
+//    SPI_Deselect();
+//    Command_CC1200(COMMAND_SFRX);
+//
+//    packet_len = len;
+//}
 
 CC1200ReadResult Read_CC1200(uint16_t reg) {
     CC1200ReadResult result;
@@ -204,24 +204,21 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
 uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg) {
     if (msg->data_len + 6 >= CC1200_TX_Buffer_Bytes())//4 bytes of sid and 2 of length
     {
-        uint8_t buffer[14];//max size of can message
-        for(int i=0; i<4;i++)
-        {
-            buffer[i] = (msg->sid >> (3-i)*8) & 0xFF; 
+        uint8_t buffer[14]; //max size of can message
+        for (int i = 0; i < 4; i++) {
+            buffer[i] = (msg->sid >> (3 - i)*8) & 0xFF;
         }
-        
+
         buffer[4] = msg->data_len;
 
         // Data
         for (int i = 0; i < msg->data_len; i++) {
             buffer[5 + i] = msg->data[i];
         }
-        CC1200_Transmit(&buffer,msg->data_len + 6);
+        CC1200_Transmit(buffer, msg->data_len + 6);
         return 0;
     }
-    else{
-        return 1;
-    }
+    return 1;
 }
 
 uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
@@ -231,6 +228,41 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     memcpy(data, packet, len);
     packet_len = 0;
     return len;
+}
+
+uint8_t CC1200_Recieve_RX_FIFO() {
+    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    if (len < 8) { //5 bytes is length of sid + len + 3bytes of data is smallest possible can msg
+        return 1;
+    }
+
+    SPI_Select();
+    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+    uint8_t data;
+    for (int i = 0; i < 5; i++) {
+        data = SPI_Transfer(0);
+        packet[i] = data;
+    }
+    SPI_Deselect();
+    len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    if (len < packet[4]) {
+        //need to reset RX buffer pointers
+        return 1;
+    } else {
+        uint8_t msg_data[8];//match definition in can_msg_t
+        SPI_Select();
+        SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+        for (int i = 0; i < packet[4]; i++) {
+            msg_data[i]=SPI_Transfer(0);
+        }
+        SPI_Deselect();
+        can_msg_t prio;
+        prio.sid = (packet[0] << 24) + (packet[1] << 16) + (packet[2] << 8) + packet[3];
+        prio.data_len = packet[4];
+        prio.data = msg_data;
+        return 0;
+    }
+
 }
 
 uint8_t CC1200_TX_Buffer_Bytes() {
@@ -247,7 +279,7 @@ uint8_t CC1200_State_Transition(void) {
     uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
     switch (state) {
         case STATE_IDLE:
-            Receive_Packet();
+            //Receive_Packet();
             Command_CC1200(COMMAND_SRX);
             break;
         case STATE_RX_FIFO_ERROR:

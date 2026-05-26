@@ -11,6 +11,7 @@
 #include "spi.h"
 #include "stdint.h"
 #include <xc.h>
+#include "canlib/can.h"
 
 typedef struct {
     uint16_t addr;
@@ -32,7 +33,7 @@ void CC1200_Init(void);
 
 void CC1200_Transmit(uint8_t *, uint8_t);
 
-uint8_t CC1200_Load_TX_FIFO(can_msg_t *msg);
+uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg);
 
 uint8_t CC1200_Receive(uint8_t *, uint8_t);
 

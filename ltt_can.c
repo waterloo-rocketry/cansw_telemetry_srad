@@ -21,6 +21,7 @@
 uint8_t tx_pool[200];
 // memory pool for CAN rx buffer
 CAN_PriorityQueue tx_queue;
+CAN_PriorityQueue rx_queue;
 // holds latest received CAN message
 volatile can_msg_t latest_CAN_message;
 volatile uint8_t latest_CAN_message_updated = 0;
