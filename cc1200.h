@@ -37,6 +37,8 @@ uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg);
 
 uint8_t CC1200_Receive(uint8_t *, uint8_t);
 
+uint8_t CC1200_Receive_RX_FIFO();
+
 uint8_t CC1200_TX_Buffer_Bytes();
 
 uint8_t CC1200_RX_Buffer_Bytes();

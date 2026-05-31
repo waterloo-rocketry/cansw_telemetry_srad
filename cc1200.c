@@ -18,6 +18,7 @@
 #include "cc1200.h"
 #include <string.h>
 #include "canlib/can.h"
+#include "canlib/pic18f26k83/pic18f26k83_can.h"
 
 #define MAX_PACKET_LEN 64
 
@@ -230,7 +231,7 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     return len;
 }
 
-uint8_t CC1200_Recieve_RX_FIFO() {
+uint8_t CC1200_Receive_RX_FIFO() {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     if (len < 8) { //5 bytes is length of sid + len + 3bytes of data is smallest possible can msg
         return 1;
@@ -238,28 +239,40 @@ uint8_t CC1200_Recieve_RX_FIFO() {
 
     SPI_Select();
     SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    uint8_t data;
+    uint8_t data; //used to temp hold received SPI byte
+    //transfer sid and length bytes
     for (int i = 0; i < 5; i++) {
         data = SPI_Transfer(0);
         packet[i] = data;
     }
     SPI_Deselect();
+    
+    //extract length of current can message in buffer
     len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    //if the whole message has not arrived yet
     if (len < packet[4]) {
-        //need to reset RX buffer pointers
+        uint8_t rx_last=Read_CC1200(CC1200_RXLAST).value;
+        Write_CC1200(CC1200_RXLAST,rx_last-6);
         return 1;
-    } else {
+    }
+    //whole message has been received, extract it from buffer
+    else {
         uint8_t msg_data[8];//match definition in can_msg_t
         SPI_Select();
         SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+        //transfer over can msg data
         for (int i = 0; i < packet[4]; i++) {
             msg_data[i]=SPI_Transfer(0);
         }
         SPI_Deselect();
         can_msg_t prio;
-        prio.sid = (packet[0] << 24) + (packet[1] << 16) + (packet[2] << 8) + packet[3];
+        prio.sid = ((uint32_t)packet[0] << 24) + ((uint32_t)packet[1] << 16) + ((uint32_t)packet[2] << 8) + (uint32_t)packet[3];
         prio.data_len = packet[4];
-        prio.data = msg_data;
+        memcpy(prio.data,msg_data,sizeof(prio.data));
+        
+        //TODO:
+        //implement the check for endframe here to queue transition
+        pic18f26k83_can_send(&prio); 
         return 0;
     }
 

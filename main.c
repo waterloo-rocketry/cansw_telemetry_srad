@@ -70,10 +70,14 @@ void main() {
             
             if(pq_pop(&tx_queue,&msg_hold)==0)
             {
-                uint8_t result=CC1200_Load_TX_FIFO(&msg_hold);
-                if(result==1)
+                
+                if(CC1200_Load_TX_FIFO(&msg_hold)==1)
                 {
-                    pq_push(&tx_queue,&msg_hold); //what about if queue fills up between dequeue to send and requeue action?
+                    if(pq_push(&tx_queue,&msg_hold)==1) //try to push and check if queue is full
+                    {
+                        //asked in electrical for this
+                    }
+                        
                 }
             }
             
@@ -122,13 +126,11 @@ void main() {
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
-//            
-//            //uint8_t length=CC1200_Receive_Packet(data, sizeof(data));
-//            if(data[length-1]==END_FRAME)
-//            {
-//                tstate=TX;
-//                time_to=millis();
-//            }
+            if(CC1200_Receive_RX_FIFO()==END_FRAME)
+            {
+                tstate=TX;
+                time_to=millis();
+            }
 
         }
 

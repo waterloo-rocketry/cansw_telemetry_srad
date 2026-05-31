@@ -21,7 +21,6 @@
 uint8_t tx_pool[200];
 // memory pool for CAN rx buffer
 CAN_PriorityQueue tx_queue;
-CAN_PriorityQueue rx_queue;
 // holds latest received CAN message
 volatile can_msg_t latest_CAN_message;
 volatile uint8_t latest_CAN_message_updated = 0;
@@ -34,10 +33,10 @@ static void can_msg_handler(const can_msg_t *msg) {
     for (int i = 0; i < 8; i++) {
         msg_data = (msg_data << 8) | msg->data[i];
     }
-    pq_push(&tx_queue,&msg);
+    pq_push(&tx_queue,msg);
     // For parsing commands to LTT board
     uint16_t msg_type = get_message_type(msg);
-    pic18f26k83_can_send(&msg);
+    pic18f26k83_can_send(msg);
 
     switch (msg_type) {
         case MSG_LEDS_ON:
