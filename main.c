@@ -67,43 +67,40 @@ void main() {
 #if BOARD_MODE == BOARD_MODE_ROCKET
         if (tstate == TX) {
             Command_CC1200(COMMAND_STX);
-            
-            if(pq_pop(&tx_queue,&msg_hold)==0)
-            {
-                
-                if(CC1200_Load_TX_FIFO(&msg_hold)==1)
-                {
-                    if(pq_push(&tx_queue,&msg_hold)==1) //try to push and check if queue is full
-                    {
-                        //asked in electrical for this
-                    }
-                        
+            //check if there is a message in the queue to send
+            if (pq_peek(&tx_queue, &msg_hold) == 0) { // there is a message in the queue, moved to msg_hold
+                if (CC1200_Load_TX_FIFO(&msg_hold) == 0) { //buffer was big enough and msg was loaded
+                    pq_pop(&tx_queue, &msg_hold); //remove message from queue
                 }
             }
-            
+
+            //transmitting time elapsed
             if (time_to >= TRANSMIT_TIME2) {
-                tstate = RX;
+                tstate = TX_ENDFRAME;
                 time_to = millis();
                 time_rx = millis();
-                
+
                 sel_trans = (sel_trans + 1) % Number_Of_Trans;
                 //send ending frame to queue other side with transceiver
                 //make it so that the frame is orred with transsel to send address
-                
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
-            uint8_t data[64] = {0};
-            uint8_t length=CC1200_Receive(data, sizeof(data));
+            uint8_t rx_status = CC1200_Receive_RX_FIFO();
             // receive messages
 
-            if (length>0) //message received
+            if (rx_status != 2) //message received or being recieved
             {
-                time_rx=millis();
+                time_rx = millis();
             }
-            if (millis() - time_rx >= RECEIVE_TIME || millis() - time_to >= TRANSMIT_TIME) { //need to add check for end frame 
+            if (millis() - time_rx >= RECEIVE_TIME || millis() - time_to >= TRANSMIT_TIME) { // || end frame received
                 tstate = TX;
                 time_to = millis();
+            }
+        } else if (tstate == TX_ENDFRAME) {
+            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE) // wait till endframe and remaining items in buffer is sent 
+            {
+                tstate = RX;
             }
         }
 
@@ -112,24 +109,26 @@ void main() {
 #elif BOARD_MODE == BOARD_MODE_GROUND
         if (tstate == TX) {
             Command_CC1200(COMMAND_STX); //command to TX state
-            if(pq_pop(&tx_queue,&msg_hold)==0)
-            {
-                if(CC1200_Load_TX_FIFO(&msg_hold)==1)
-                {
-                    pq_push(&tx_queue,&msg_hold); //what about if queue fills up between dequeue to send and requeue action?
+            if (pq_peek(&tx_queue, &msg_hold) == 0) { // there is a message in the queue, moved to msg_hold
+                if (CC1200_Load_TX_FIFO(&msg_hold) == 0) { //buffer was big enough and msg was loaded
+                    pq_pop(&tx_queue, &msg_hold); //remove message from queue
                 }
             }
-
-            if (pq_empty(&tx_queue) || millis() - time_to >= TRANSMIT_TIME) {
-                tstate = RX;
+            if ((pq_empty(&tx_queue) || millis() - time_to >= TRANSMIT_TIME) && (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE)) { //need to check if the cc1200 buffer is empty aswell)
+                tstate = TX_ENDFRAME;
                 //send ending frame
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
-            if(CC1200_Receive_RX_FIFO()==END_FRAME)
+            if (CC1200_Receive_RX_FIFO() == END_FRAME) {
+                tstate = TX;
+                time_to = millis();
+            }
+
+        } else if (tstate == TX_ENDFRAME) {
+            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE) // wait till endframe is fully sent before moving to 
             {
-                tstate=TX;
-                time_to=millis();
+                tstate = RX;
             }
 
         }
@@ -212,7 +211,7 @@ void main() {
             toggle_LED_Green(0);
         }
     }
-    
+
 #endif
 }
 }

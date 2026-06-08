@@ -7,6 +7,7 @@
 
 #ifndef CC1200_H
 #define CC1200_H
+#define BUFFER_SIZE 255
 
 #include "spi.h"
 #include "stdint.h"

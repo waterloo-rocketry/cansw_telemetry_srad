@@ -22,6 +22,7 @@
 
 #define MAX_PACKET_LEN 64
 
+
 // Call sign MUST be transmitted at start of every message
 const uint64_t CALLSIGN = 0x564133555750; // ASCII "VAEUWP"/Manav
 
@@ -203,7 +204,7 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
 }
 
 uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg) {
-    if (msg->data_len + 6 >= CC1200_TX_Buffer_Bytes())//4 bytes of sid and 2 of length
+    if (msg->data_len + 6 >= CC1200_TX_Buffer_Bytes())//if there is enough space to send msg
     {
         uint8_t buffer[14]; //max size of can message
         for (int i = 0; i < 4; i++) {
@@ -233,6 +234,11 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
 
 uint8_t CC1200_Receive_RX_FIFO() {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
+    //no new message has arrived and all previous msgs have been removed from buffer
+    if(len==0)
+    {
+        return 2;
+    }
     if (len < 8) { //5 bytes is length of sid + len + 3bytes of data is smallest possible can msg
         return 1;
     }
@@ -280,12 +286,12 @@ uint8_t CC1200_Receive_RX_FIFO() {
 
 uint8_t CC1200_TX_Buffer_Bytes() {
     CC1200ReadResult tx_bytes = Read_CC1200(CC1200_NUM_TXBYTES);
-    return tx_bytes.value;
+    return BUFFER_SIZE-tx_bytes.value;
 }
 
 uint8_t CC1200_RX_Buffer_Bytes() {
     CC1200ReadResult rx_bytes = Read_CC1200(CC1200_NUM_RXBYTES);
-    return rx_bytes.value;
+    return BUFFER_SIZE-rx_bytes.value;
 }
 
 uint8_t CC1200_State_Transition(void) {
