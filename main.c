@@ -5,7 +5,6 @@
  * Created on February 22, 2025, 11:40 AM
  */
 
-#include "config.h"
 #include <xc.h>
 #include <string.h>
 
@@ -21,9 +20,11 @@
 #include "timer.h" // import custom millis() function
 
 #include "priority_queue.h"
+#include "ltt_packet.h"
 #define TEST_SIZE 32
 
 uint8_t board_status = 0; // board status flag
+uint8_t endframe_loaded = 0;
 enum Ground_Transceiver_Sel sel_trans = Trans1;
 enum Transceiver_State tstate = RX; // this also needs to vary based on rocket or ground
 can_msg_t msg_hold;
@@ -79,10 +80,7 @@ void main() {
                 tstate = TX_ENDFRAME;
                 time_to = millis();
                 time_rx = millis();
-
                 sel_trans = (sel_trans + 1) % Number_Of_Trans;
-                //send ending frame to queue other side with transceiver
-                //make it so that the frame is orred with transsel to send address
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
@@ -98,9 +96,18 @@ void main() {
                 time_to = millis();
             }
         } else if (tstate == TX_ENDFRAME) {
-            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE) // wait till endframe and remaining items in buffer is sent 
+            //load endframe if first time entering in cycle
+            if (endframe_loaded == 0) {
+                build_telemetry_state_switch_msg(PRIO_LOW, millis(), sel_trans, &msg_hold);//keep rebuilding message to keep time accurate
+                //try to load msg into buffer
+                if (CC1200_Load_TX_FIFO(&msg_hold) == 0) {
+                    endframe_loaded = 1;
+                }
+            }
+            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE && endframe_loaded==1) // wait till endframe loaded and then sent
             {
                 tstate = RX;
+                endframe_loaded=0;
             }
         }
 

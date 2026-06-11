@@ -14,11 +14,12 @@
  * is tested and characterized
  */
 
-#include "config.h"
+
 #include "cc1200.h"
 #include <string.h>
 #include "canlib/can.h"
 #include "canlib/pic18f26k83/pic18f26k83_can.h"
+#include "ltt_packet.h"
 
 #define MAX_PACKET_LEN 64
 
@@ -192,7 +193,6 @@ void CC1200_Init(void) {
 }
 
 void CC1200_Transmit(uint8_t *data, uint8_t len) {
-    // TODO check space in FIFO
     SPI_Select();
     uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
     SPI_Transfer(len);
@@ -204,23 +204,22 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
 }
 
 uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg) {
-    if (msg->data_len + 6 >= CC1200_TX_Buffer_Bytes())//if there is enough space to send msg
-    {
+    if (msg->data_len + 5 >= CC1200_TX_Buffer_Bytes()) //4 bytes for sid, 1 for data len
         uint8_t buffer[14]; //max size of can message
-        for (int i = 0; i < 4; i++) {
-            buffer[i] = (msg->sid >> (3 - i)*8) & 0xFF;
-        }
-
-        buffer[4] = msg->data_len;
-
-        // Data
-        for (int i = 0; i < msg->data_len; i++) {
-            buffer[5 + i] = msg->data[i];
-        }
-        CC1200_Transmit(buffer, msg->data_len + 6);
-        return 0;
+    for (int i = 0; i < 4; i++) {
+        buffer[i] = (msg->sid >> (3 - i)*8) & 0xFF;
     }
-    return 1;
+
+    buffer[4] = msg->data_len;
+
+    // Data
+    for (int i = 0; i < msg->data_len; i++) {
+        buffer[5 + i] = msg->data[i];
+    }
+    CC1200_Transmit(buffer, msg->data_len + 5);
+    return 0;
+}
+return 1;
 }
 
 uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
@@ -235,11 +234,10 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
 uint8_t CC1200_Receive_RX_FIFO() {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //no new message has arrived and all previous msgs have been removed from buffer
-    if(len==0)
-    {
+    if (len == 0) {
         return 2;
     }
-    if (len < 8) { //5 bytes is length of sid + len + 3bytes of data is smallest possible can msg
+    if (len < 7) { //5 bytes is length of sid + len + 2bytes of data is smallest possible can msg
         return 1;
     }
 
@@ -252,33 +250,37 @@ uint8_t CC1200_Receive_RX_FIFO() {
         packet[i] = data;
     }
     SPI_Deselect();
-    
+
     //extract length of current can message in buffer
     len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //if the whole message has not arrived yet
     if (len < packet[4]) {
-        uint8_t rx_last=Read_CC1200(CC1200_RXLAST).value;
-        Write_CC1200(CC1200_RXLAST,rx_last-6);
+        uint8_t rx_first = Read_CC1200(CC1200_RXFIRST).value;
+        Write_CC1200(CC1200_RXFIRST, rx_first - 6); //move pointer back by 6 bytes in queue (sid + data)
         return 1;
-    }
-    //whole message has been received, extract it from buffer
+    }        //whole message has been received, extract it from buffer
     else {
-        uint8_t msg_data[8];//match definition in can_msg_t
+        uint8_t msg_data[8]; //match definition in can_msg_t
         SPI_Select();
         SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
         //transfer over can msg data
         for (int i = 0; i < packet[4]; i++) {
-            msg_data[i]=SPI_Transfer(0);
+            msg_data[i] = SPI_Transfer(0);
         }
         SPI_Deselect();
-        can_msg_t prio;
-        prio.sid = ((uint32_t)packet[0] << 24) + ((uint32_t)packet[1] << 16) + ((uint32_t)packet[2] << 8) + (uint32_t)packet[3];
-        prio.data_len = packet[4];
-        memcpy(prio.data,msg_data,sizeof(prio.data));
-        
-        //TODO:
-        //implement the check for endframe here to queue transition
-        pic18f26k83_can_send(&prio); 
+        can_msg_t msg;
+        msg.sid = ((uint32_t) packet[0] << 24) + ((uint32_t) packet[1] << 16) + ((uint32_t) packet[2] << 8) + (uint32_t) packet[3];
+        msg.data_len = packet[4];
+        memcpy(msg.data, msg_data, sizeof (msg.data));
+        uint8_t channel_id;
+        uint8_t state = get_telemetry_state_switch_msg(&msg, &channel_id);
+        if (state = W_SUCCESS) {
+//            if (BOARD_MODE == BOARD_MODE_ROCKET && channel_id == BOARD_INST_ID_ROCKET) { //kinda redundant to check Id on rocket side but might as well ig
+//                return 3;
+//            } else if (BOARD_MODE == BOARD_MODE_GROUND && channel_id ==  )
+           }
+// can probably write this as one if statement instead of an if else, just check if channel id matches board defined id
+        pic18f26k83_can_send(&msg);
         return 0;
     }
 
@@ -286,12 +288,12 @@ uint8_t CC1200_Receive_RX_FIFO() {
 
 uint8_t CC1200_TX_Buffer_Bytes() {
     CC1200ReadResult tx_bytes = Read_CC1200(CC1200_NUM_TXBYTES);
-    return BUFFER_SIZE-tx_bytes.value;
+    return BUFFER_SIZE - tx_bytes.value;
 }
 
 uint8_t CC1200_RX_Buffer_Bytes() {
     CC1200ReadResult rx_bytes = Read_CC1200(CC1200_NUM_RXBYTES);
-    return BUFFER_SIZE-rx_bytes.value;
+    return BUFFER_SIZE - rx_bytes.value;
 }
 
 uint8_t CC1200_State_Transition(void) {

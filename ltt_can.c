@@ -12,6 +12,7 @@
 #include "adc.h"
 #include "osc.h"
 #include "leds.h"
+#include "ltt_packet.h"
 
 #include <xc.h>
 #include "canlib.h" // interface with RocketCAN
@@ -27,12 +28,11 @@ volatile uint8_t latest_CAN_message_updated = 0;
 
 static void can_msg_handler(const can_msg_t *msg) {
     // For transmitting, we don't care what the message is or where it's from
-    uint32_t msg_SID = msg->sid;
-    uint8_t msg_len = msg->data_len;
-    uint64_t msg_data;
-    for (int i = 0; i < 8; i++) {
-        msg_data = (msg_data << 8) | msg->data[i];
-    }
+    ltt_packet pckt;
+    pckt->msg->sid=msg->sid;
+    pckt->msg->data_len=msg->data_len;
+    pckt->msg->data=msg->data;
+    pckt->pkt_type=
     pq_push(&tx_queue,msg);
     // For parsing commands to LTT board
     uint16_t msg_type = get_message_type(msg);

@@ -13,6 +13,7 @@
 #include "stdint.h"
 #include <xc.h>
 #include "canlib/can.h"
+#include "ltt_packet.h"
 
 typedef struct {
     uint16_t addr;
