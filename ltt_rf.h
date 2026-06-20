@@ -10,15 +10,15 @@
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+#include <xc.h> // include processor files - each processor file is guarded.
+#include <stdint.h>
 
 void CC1200_Set_Power(int8_t power);
 
 void CC1200_Frequency(uint32_t freq);
 
-RF_Init(void);
+void RF_Init(void);
 
-RF_Receive(void);
-
+void RF_Receive(void);
 #endif	/* XC_HEADER_TEMPLATE_H */
 
