@@ -28,11 +28,6 @@ volatile uint8_t latest_CAN_message_updated = 0;
 
 static void can_msg_handler(const can_msg_t *msg) {
     // For transmitting, we don't care what the message is or where it's from
-    ltt_packet pckt;
-    pckt->msg->sid=msg->sid;
-    pckt->msg->data_len=msg->data_len;
-    pckt->msg->data=msg->data;
-    pckt->pkt_type=
     pq_push(&tx_queue,msg);
     // For parsing commands to LTT board
     uint16_t msg_type = get_message_type(msg);
@@ -54,7 +49,7 @@ static void can_msg_handler(const can_msg_t *msg) {
         default:
             break;
     }
-#if BOARD_MODE == (BOARD_MODE_ROCKET) || (BOARD_MODE == BOARD_MODE_TEST)
+#if BOARD_INST_UNIQUE_ID == (BOARD_INST_ID_ROCKET) || (BOARD_MODE == BOARD_MODE_TEST)
     latest_CAN_message = *msg;
     latest_CAN_message_updated = 1;
 #endif 
