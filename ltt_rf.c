@@ -61,7 +61,6 @@ void RF_Init(void) {
 void RF_Receive(void) {
     uint8_t data[64] = {0};
     uint8_t rx_len = CC1200_Receive(data, sizeof (data));
-    uint8_t rx_len = CC1200_Receive(data, sizeof(data));
     
     if (rx_len) {
         // counter increments by one and crc check passes
