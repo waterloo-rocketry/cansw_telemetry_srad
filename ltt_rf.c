@@ -51,15 +51,16 @@ void CC1200_Frequency(uint32_t freq) {
     SPI_Deselect();
 }
 
-RF_Init() {
+void RF_Init(void) {
     CC1200_Init();
-    
+
     CC1200_Frequency(915000);
     CC1200_Set_Power(14);
 }
 
-RF_Receive(void) {
+void RF_Receive(void) {
     uint8_t data[64] = {0};
+    uint8_t rx_len = CC1200_Receive(data, sizeof (data));
     uint8_t rx_len = CC1200_Receive(data, sizeof(data));
     
     if (rx_len) {
