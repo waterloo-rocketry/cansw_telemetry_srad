@@ -69,7 +69,7 @@ void CAN_Init() {
     can_timing_t can_setup;
     can_generate_timing_params(_XTAL_FREQ, &can_setup);
     pic18f26k83_can_init(&can_setup, can_msg_handler);
-    pq_init(*tx_queue);
+    pq_init(&tx_queue);
 
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), pic18f26k83_can_send, pic18f26k83_can_send_rdy);

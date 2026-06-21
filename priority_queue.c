@@ -19,12 +19,12 @@ uint8_t pq_full(CAN_PriorityQueue *q)
 
 uint8_t pq_push(CAN_PriorityQueue *q, can_msg_t *msg)
 {
-    if(pq_is_full(q))
+    if(pq_full(q))
     {
         return 1;
     }
     int i = q->size;
-    while (i>0 && q->rx_msgs[i-1].sid > msg->sid)
+    while (i>0 && q->msgs[i-1].sid > msg->sid)
     {
         q->msgs[i]=q->msgs[i-1];
         i--;
@@ -36,7 +36,7 @@ uint8_t pq_push(CAN_PriorityQueue *q, can_msg_t *msg)
 
 uint8_t pq_pop(CAN_PriorityQueue *q, can_msg_t *msg_out)
 {
-    if(pq_is_empty(q))
+    if(pq_empty(q))
     {
         return 1;
     }
@@ -55,7 +55,7 @@ uint8_t pq_pop(CAN_PriorityQueue *q, can_msg_t *msg_out)
 
 uint8_t pq_peek(CAN_PriorityQueue *q, can_msg_t *msg_out)
 {
-    if(pq_is_empty(q))
+    if(pq_empty(q))
     {
         return 1;
     } 

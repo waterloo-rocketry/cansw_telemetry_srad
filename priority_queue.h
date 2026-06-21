@@ -10,12 +10,15 @@
 #define QUEUE_SIZE 32
 #include "canlib/can.h"
 
+
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
+    
     typedef struct
     {
-        can_msg_t rx_msgs[QUEUE_SIZE];
+        can_msg_t msgs[QUEUE_SIZE];
         uint8_t size;
     }CAN_PriorityQueue;
     
