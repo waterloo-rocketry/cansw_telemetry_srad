@@ -24,6 +24,18 @@ typedef struct {
     uint8_t value;
 } CC1200ReadResult;
 
+typedef enum {
+    MSG_RCV,
+    MSG_PARTIAL_RCV,
+    BUFFER_EMPTY,
+    MSG_STATE_SW,        
+} cc1200_receive_status;
+
+typedef enum {
+    MSG_LOADED,
+    MSG_NOT_LOADED,        
+} cc1200_transmit_status;
+
 uint8_t Write_CC1200(uint16_t, uint8_t);
 
 uint8_t Command_CC1200(uint8_t);
@@ -34,11 +46,11 @@ void CC1200_Init(void);
 
 void CC1200_Transmit(uint8_t *, uint8_t);
 
-uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg);
+cc1200_transmit_status CC1200_Load_TX_FIFO(const can_msg_t *msg);
 
 uint8_t CC1200_Receive(uint8_t *, uint8_t);
 
-uint8_t CC1200_Receive_RX_FIFO();
+cc1200_receive_status CC1200_Receive_RX_FIFO();
 
 uint8_t CC1200_TX_Buffer_Bytes();
 

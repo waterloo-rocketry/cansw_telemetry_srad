@@ -204,7 +204,7 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
     Command_CC1200(COMMAND_STX);
 }
 
-uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg) {
+cc1200_transmit_status CC1200_Load_TX_FIFO(const can_msg_t *msg) {
     if (msg->data_len + 5 >= CC1200_TX_Buffer_Bytes()) { //4 bytes for sid, 1 for data len
         uint8_t buffer[14]; //max size of can message
         for (int i = 0; i < 4; i++) {
@@ -218,9 +218,9 @@ uint8_t CC1200_Load_TX_FIFO(const can_msg_t *msg) {
             buffer[5 + i] = msg->data[i];
         }
         CC1200_Transmit(buffer, msg->data_len + 5);
-        return 0;
+        return MSG_LOADED;
     }
-    return 1;
+    return MSG_NOT_LOADED;
 }
 
 uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
@@ -232,33 +232,31 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     return len;
 }
 
-uint8_t CC1200_Receive_RX_FIFO() {
+cc1200_receive_status CC1200_Receive_RX_FIFO() {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //no new message has arrived and all previous msgs have been removed from buffer
     if (len == 0) {
-        return 2;
+        return BUFFER_EMPTY;
     }
     if (len < 7) { //5 bytes is length of sid + len + 2bytes of data is smallest possible can msg
-        return 1;
+        return MSG_PARTIAL_RCV;
     }
 
     SPI_Select();
     SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    uint8_t data; //used to temp hold received SPI byte
     //transfer sid and length bytes
     for (int i = 0; i < 5; i++) {
-        data = SPI_Transfer(0);
-        packet[i] = data;
+        packet[i] = SPI_Transfer(0);
     }
     SPI_Deselect();
 
     //extract length of current can message in buffer
     len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //if the whole message has not arrived yet
-    if (len < packet[4]) {
+    if (len < packet[4]) { //buffer length is less than datalen of msg
         uint8_t rx_first = Read_CC1200(CC1200_RXFIRST).value;
         Write_CC1200(CC1200_RXFIRST, (uint8_t) (rx_first - 6)); //move pointer back by 6 bytes in queue (sid + data)
-        return 1;
+        return MSG_PARTIAL_RCV;
     }
     else { //whole message has been received, extract it from buffer
         uint8_t msg_data[8]; //match definition in can_msg_t
@@ -278,11 +276,11 @@ uint8_t CC1200_Receive_RX_FIFO() {
         if (state == W_SUCCESS) {
             if (channel_id == BOARD_INST_UNIQUE_ID) // checks if the state received matches the board current id
             {
-                return 3; //received state switch
+                return MSG_STATE_SW; //received state switch
             }
         }
         pic18f26k83_can_send(&msg);
-        return 0;
+        return MSG_RCV;
     }
 
 }

@@ -25,9 +25,9 @@
 
 uint8_t board_status = 0; // board status flag
 uint8_t endframe_loaded = 0;
-can_board_inst_id_telemetry_t sel_trans = BOARD_INST_ID_TELEMETRY_GROUND_1;
-enum Transceiver_State tstate = RX; // this also needs to vary based on rocket or ground
-can_msg_t msg_hold;
+can_board_inst_id_telemetry_t sel_trans = BOARD_INST_ID_TELEMETRY_GROUND_1; //selected transmitter to go next
+enum Transceiver_State tstate = RX; //state of telemetry state machine
+can_msg_t msg_hold; // place to hold a can msg in transfer from can buffer to LTT buffer
 
 void delay_ms(unsigned int ms) {
     unsigned int i, j;
@@ -43,7 +43,7 @@ void Board_Init() {
     SPI_Init();
     CAN_Init();
     RF_Init();
-    pq_init(&tx_queue);
+    pq_init(&tx_queue); //priority queue init
 }
 
 void main() {
@@ -70,7 +70,7 @@ void main() {
             Command_CC1200(COMMAND_STX);
             //check if there is a message in the queue to send
             if (pq_peek(&tx_queue, &msg_hold) == 0) { // there is a message in the queue, moved to msg_hold
-                if (CC1200_Load_TX_FIFO(&msg_hold) == 0) { //buffer was big enough and msg was loaded
+                if (CC1200_Load_TX_FIFO(&msg_hold) == MSG_LOADED) { //buffer was big enough and msg was loaded
                     pq_pop(&tx_queue, &msg_hold); //remove message from queue
                 }
             }
@@ -87,11 +87,11 @@ void main() {
             uint8_t rx_status = CC1200_Receive_RX_FIFO();
             // receive messages
 
-            if (rx_status != 2) //message received or being received
+            if (rx_status != BUFFER_EMPTY) //message received or being received
             {
                 time_rx = millis();
             }
-            if (millis() - time_rx >= RECEIVE_TIME || millis() - time_to >= TRANSMIT_TIME || rx_status == 3) { //|| end frame received
+            if (millis() - time_rx >= RECEIVE_TIME || millis() - time_to >= TRANSMIT_TIME || rx_status == MSG_STATE_SW) { //|| end frame received
                 tstate = TX;
                 time_to = millis();
             }
@@ -100,7 +100,7 @@ void main() {
             if (endframe_loaded == 0) {
                 build_telemetry_state_switch_msg(PRIO_LOW, millis(), sel_trans, &msg_hold); //keep rebuilding message to keep time accurate
                 //try to load msg into buffer
-                if (CC1200_Load_TX_FIFO(&msg_hold) == 0) {
+                if (CC1200_Load_TX_FIFO(&msg_hold) == MSG_LOADED) {
                     endframe_loaded = 1;
                 }
             }
