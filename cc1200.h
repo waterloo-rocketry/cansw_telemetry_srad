@@ -29,6 +29,7 @@ typedef enum {
     MSG_PARTIAL_RCV,
     BUFFER_EMPTY,
     MSG_STATE_SW,        
+    MSG_CORRUPTED       
 } cc1200_receive_status;
 
 typedef enum {

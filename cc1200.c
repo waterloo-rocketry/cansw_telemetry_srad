@@ -22,7 +22,7 @@
 #include "canlib/message/msg_telemetry.h"
 #include "config.h"
 
-#define MAX_PACKET_LEN 64
+#define MAX_PACKET_LEN 14
 
 
 // Call sign MUST be transmitted at start of every message
@@ -205,19 +205,20 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
 }
 
 cc1200_transmit_status CC1200_Load_TX_FIFO(const can_msg_t *msg) {
-    if (msg->data_len + 5 >= CC1200_TX_Buffer_Bytes()) { //4 bytes for sid, 1 for data len
-        uint8_t buffer[14]; //max size of can message
+    if (msg->data_len + 6 <= CC1200_TX_Buffer_Bytes()) { //1 for start byte, 4 bytes for sid, 1 for data len 
+        uint8_t buffer[14]; //max size of can message + start byte
+        buffer[0]=MSG_START_BYTE;
         for (int i = 0; i < 4; i++) {
-            buffer[i] = (msg->sid >> (3 - i)*8) & 0xFF;
+            buffer[i+1] = (msg->sid >> (3 - i)*8) & 0xFF;
         }
 
-        buffer[4] = msg->data_len;
+        buffer[5] = msg->data_len;
 
         // Data
         for (int i = 0; i < msg->data_len; i++) {
-            buffer[5 + i] = msg->data[i];
+            buffer[6 + i] = msg->data[i];
         }
-        CC1200_Transmit(buffer, msg->data_len + 5);
+        CC1200_Transmit(buffer, msg->data_len + 6);
         return MSG_LOADED;
     }
     return MSG_NOT_LOADED;
@@ -238,22 +239,33 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
     if (len == 0) {
         return BUFFER_EMPTY;
     }
-    if (len < 7) { //5 bytes is length of sid + len + 2bytes of data is smallest possible can msg
+    if (len < 8) { //5 bytes is length of sid + len + 1 start byte + 2bytes of data is smallest possible can msg
         return MSG_PARTIAL_RCV;
     }
 
     SPI_Select();
     SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+    packet[0]=SPI_Transfer(0); //transfer out start byte
     //transfer sid and length bytes
+    
+    if(packet[0]!=MSG_START_BYTE)
+    {
+        //CC1200_Resync();
+        return MSG_CORRUPTED;
+    }
     for (int i = 0; i < 5; i++) {
-        packet[i] = SPI_Transfer(0);
+        packet[i+1] = SPI_Transfer(0);
     }
     SPI_Deselect();
-
+    if(packet[5]>8)
+    {
+        //CC1200_Resync();
+        return MSG_CORRUPTED;
+    }
     //extract length of current can message in buffer
     len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //if the whole message has not arrived yet
-    if (len < packet[4]) { //buffer length is less than datalen of msg
+    if (len < packet[5]) { //buffer length is less than datalen of msg
         uint8_t rx_first = Read_CC1200(CC1200_RXFIRST).value;
         Write_CC1200(CC1200_RXFIRST, (uint8_t) (rx_first - 6)); //move pointer back by 6 bytes in queue (sid + data)
         return MSG_PARTIAL_RCV;
@@ -263,14 +275,14 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
         SPI_Select();
         SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
         //transfer over can msg data
-        for (int i = 0; i < packet[4]; i++) {
+        for (int i = 0; i < packet[5]; i++) {
             msg_data[i] = SPI_Transfer(0);
         }
         SPI_Deselect();
         can_msg_t msg;
-        msg.sid = ((uint32_t) packet[0] << 24) + ((uint32_t) packet[1] << 16) + ((uint32_t) packet[2] << 8) + (uint32_t) packet[3];
-        msg.data_len = packet[4];
-        memcpy(msg.data, msg_data, sizeof (msg.data));
+        msg.sid = ((uint32_t) packet[1] << 24) + ((uint32_t) packet[2] << 16) + ((uint32_t) packet[3] << 8) + (uint32_t) packet[4];
+        msg.data_len = packet[5];
+        memcpy(msg.data, msg_data, msg.data_len);
         uint8_t channel_id;
         uint8_t state = get_telemetry_state_switch_msg(&msg, &channel_id);
         if (state == W_SUCCESS) {

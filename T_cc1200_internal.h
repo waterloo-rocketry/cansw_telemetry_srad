@@ -28,8 +28,6 @@ uint8_t Command_CC1200(uint8_t);
 
 CC1200ReadResult Read_CC1200(uint16_t);
 
-static uint8_t packet[MAX_PACKET_LEN];
-static uint8_t packet_len;
 static void Receive_Packet(void);
 
 // Registers: See CC1200 User's Guide

@@ -1,6 +1,8 @@
 // PIC18LF26K83 Configuration Bit Settings
 
 #define _XTAL_FREQ 12000000
+#define MSG_START_BYTE 0x7E
+#define RESYNC_MAX_BYTES 16
 
 #define BOARD_MODE_ROCKET 0
 #define BOARD_MODE_GROUND 1
