@@ -233,6 +233,30 @@ uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
     return len;
 }
 
+void CC1200_Resync(void)
+{
+    uint8_t byte;
+    uint8_t bytes_checked = 0;
+
+    while ((Read_CC1200(CC1200_NUM_RXBYTES).value > 0) &&
+           (bytes_checked < RESYNC_MAX_BYTES))
+    {
+        SPI_Select();
+        SPI_Transfer(CC1200_FIFO | CC1200_READ);
+        byte = SPI_Transfer(0);
+        SPI_Deselect();
+
+        bytes_checked++;
+
+        if (byte == MSG_START_BYTE)
+        {
+            uint8_t rx_first = Read_CC1200(CC1200_RXFIRST).value;
+            Write_CC1200(CC1200_RXFIRST, (uint8_t)(rx_first - 1));
+            return;
+        }
+    }
+}
+
 cc1200_receive_status CC1200_Receive_RX_FIFO() {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //no new message has arrived and all previous msgs have been removed from buffer
@@ -250,7 +274,7 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
     
     if(packet[0]!=MSG_START_BYTE)
     {
-        //CC1200_Resync();
+        CC1200_Resync();
         return MSG_CORRUPTED;
     }
     for (int i = 0; i < 5; i++) {
@@ -259,7 +283,7 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
     SPI_Deselect();
     if(packet[5]>8)
     {
-        //CC1200_Resync();
+        CC1200_Resync();
         return MSG_CORRUPTED;
     }
     //extract length of current can message in buffer
