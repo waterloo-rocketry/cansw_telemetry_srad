@@ -19,8 +19,8 @@
 #include <string.h>
 #include "canlib/can.h"
 #include "canlib/pic18f26k83/pic18f26k83_can.h"
-#include "ltt_packet.h"
 #include "canlib/message/msg_telemetry.h"
+#include "config.h"
 
 #define MAX_PACKET_LEN 64
 

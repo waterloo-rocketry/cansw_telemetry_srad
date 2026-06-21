@@ -14,13 +14,13 @@
 #include "cc1200.h" // interface with CC1200
 #include "osc.h" // initialize XTAL
 #include "leds.h" // interface with LEDs
+#include "config.h"
 
 // rocketlib and canlib
 #include "canlib.h" // interface with RocketCAN
 #include "timer.h" // import custom millis() function
 
 #include "priority_queue.h"
-#include "ltt_packet.h"
 #define TEST_SIZE 32
 
 uint8_t board_status = 0; // board status flag
@@ -42,7 +42,7 @@ void Board_Init() {
     ADC_Init();
     SPI_Init();
     CAN_Init();
-    //RF_Init();
+    RF_Init();
     pq_init(&tx_queue);
 }
 
