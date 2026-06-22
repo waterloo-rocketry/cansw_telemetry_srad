@@ -84,7 +84,7 @@ void main() {
             }
         } else if (tstate == RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
-            uint8_t rx_status = CC1200_Receive_RX_FIFO();
+            cc1200_receive_status rx_status = CC1200_Receive_RX_FIFO();
             // receive messages
 
             if (rx_status != BUFFER_EMPTY) //message received or being received

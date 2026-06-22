@@ -308,7 +308,7 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
         msg.data_len = packet[5];
         memcpy(msg.data, msg_data, msg.data_len);
         uint8_t channel_id;
-        uint8_t state = get_telemetry_state_switch_msg(&msg, &channel_id);
+        w_status_t state = get_telemetry_state_switch_msg(&msg, &channel_id);
         if (state == W_SUCCESS) {
             if (channel_id == BOARD_INST_UNIQUE_ID) // checks if the state received matches the board current id
             {
