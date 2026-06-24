@@ -26,14 +26,8 @@
 uint8_t board_status = 0; // board status flag
 uint8_t endframe_loaded = 0;
 can_board_inst_id_telemetry_t sel_trans = BOARD_INST_ID_TELEMETRY_GROUND_1; //selected transmitter to go next
-enum Transceiver_State tstate = RX; //state of telemetry state machine
+enum Transceiver_State tstate = TX_STATE_RX; //state of telemetry state machine
 can_msg_t msg_hold; // place to hold a can msg in transfer from can buffer to LTT buffer
-
-void delay_ms(unsigned int ms) {
-    unsigned int i, j;
-    for (i = 0; i < ms; i++)
-        for (j = 0; j < 75; j++); // tune this inner value
-}
 
 void Board_Init() {
     timer0_init();
@@ -66,7 +60,7 @@ void main() {
         send_current_reading(&board_status);
 
 #if BOARD_INST_UNIQUE_ID == BOARD_INST_ID_ROCKET
-        if (tstate == TX) {
+        if (tstate == TX_STATE_TX) {
             Command_CC1200(COMMAND_STX);
             //check if there is a message in the queue to send
             if (pq_peek(&tx_queue, &msg_hold) == 0) { // there is a message in the queue, moved to msg_hold
@@ -77,12 +71,12 @@ void main() {
 
             //transmitting time elapsed
             if (time_to >= TRANSMIT_TIME2) {
-                tstate = TX_ENDFRAME;
+                tstate = TX_ENDFRAME_LOAD;
                 time_to = millis();
                 time_rx = millis();
                 sel_trans = (sel_trans + 1) % BOARD_INST_ID_TELEMETRY_ENUM_MAX;
             }
-        } else if (tstate == RX) {
+        } else if (tstate == TX_STATE_RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
             cc1200_receive_status rx_status = CC1200_Receive_RX_FIFO();
             // receive messages
@@ -92,29 +86,25 @@ void main() {
                 time_rx = millis();
             }
             if (millis() - time_rx >= RECEIVE_TIME || millis() - time_to >= TRANSMIT_TIME || rx_status == MSG_STATE_SW) { //|| end frame received
-                tstate = TX;
+                tstate = TX_STATE_TX;
                 time_to = millis();
             }
-        } else if (tstate == TX_ENDFRAME) {
-            //load endframe if first time entering in cycle
-            if (endframe_loaded == 0) {
-                build_telemetry_state_switch_msg(PRIO_LOW, millis(), sel_trans, &msg_hold); //keep rebuilding message to keep time accurate
-                //try to load msg into buffer
-                if (CC1200_Load_TX_FIFO(&msg_hold) == MSG_LOADED) {
-                    endframe_loaded = 1;
-                }
+        } else if (tstate == TX_ENDFRAME_LOAD) {
+            build_telemetry_state_switch_msg(PRIO_LOW, millis(), sel_trans, &msg_hold);
+            if (CC1200_Load_TX_FIFO(&msg_hold) == MSG_LOADED) {
+                tstate == TX_ENDFRAME_SEND;
             }
-            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE && endframe_loaded == 1) // wait till endframe loaded and then sent
+        } else if (tstate == TX_ENDFRAME_SEND) {
+            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE) // wait till endframe loaded and then sent
             {
-                tstate = RX;
-                endframe_loaded = 0;
+                tstate = TX_STATE_RX;
             }
         }
 
         toggle_LED_Green(0);
 
 #elif (BOARD_INST_UNIQUE_ID >= BOARD_INST_ID_TELEMETRY_GROUND_1) && (BOARD_INST_UNIQUE_ID < BOARD_INST_ID_TELEMETRY_ENUM_MAX)
-        if (tstate == TX) {
+        if (tstate == TX_STATE_TX) {
             Command_CC1200(COMMAND_STX); //command to TX state
             if (pq_peek(&tx_queue, &msg_hold) == 0) { // there is a message in the queue, moved to msg_hold
                 if (CC1200_Load_TX_FIFO(&msg_hold) == 0) { //buffer was big enough and msg was loaded
@@ -124,26 +114,24 @@ void main() {
             if ((pq_empty(&tx_queue) || millis() - time_to >= TRANSMIT_TIME) && (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE)) { //need to check if the cc1200 buffer is empty aswell)
                 tstate = TX_ENDFRAME;
             }
-        } else if (tstate == RX) {
+        } else if (tstate == TX_STATE_RX) {
             Command_CC1200(COMMAND_SRX); //command to RX state
             if (CC1200_Receive_RX_FIFO() == END_FRAME) {
-                tstate = TX;
+                tstate = TX_STATE_TX;
                 time_to = millis();
             }
 
-        } else if (tstate == TX_ENDFRAME) {
-            //load endframe if first time entering in cycle
-            if (endframe_loaded == 0) {
-                build_telemetry_state_switch_msg(PRIO_LOW, millis(), BOARD_INST_ID_ROCKET, &msg_hold); //keep rebuilding message to keep time accurate
-                //try to load msg into buffer
-                if (CC1200_Load_TX_FIFO(&msg_hold) == 0) {
-                    endframe_loaded = 1;
-                }
+        } else if (tstate == TX_ENDFRAME_LOAD)
+        {
+            build_telemetry_state_switch_msg(PRIO_LOW, millis(), BOARD_INST_ID_ROCKET, &msg_hold); //keep rebuilding message to keep time accurate
+            if (CC1200_Load_TX_FIFO(&msg_hold) == 0) {
+                tstate=TX_ENDFRAME_SEND;
             }
-            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE && endframe_loaded == 1) // wait till endframe loaded and then sent
+        } 
+        else if (tstate == TX_ENDFRAME_SEND) {
+            if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE) // wait till endframe loaded and then sent
             {
-                tstate = RX;
-                endframe_loaded = 0;
+                tstate = TX_STATE_RX;
             }
         }
 

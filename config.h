@@ -13,9 +13,11 @@
 #define BOARD_MODE BOARD_MODE_ROCKET
 
 enum Transceiver_State{
-    TX,
-    RX,
-    TX_ENDFRAME,
+    TX_STATE_TX,
+    TX_STATE_RX,
+    TX_ENDFRAME_LOAD,
+    TX_ENDFRAME_SEND,
+    
     
 };
 
