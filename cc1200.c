@@ -206,7 +206,7 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
 
 cc1200_transmit_status CC1200_Load_TX_FIFO(const can_msg_t *msg) {
     if (msg->data_len + 6 <= CC1200_TX_Buffer_Bytes()) { //1 for start byte, 4 bytes for sid, 1 for data len 
-        uint8_t buffer[14]; //max size of can message + start byte
+        uint8_t buffer[MAX_PACKET_LEN]; //max size of can message + start byte
         buffer[0]=MSG_START_BYTE;
         for (int i = 0; i < 4; i++) {
             buffer[i+1] = (msg->sid >> (3 - i)*8) & 0xFF;

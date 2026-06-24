@@ -12,7 +12,6 @@
 #include "adc.h"
 #include "osc.h"
 #include "leds.h"
-#include "ltt_packet.h"
 
 #include <xc.h>
 #include "canlib.h" // interface with RocketCAN
