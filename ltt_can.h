@@ -10,7 +10,7 @@
 #ifndef LTT_CAN_H
 #define LTT_CAN_H
 #include "priority_queue.h"
-extern CAN_PriorityQueue tx_queue;
+extern PriorityQueue tx_queue;
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 

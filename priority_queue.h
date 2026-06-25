@@ -20,19 +20,19 @@ extern "C" {
     {
         can_msg_t msgs[QUEUE_SIZE];
         uint8_t size;
-    }CAN_PriorityQueue;
+    }PriorityQueue;
     
     // Initialize queue
-    void pq_init(CAN_PriorityQueue *q);
+    void pq_init(PriorityQueue *q);
 
     // Status checks
-    uint8_t pq_empty(CAN_PriorityQueue *q);
-    uint8_t pq_full(CAN_PriorityQueue *q);
+    uint8_t pq_empty(PriorityQueue *q);
+    uint8_t pq_full(PriorityQueue *q);
 
     // Queue operations
-    uint8_t pq_push(CAN_PriorityQueue *q, can_msg_t *msg);
-    uint8_t pq_pop(CAN_PriorityQueue *q, can_msg_t *out);
-    uint8_t pq_peek(CAN_PriorityQueue *q, can_msg_t *out);
+    uint8_t pq_push(PriorityQueue *q, can_msg_t *msg);
+    uint8_t pq_pop(PriorityQueue *q, can_msg_t *out);
+    uint8_t pq_peek(PriorityQueue *q, can_msg_t *out);
     
 #ifdef	__cplusplus
 }

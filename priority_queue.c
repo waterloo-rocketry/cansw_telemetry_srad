@@ -2,22 +2,22 @@
 #include <stdio.h>
 
 
-void pq_init(CAN_PriorityQueue *q)
+void pq_init(PriorityQueue *q)
 {
     q->size=0;
 }
 
-uint8_t pq_empty(CAN_PriorityQueue *q)
+uint8_t pq_empty(PriorityQueue *q)
 {
     return q->size==0;
 }
 
-uint8_t pq_full(CAN_PriorityQueue *q)
+uint8_t pq_full(PriorityQueue *q)
 {
     return q->size==QUEUE_SIZE;
 }
 
-uint8_t pq_push(CAN_PriorityQueue *q, can_msg_t *msg)
+uint8_t pq_push(PriorityQueue *q, can_msg_t *msg)
 {
     if(pq_full(q))
     {
@@ -34,7 +34,7 @@ uint8_t pq_push(CAN_PriorityQueue *q, can_msg_t *msg)
     return 0;
 }
 
-uint8_t pq_pop(CAN_PriorityQueue *q, can_msg_t *msg_out)
+uint8_t pq_pop(PriorityQueue *q, can_msg_t *msg_out)
 {
     if(pq_empty(q))
     {
@@ -53,7 +53,7 @@ uint8_t pq_pop(CAN_PriorityQueue *q, can_msg_t *msg_out)
     return 0;
 }
 
-uint8_t pq_peek(CAN_PriorityQueue *q, can_msg_t *msg_out)
+uint8_t pq_peek(PriorityQueue *q, can_msg_t *msg_out)
 {
     if(pq_empty(q))
     {
