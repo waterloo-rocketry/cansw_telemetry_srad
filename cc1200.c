@@ -22,7 +22,7 @@
 #include "canlib/message/msg_telemetry.h"
 #include "config.h"
 
-#define MAX_PACKET_LEN 14
+#define MAX_PACKET_LEN 12
 
 
 // Call sign MUST be transmitted at start of every message
@@ -102,31 +102,6 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_XOSC1, 0x03},
 };
 
-// read one packet from fifo
-static uint8_t packet[MAX_PACKET_LEN] = {0};
-static uint8_t packet_len = 0;
-
-//static void Receive_Packet(void) {
-//    uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
-//    if (!len) {
-//        return;
-//    }
-//
-//    SPI_Select();
-//    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-//    for (int i = 0; i < len; i++) {
-//        // read the whole packet even if buffer isn't big enough
-//        uint8_t data = SPI_Transfer(0);
-//        if (i < MAX_PACKET_LEN) {
-//            packet[i] = data;
-//        }
-//    }
-//    SPI_Deselect();
-//    Command_CC1200(COMMAND_SFRX);
-//
-//    packet_len = len;
-//}
-
 CC1200ReadResult Read_CC1200(uint16_t reg) {
     CC1200ReadResult result;
 
@@ -182,10 +157,6 @@ void CC1200_Init(void) {
     LATC7 = 0;
     __delay_ms(100);
     LATC7 = 1;
-
-    // variables
-    packet_len = 0;
-
     // registers
     size_t numSettings = sizeof (preferredSettings) / sizeof (preferredSettings[0]);
     for (size_t i = 0; i < numSettings; i++) {
@@ -196,7 +167,6 @@ void CC1200_Init(void) {
 void CC1200_Transmit(uint8_t *data, uint8_t len) {
     SPI_Select();
     uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_BURST); // 3.2.4 FIFO access with burst
-    SPI_Transfer(len);
     for (int i = 0; i < len; i++) {
         SPI_Transfer(data[i]);
     }
@@ -204,33 +174,33 @@ void CC1200_Transmit(uint8_t *data, uint8_t len) {
     Command_CC1200(COMMAND_STX);
 }
 
+void CC1200_Read_Burst(uint8_t *data, uint8_t num_bytes, uint8_t st_index, uint8_t reg) {
+    //need to ensure this function doesn't overun end of passed array
+    SPI_Select();
+    SPI_Transfer(reg | CC1200_READ | CC1200_BURST);
+    for (uint8_t i = 0; i < num_bytes; i++) {
+        data[st_index + i] = SPI_Transfer(0);
+    }
+    SPI_Deselect();
+}
+
 cc1200_transmit_status CC1200_Load_TX_FIFO(const can_msg_t *msg) {
-    if (msg->data_len + 6 <= CC1200_TX_Buffer_Bytes()) { //1 for start byte, 4 bytes for sid, 1 for data len 
-        uint8_t buffer[MAX_PACKET_LEN]; //max size of can message + start byte
-        buffer[0] = MSG_START_BYTE;
+    if (msg->data_len + 4 <= CC1200_TX_Buffer_Bytes()) { //4 bytes for sid
+        uint8_t buffer[MAX_PACKET_LEN]; //max size of can message -1 length byte
         for (int i = 0; i < 4; i++) {
-            buffer[i + 1] = (msg->sid >> (3 - i) << 3) & 0xFF;
+            buffer[i] = (msg->sid >> (3 - i) << 3) & 0xFF;
         }
 
-        buffer[5] = msg->data_len;
+        //removed loading data length since we can calculate this from packet length
 
         // Data
         for (int i = 0; i < msg->data_len; i++) {
-            buffer[6 + i] = msg->data[i];
+            buffer[4 + i] = msg->data[i];
         }
-        CC1200_Transmit(buffer, msg->data_len + 6);
+        CC1200_Transmit(buffer, msg->data_len + 5);
         return MSG_LOADED;
     }
     return MSG_NOT_LOADED;
-}
-
-uint8_t CC1200_Receive(uint8_t *data, uint8_t len) {
-    if (len > packet_len) {
-        len = packet_len;
-    }
-    memcpy(data, packet, len);
-    packet_len = 0;
-    return len;
 }
 
 void CC1200_Resync(void) {
@@ -254,65 +224,56 @@ void CC1200_Resync(void) {
     }
 }
 
+//Fix this to receive the data correctly
+
+/* 
+ * 1 byte length
+ * 4 bytes sid
+ * 2-8 bytes data
+ * 1 byte RSSI
+ * 1bit CRC and 7 bits LQI
+ */
 cc1200_receive_status CC1200_Receive_RX_FIFO() {
     uint8_t len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     //no new message has arrived and all previous msgs have been removed from buffer
+    uint8_t buffer[MAX_PACKET_LEN + 3] = {0};
     if (len == 0) {
         return BUFFER_EMPTY;
     }
-    if (len < 8) { //5 bytes is length of sid + len + 1 start byte + 2bytes of data is smallest possible can msg
+    if (len < 10) { //1 byte len + 4 bytes is length of sid + 2bytes of data + RSSI and CRC+LQI 
         return MSG_PARTIAL_RCV;
     }
-
-    SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    packet[0] = SPI_Transfer(0); //transfer out start byte
-    //transfer sid and length bytes
-
-    if (packet[0] != MSG_START_BYTE) {
-        CC1200_Resync();
-        return MSG_CORRUPTED;
-    }
-    for (int i = 0; i < 5; i++) {
-        packet[i + 1] = SPI_Transfer(0);
-    }
-    SPI_Deselect();
-    if (packet[5] > 8) {
-        CC1200_Resync();
-        return MSG_CORRUPTED;
-    }
+    buffer[0] = Read_CC1200(CC1200_FIFO); //extract packet length
     //extract length of current can message in buffer
     len = Read_CC1200(CC1200_NUM_RXBYTES).value;
-    //if the whole message has not arrived yet
-    if (len < packet[5]) { //buffer length is less than datalen of msg
+    if (len < buffer[0]) {
         uint8_t rx_first = Read_CC1200(CC1200_RXFIRST).value;
-        Write_CC1200(CC1200_RXFIRST, (uint8_t) (rx_first - 6)); //move pointer back by 6 bytes in queue (sid + data)
+        Write_CC1200(CC1200_RXFIRST, (rx_first - 1) & (BUFFER_SIZE - 1)); //move pointer back by 1 bytes in queue packet size
         return MSG_PARTIAL_RCV;
-    } else { //whole message has been received, extract it from buffer
-        uint8_t msg_data[8]; //match definition in can_msg_t
-        SPI_Select();
-        SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-        //transfer over can msg data
-        for (int i = 0; i < packet[5]; i++) {
-            msg_data[i] = SPI_Transfer(0);
-        }
-        SPI_Deselect();
-        can_msg_t msg;
-        msg.sid = ((uint32_t) packet[1] << 24) + ((uint32_t) packet[2] << 16) + ((uint32_t) packet[3] << 8) + (uint32_t) packet[4];
-        msg.data_len = packet[5];
-        memcpy(msg.data, msg_data, msg.data_len);
-        uint8_t channel_id;
-        w_status_t state = get_telemetry_state_switch_msg(&msg, &channel_id);
-        if (state == W_SUCCESS) {
-            if (channel_id == BOARD_INST_UNIQUE_ID) // checks if the state received matches the board current id
-            {
-                return MSG_STATE_SW; //received state switch
-            }
-        }
-        pic18f26k83_can_send(&msg);
-        return MSG_RCV;
     }
-
+    
+    //whole message has been received, extract it from buffer
+    uint8_t msg_data[8]; //match definition in can_msg_t
+    CC1200_Read_Burst(&msg_data, buffer[0], 1, CC1200_FIFO); //transfer out whole packet
+    uint8_t crc_valid = (buffer[buffer[0] - 1] >> 7) & & 0x01;
+    if (crc_valid) {
+        return MSG_CORRUPTED;
+        //msg automatically flushed since all bytes removed (assuming packet length is not the byte corrupted :P)
+    }
+    can_msg_t msg;
+    msg.sid = ((uint32_t) buffer[1] << 24) + ((uint32_t) buffer[2] << 16) + ((uint32_t) buffer[3] << 8) + (uint32_t) buffer[4];
+    msg.data_len = buffer[0] - 6; //take off 4 byte sid + 2 bytes for RSSI and CRC+LQQI
+    memcpy(msg.data, msg_data, msg.data_len);
+    uint8_t channel_id;
+    w_status_t state = get_telemetry_state_switch_msg(&msg, &channel_id);
+    if (state == W_SUCCESS) {
+        if (channel_id == BOARD_INST_UNIQUE_ID) // checks if the state received matches the board current id
+        {
+            return MSG_STATE_SW; //received state switch
+        }
+    }
+    pic18f26k83_can_send(&msg);
+    return MSG_RCV;
 }
 
 uint8_t CC1200_TX_Buffer_Bytes() {
