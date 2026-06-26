@@ -243,7 +243,7 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
     if (len < 10) { //1 byte len + 4 bytes is length of sid + 2bytes of data + RSSI and CRC+LQI 
         return MSG_PARTIAL_RCV;
     }
-    buffer[0] = Read_CC1200(CC1200_FIFO); //extract packet length
+    buffer[0] = Read_CC1200(CC1200_FIFO).value; //extract packet length
     //extract length of current can message in buffer
     len = Read_CC1200(CC1200_NUM_RXBYTES).value;
     if (len < buffer[0]) {
@@ -254,8 +254,8 @@ cc1200_receive_status CC1200_Receive_RX_FIFO() {
     
     //whole message has been received, extract it from buffer
     uint8_t msg_data[8]; //match definition in can_msg_t
-    CC1200_Read_Burst(&msg_data, buffer[0], 1, CC1200_FIFO); //transfer out whole packet
-    uint8_t crc_valid = (buffer[buffer[0] - 1] >> 7) & & 0x01;
+    CC1200_Read_Burst(msg_data, buffer[0], 1, CC1200_FIFO); //transfer out whole packet
+    uint8_t crc_valid = (buffer[buffer[0] - 1] >> 7) & 0x01;
     if (crc_valid) {
         return MSG_CORRUPTED;
         //msg automatically flushed since all bytes removed (assuming packet length is not the byte corrupted :P)

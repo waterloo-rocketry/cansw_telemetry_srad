@@ -92,7 +92,7 @@ void main() {
         } else if (tstate == TX_ENDFRAME_LOAD) {
             build_telemetry_state_switch_msg(PRIO_LOW, millis(), sel_trans, &msg_hold);
             if (CC1200_Load_TX_FIFO(&msg_hold) == MSG_LOADED) {
-                tstate == TX_ENDFRAME_SEND;
+                tstate = TX_ENDFRAME_SEND;
             }
         } else if (tstate == TX_ENDFRAME_SEND) {
             if (CC1200_TX_Buffer_Bytes() == BUFFER_SIZE) // wait till endframe loaded and then sent
