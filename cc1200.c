@@ -208,19 +208,20 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
         goto CC1200_Receive_Packet_end;
     }
 
-    msg.data_len = len - 4;
+    msg->data_len = len - 4;
 
     for(int i = 0; i < 4; i++) {
-        msg.sid = (msg.sid << 8) | SPI_Transfer(0);
+        msg->sid = (msg->sid << 8) | SPI_Transfer(0);
     }
 
     for(int i = 0; i < len-4; i++) {
-        msg.data[i] = SPI_Transfer(0);
+        msg->data[i] = SPI_Transfer(0);
     }
 
     // TODO do something with these
     uint8_t rssi = SPI_Transfer(0);
     uint8_t crc_lqi = SPI_Transfer(0);
+    
 
 CC1200_Receive_Packet_end:
     SPI_Deselect();

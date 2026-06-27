@@ -15,7 +15,7 @@
 #include "osc.h" // initialize XTAL
 #include "leds.h" // interface with LEDs
 #include "statemachine.h"
-#include "statetimer.h
+#include "statetimer.h"
 #include "config.h"
 
 // rocketlib and canlib

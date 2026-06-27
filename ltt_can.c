@@ -12,6 +12,7 @@
 #include "adc.h"
 #include "osc.h"
 #include "leds.h"
+#include "status_tracker.h"
 
 #include <xc.h>
 #include "canlib.h" // interface with RocketCAN
@@ -106,4 +107,17 @@ void send_current_reading(uint8_t *board_status) {
     if (current_sense_val >= 8000) {
         *board_status = 0x01;
     }
+}
+
+//function user must guarantee channel_id is valid
+void send_telemetry_info(can_msg_prio_t prio, uint16_t timestamp, uint8_t channel_id)
+{
+    can_msg_t telemetry_info_msg;
+    
+    uint8_t rssi=get_telemetry_channel_rssi(channel_id);
+    uint8_t lqi=get_telemetry_channel_lqi(channel_id);
+    
+    build_telemetry_info_msg(prio,timestamp,channel_id,lqi,rssi,&telemetry_info_msg);
+    
+    pic18f26k83_can_send(&telemetry_info_msg);
 }

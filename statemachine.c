@@ -1,4 +1,4 @@
-#include "statemachine.c"
+#include "statemachine.h"
 #include "cc1200.h"
 #include "ltt_can.h"
 
@@ -50,5 +50,5 @@ uint8_t SM_CC1200_State_Transition(LTT_State ltt_state) {
 }
 
 void SM_LTT_State_Machine(void) {
-    uint8_t cc1200_state = CC1200_State_Transition(ltt_state);
+    uint8_t cc1200_state = SM_CC1200_State_Transition(ltt_state);
 }

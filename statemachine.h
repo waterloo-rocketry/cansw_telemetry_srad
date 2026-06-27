@@ -16,5 +16,6 @@ typedef enum {
 
 uint8_t SM_CC1200_State_Transition(void);
 void SM_LTT_State_Machine(void);
+void SM_Init(void);
 
 #endif
