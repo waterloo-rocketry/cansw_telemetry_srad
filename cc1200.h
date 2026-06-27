@@ -25,13 +25,14 @@ typedef struct {
 } CC1200ReadResult;
 
 uint8_t Write_CC1200(uint16_t, uint8_t);
-CC1200ReadResult Read_CC1200(uint16_t);
+uint8_t Read_CC1200(uint16_t);
 uint8_t Command_CC1200(uint8_t);
 
 void CC1200_Init(void);
 
 uint8_t CC1200_Transmit_Packet(can_msg_t*);
-uint8_t CC1200_Receive_Packet(void);
+uint8_t CC1200_Receive_Packet(can_msg_t*);
+uint8_t CC1200_Transmit_End(uint8_t next_channel);
 
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00 // R/W configuration registers, burst access possible

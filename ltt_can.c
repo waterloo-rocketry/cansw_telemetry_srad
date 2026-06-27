@@ -20,17 +20,15 @@
 // memory pool for the CAN tx buffer
 uint8_t tx_pool[200];
 // memory pool for CAN rx buffer
-PriorityQueue tx_queue;
-// holds latest received CAN message
-volatile can_msg_t latest_CAN_message;
-volatile uint8_t latest_CAN_message_updated = 0;
+PriorityQueue ltt_can_queue;
 
 static void can_msg_handler(const can_msg_t *msg) {
-    // For transmitting, we don't care what the message is or where it's from
-    pq_push(&tx_queue,msg);
+    if(msg_type != MSG_TELEMETRY_STATE_SWITCH) {
+        pq_push(&ltt_can_queue,msg);
+    }
+
     // For parsing commands to LTT board
     uint16_t msg_type = get_message_type(msg);
-    pic18f26k83_can_send(msg);
 
     switch (msg_type) {
         case MSG_LEDS_ON:
@@ -48,10 +46,6 @@ static void can_msg_handler(const can_msg_t *msg) {
         default:
             break;
     }
-#if BOARD_INST_UNIQUE_ID == (BOARD_INST_ID_ROCKET) || (BOARD_MODE == BOARD_MODE_TEST)
-    latest_CAN_message = *msg;
-    latest_CAN_message_updated = 1;
-#endif 
 }
 
 void CAN_Init() {
@@ -68,7 +62,7 @@ void CAN_Init() {
     can_timing_t can_setup;
     can_generate_timing_params(_XTAL_FREQ, &can_setup);
     pic18f26k83_can_init(&can_setup, can_msg_handler);
-    pq_init(&tx_queue);
+    pq_init(&ltt_can_queue);
 
     // set up CAN tx buffer
     txb_init(tx_pool, sizeof(tx_pool), pic18f26k83_can_send, pic18f26k83_can_send_rdy);

@@ -15,11 +15,11 @@
 #include "osc.h" // initialize XTAL
 #include "leds.h" // interface with LEDs
 #include "statemachine.h"
+#include "statetimer.h
 #include "config.h"
 
 // rocketlib and canlib
 #include "canlib.h" // interface with RocketCAN
-#include "timer.h" // import custom millis() function
 
 #define TEST_SIZE 32
 
