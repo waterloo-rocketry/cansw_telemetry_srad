@@ -14,13 +14,13 @@
 #include "cc1200.h" // interface with CC1200
 #include "osc.h" // initialize XTAL
 #include "leds.h" // interface with LEDs
+#include "statemachine.h"
 #include "config.h"
 
 // rocketlib and canlib
 #include "canlib.h" // interface with RocketCAN
 #include "timer.h" // import custom millis() function
 
-#include "priority_queue.h"
 #define TEST_SIZE 32
 
 uint8_t board_status = 0; // board status flag
@@ -37,7 +37,7 @@ void Board_Init() {
     SPI_Init();
     CAN_Init();
     RF_Init();
-    pq_init(&tx_queue); //priority queue init
+    SM_Init();
 }
 
 void main() {
@@ -50,8 +50,6 @@ void main() {
     uint32_t last_millis = millis();
     uint32_t time_to = millis(); //tracks the time for overall timeout of the state
     uint32_t time_rx = millis(); //tracks time since last received message for RX check
-
-    uint8_t state = CC1200_State_Transition();
 
     while (1) {
         CLRWDT();

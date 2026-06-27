@@ -19,18 +19,14 @@ uint8_t pq_full(PriorityQueue *q)
 
 uint8_t pq_push(PriorityQueue *q, can_msg_t *msg)
 {
-    if(pq_full(q))
-    {
-        return 1;
-    }
+    if(q->size < QUEUE_SIZE) q->size++;
     int i = q->size;
-    while (i>0 && q->msgs[i-1].sid > msg->sid)
+    while (i>0 && q->msgs[i].sid > msg->sid)
     {
         q->msgs[i]=q->msgs[i-1];
         i--;
     }
-    q->msgs[i]=*msg;
-    q->size++;
+    q->msgs[i] = *msg;
     return 0;
 }
 

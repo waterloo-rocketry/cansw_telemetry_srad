@@ -24,40 +24,14 @@ typedef struct {
     uint8_t value;
 } CC1200ReadResult;
 
-typedef enum {
-    MSG_RCV,
-    MSG_PARTIAL_RCV,
-    BUFFER_EMPTY,
-    MSG_STATE_SW,        
-    MSG_CORRUPTED       
-} cc1200_receive_status;
-
-typedef enum {
-    MSG_LOADED,
-    MSG_NOT_LOADED,        
-} cc1200_transmit_status;
-
 uint8_t Write_CC1200(uint16_t, uint8_t);
-
-uint8_t Command_CC1200(uint8_t);
-
 CC1200ReadResult Read_CC1200(uint16_t);
+uint8_t Command_CC1200(uint8_t);
 
 void CC1200_Init(void);
 
-void CC1200_Transmit(uint8_t *, uint8_t);
-
-cc1200_transmit_status CC1200_Load_TX_FIFO(const can_msg_t *msg);
-
-uint8_t CC1200_Receive(uint8_t *, uint8_t);
-
-cc1200_receive_status CC1200_Receive_RX_FIFO();
-
-uint8_t CC1200_TX_Buffer_Bytes();
-
-uint8_t CC1200_RX_Buffer_Bytes();
-
-uint8_t CC1200_State_Transition(void);
+uint8_t CC1200_Transmit_Packet(can_msg_t*);
+uint8_t CC1200_Receive_Packet(void);
 
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00 // R/W configuration registers, burst access possible

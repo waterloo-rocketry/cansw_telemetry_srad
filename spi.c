@@ -17,7 +17,7 @@ void SPI_Init(void) {
     SPI1SDIPPS = 0b10100; // Set RC4 to MISO
 
     SPI1CLKbits.CLKSEL = 0; // Fosc as clock
-    SPI1BAUD = 0x05; // 1MHz baud, 1000000 / (2 * 1000000) - 1
+    SPI1BAUD = 0x0; // 6MHz baud
 
     SPI1CON0bits.MST = 1; // set mode to master
     SPI1CON0bits.BMODE = 1; // sets bit mode to constant width

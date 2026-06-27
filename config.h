@@ -1,36 +1,6 @@
 // PIC18LF26K83 Configuration Bit Settings
 
 #define _XTAL_FREQ 12000000
-#define MSG_START_BYTE 0x7E
-#define RESYNC_MAX_BYTES 16
-
-#define BOARD_MODE_ROCKET 0
-#define BOARD_MODE_GROUND 1
-#define BOARD_MODE_TEST_TX 2
-#define BOARD_MODE_TEST_RX 3
-
-// THIS DEFINES WHAT MODE LTT OPERATES AT
-#define BOARD_MODE BOARD_MODE_ROCKET
-
-enum Transceiver_State{
-    TX_STATE_TX,
-    TX_STATE_RX,
-    TX_ENDFRAME_LOAD,
-    TX_ENDFRAME_SEND,
-    
-    
-};
-
-enum Ground_Transceiver_Sel{
-    Trans1,
-    Trans2,
-    Trans3,    
-    Number_Of_Trans,
-};
-
-#define TRANSMIT_TIME 100
-#define TRANSMIT_TIME2 100
-#define RECEIVE_TIME 10
 
 // 'C' source line config statements
 
