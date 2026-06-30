@@ -7,15 +7,10 @@
 
 #ifndef PRIORITY_QUEUE_H
 #define	PRIORITY_QUEUE_H
+
 #define QUEUE_SIZE 32
 #include "canlib/can.h"
 
-
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
-    
 typedef struct {
     can_msg_t msgs[QUEUE_SIZE];
     uint8_t size;
@@ -32,10 +27,6 @@ uint8_t pq_full(PriorityQueue *q);
 uint8_t pq_push(PriorityQueue *q, can_msg_t *msg);
 uint8_t pq_pop(PriorityQueue *q, can_msg_t *out);
 uint8_t pq_peek(PriorityQueue *q, can_msg_t *out);
-    
-#ifdef	__cplusplus
-}
-#endif
 
 #endif	/* PRIORITY_QUEUE_H */
 

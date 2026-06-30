@@ -109,13 +109,12 @@ void send_current_reading(uint8_t *board_status) {
     }
 }
 
-//function user must guarantee channel_id is valid
-void send_telemetry_info(can_msg_prio_t prio, uint16_t timestamp, uint8_t channel_id)
-{
+// function user must guarantee channel_id is valid
+void send_telemetry_info(can_msg_prio_t prio, uint16_t timestamp, uint8_t channel_id) {
     can_msg_t telemetry_info_msg;
     
-    uint8_t rssi=get_telemetry_channel_rssi(channel_id);
-    uint8_t lqi=get_telemetry_channel_lqi(channel_id);
+    uint8_t rssi = get_telemetry_channel_rssi(channel_id);
+    uint8_t lqi = get_telemetry_channel_lqi(channel_id);
     
     build_telemetry_info_msg(prio,timestamp,channel_id,lqi,rssi,&telemetry_info_msg);
     

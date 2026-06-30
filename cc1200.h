@@ -31,7 +31,7 @@ uint8_t Command_CC1200(uint8_t);
 void CC1200_Init(void);
 
 uint8_t CC1200_Transmit_Packet(can_msg_t*);
-uint8_t CC1200_Receive_Packet(can_msg_t*);
+uint8_t CC1200_Receive_Packet(can_msg_t*, uint8_t *rssi, uint8_t *lqi);
 uint8_t CC1200_Transmit_End(uint8_t next_channel);
 
 // Registers: See CC1200 User's Guide
@@ -232,14 +232,14 @@ uint8_t CC1200_Transmit_End(uint8_t next_channel);
 #define COMMAND_SNOP 0x3D
 
 // State of chip: See user guide Figure 2
-#define STATE_IDLE 0x00
-#define STATE_RX 0x01
-#define STATE_TX 0x02
-#define STATE_FAST_ON 0x03
-#define STATE_CALIBRATE 0x04
-#define STATE_SETTLING 0x05
-#define STATE_RX_FIFO_ERROR 0x06
-#define STATE_TX_FIFO_ERROR 0x07
+#define CC1200_STATE_IDLE 0x00
+#define CC1200_STATE_RX 0x01
+#define CC1200_STATE_TX 0x02
+#define CC1200_STATE_FAST_ON 0x03
+#define CC1200_STATE_CALIBRATE 0x04
+#define CC1200_STATE_SETTLING 0x05
+#define CC1200_STATE_RX_FIFO_ERROR 0x06
+#define CC1200_STATE_TX_FIFO_ERROR 0x07
 
 // SPI commands to access data buffers
 #define CC1200_FIFO 0x3F

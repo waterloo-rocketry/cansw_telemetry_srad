@@ -181,7 +181,7 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
     return Command_CC1200(COMMAND_STX);
 }
 
-/* 
+/*
  * CC1200 FIFO packet format:
  * 1 byte length
  * 4 bytes sid
@@ -189,7 +189,7 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
  * 1 byte RSSI
  * 1bit CRC and 7 bits LQI
  */
-uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
+uint8_t CC1200_Receive_Packet(can_msg_t *msg, uint8_t *rssi, uint8_t *lqi) {
     if(!RB3) return 0; // CRC_OK is not asserted from CC1200 GPIO2
 
     SPI_Select();
@@ -199,9 +199,11 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
 
     if(len == 1) {
         // decode end of transmit frame into can message
+        // this doesn't really need to be packaged into can message since it
+        // will never leave LTT but it is what it is
         uint8_t channel_id = SPI_Transfer(0);
         build_telemetry_state_switch_msg(PRIO_LOW, 0, channel_id, msg);
-        goto CC1200_Receive_Packet_end;
+        goto CC1200_Receive_Packet_status;
     }
 
     if(len <= 4 || len > MAX_PACKET_LEN) {
@@ -218,10 +220,9 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
         msg->data[i] = SPI_Transfer(0);
     }
 
-    // TODO do something with these
-    uint8_t rssi = SPI_Transfer(0);
-    uint8_t crc_lqi = SPI_Transfer(0);
-    
+CC1200_Receive_Packet_status:
+    if(rssi != NULL) *rssi = SPI_Transfer(0);
+    if(lqi  != NULL) *lqi  = SPI_Transfer(0) & 0x7F;
 
 CC1200_Receive_Packet_end:
     SPI_Deselect();
