@@ -19,7 +19,6 @@
 #include "canlib.h"
 
 #include <xc.h>
-#include <string.h>
 
 #define MAX_PACKET_LEN 12
 
@@ -210,7 +209,7 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
         goto CC1200_Receive_Packet_status;
     }
 
-    if(len <= 4 || len > MAX_PACKET_LEN) {
+    if(len < 4 || len > MAX_PACKET_LEN) {
         goto CC1200_Receive_Packet_end;
     }
 

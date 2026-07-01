@@ -65,12 +65,6 @@ static void can_send_wrapper(const can_msg_t *msg) {
     pic18f26k83_can_send(msg);
 }
 
-// LTT internal can send that sends to both CAN and over the air
-static void can_enqueue(const can_msg_t *msg) {
-    txb_enqueue(msg);
-    rcvb_push_message(msg);
-}
-
 void CAN_Init(void) {
     // Set up CAN TX
     TRISC1 = 0;
@@ -108,16 +102,16 @@ void CAN_send_messages(void) {
         }
 
         build_analog_sensor_16bit_msg(PRIO_LOW, (uint16_t) now, SENSOR_12V_CURR, current_sense_val, &msg);
-        can_enqueue(&msg);
+        CAN_enqueue(&msg);
 
         build_general_board_status_msg(error_bitfield ? PRIO_HIGH : PRIO_LOW, (uint16_t) now, error_bitfield, &msg);
-        can_enqueue(&msg);
+        CAN_enqueue(&msg);
 
         for(uint8_t i = 0; i < channel_remote_count(); i++) {
             uint8_t rssi = 0, lqi = 0;
             channel_info_get(i, &rssi, &lqi);
             build_telemetry_info_msg(PRIO_MEDIUM, (uint16_t) now, channel_remote_from_index(i), lqi, rssi, &msg);
-            can_enqueue(&msg);
+            CAN_enqueue(&msg);
         }
 
         last_transmit = now;
@@ -125,4 +119,10 @@ void CAN_send_messages(void) {
     }
 
     txb_heartbeat();
+}
+
+// LTT internal can send that sends to both CAN and over the air
+void CAN_enqueue(const can_msg_t *msg) {
+    txb_enqueue(msg);
+    rcvb_push_message(msg);
 }

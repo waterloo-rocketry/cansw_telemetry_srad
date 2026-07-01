@@ -10,10 +10,12 @@
 #ifndef LTT_CAN_H
 #define LTT_CAN_H
 
+#include "canlib.h"
 #include <xc.h> // include processor files - each processor file is guarded.  
 
 void CAN_Init(void);
 void CAN_send_messages(void);
+void CAN_enqueue(const can_msg_t*);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 
