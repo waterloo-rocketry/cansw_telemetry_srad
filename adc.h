@@ -11,7 +11,7 @@
 #include <xc.h>
 
 void ADC_Init(void);
-
-uint16_t read_ADC(void);
+uint16_t ADC_read_raw(void);
+uint16_t ADC_read_curr_ma(void);
 
 #endif

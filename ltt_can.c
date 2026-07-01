@@ -7,29 +7,33 @@
  * All interfacing with RocketCAN done here
  */
 
-#include "config.h"
 #include "ltt_can.h"
 #include "adc.h"
-#include "osc.h"
+#include "channel_info.h"
+#include "channels.h"
 #include "leds.h"
-#include "status_tracker.h"
+#include "config.h"
+
+#include "canlib.h"
+#include "timer.h"
 
 #include <xc.h>
-#include "canlib.h" // interface with RocketCAN
-#include "timer.h" // import custom millis() function
 
-// memory pool for the CAN tx buffer
-uint8_t tx_pool[200];
-// memory pool for CAN rx buffer
-PriorityQueue ltt_can_queue;
+#define CAN_MESSAGE_PERIOD_MS 1000
+
+// memory pools for the CAN buffer
+static uint8_t tx_pool[sizeof(can_msg_t)*32];
+static uint8_t rx_pool[sizeof(can_msg_t)*32];
+
+// last transmit time
+static uint32_t last_transmit;
 
 static void can_msg_handler(const can_msg_t *msg) {
-    if(msg_type != MSG_TELEMETRY_STATE_SWITCH) {
-        pq_push(&ltt_can_queue,msg);
-    }
-
-    // For parsing commands to LTT board
     uint16_t msg_type = get_message_type(msg);
+
+    if(msg_type != MSG_TELEMETRY_STATE_SWITCH) {
+        rcvb_push_message(msg);
+    }
 
     switch (msg_type) {
         case MSG_LEDS_ON:
@@ -49,7 +53,7 @@ static void can_msg_handler(const can_msg_t *msg) {
     }
 }
 
-void CAN_Init() {
+void CAN_Init(void) {
     // Set up CAN TX
     TRISC1 = 0;
     RC1PPS = 0x33;
@@ -63,60 +67,39 @@ void CAN_Init() {
     can_timing_t can_setup;
     can_generate_timing_params(_XTAL_FREQ, &can_setup);
     pic18f26k83_can_init(&can_setup, can_msg_handler);
-    pq_init(&ltt_can_queue);
 
-    // set up CAN tx buffer
+    // set up CAN buffer
     txb_init(tx_pool, sizeof(tx_pool), pic18f26k83_can_send, pic18f26k83_can_send_rdy);
+    rcvb_init(rx_pool, sizeof (rx_pool));
+
+    last_transmit = 0;
 }
 
-void send_board_status(uint8_t status) {
-    can_msg_prio_t prio;
-    can_msg_type_t msg_type = MSG_GENERAL_BOARD_STATUS;
-    uint32_t error_bitfield;
-    can_msg_t status_msg;
+void CAN_send_messages(void) {
+    uint32_t now = millis();
+    if(now - last_transmit > CAN_MESSAGE_PERIOD_MS) {
+        can_msg_t msg;
+        uint32_t error_bitfield = 0;
+        uint16_t current_sense_val = ADC_read_curr_ma();
 
-    // no error, set bit fields to 0
-    if (status == 0x00) {
-        prio = PRIO_LOW;
-        error_bitfield = 0x00;
-    } // Over current
-    else if (status == 0x01) {
-        prio = PRIO_HIGH;
-        error_bitfield = E_12V_OVER_CURRENT_OFFSET; // 12V_OVER_CURRENT
+        // Send overcurrent warning if current over 0.8A
+        if (current_sense_val >= 800) {
+            error_bitfield |= E_12V_OVER_CURRENT_OFFSET;
+        }
+
+        build_analog_sensor_16bit_msg(PRIO_LOW, (uint16_t) now, SENSOR_12V_CURR, current_sense_val, &msg);
+        pic18f26k83_can_send(&msg);
+
+        build_general_board_status_msg(error_bitfield ? PRIO_HIGH : PRIO_LOW, (uint16_t) now, error_bitfield, &msg);
+        pic18f26k83_can_send(&msg);
+
+        for(uint8_t i = 0; i < CHANNEL_REMOTE_LEN; i++) {
+            uint8_t rssi = 0, lqi = 0;
+            channel_info_get(i, &rssi, &lqi);
+            build_telemetry_info_msg(PRIO_MEDIUM, (uint16_t) now, channel_remote_list[i], lqi, rssi, &msg);
+            pic18f26k83_can_send(&msg);
+        }
+        last_transmit = now;
+
     }
-    
-    build_general_board_status_msg(prio, millis(), error_bitfield, &status_msg);
-    pic18f26k83_can_send(&status_msg);
-}
-
-void send_current_reading(uint8_t *board_status) {
-    uint16_t current_sense_val;
-    current_sense_val = read_ADC();
-    current_sense_val = (uint16_t)((current_sense_val / 100)/ 0.025f); // fixed cast, 25mR shunt
-
-    can_msg_prio_t prio = PRIO_LOW;
-    can_analog_sensor_id_t current_reading_CAN_msgid = SENSOR_12V_CURR;
-    can_msg_t current_reading_msg;
-
-    build_analog_sensor_16bit_msg(
-        prio, millis(), current_reading_CAN_msgid, current_sense_val, &current_reading_msg
-    );
-    pic18f26k83_can_send(&current_reading_msg);
-
-    // Send overcurrent warning if current over 0.8A
-    if (current_sense_val >= 8000) {
-        *board_status = 0x01;
-    }
-}
-
-// function user must guarantee channel_id is valid
-void send_telemetry_info(can_msg_prio_t prio, uint16_t timestamp, uint8_t channel_id) {
-    can_msg_t telemetry_info_msg;
-    
-    uint8_t rssi = get_telemetry_channel_rssi(channel_id);
-    uint8_t lqi = get_telemetry_channel_lqi(channel_id);
-    
-    build_telemetry_info_msg(prio,timestamp,channel_id,lqi,rssi,&telemetry_info_msg);
-    
-    pic18f26k83_can_send(&telemetry_info_msg);
 }

@@ -6,13 +6,13 @@
 
 // CONFIG1L
 #pragma config FEXTOSC = HS     // External Oscillator Selection (HS (crystal oscillator) above 8 MHz; PFM set to high power)
-#pragma config RSTOSC = HFINTOSC_1MHZ// Reset Oscillator Selection (HFINTOSC with HFFRQ = 4 MHz and CDIV = 4:1)
+#pragma config RSTOSC = EXTOSC  // Reset Oscillator Selection (EXTOSC operating per FEXTOSC<2:0> bits)
 
 // CONFIG1H
 #pragma config CLKOUTEN = OFF   // Clock out Enable bit (CLKOUT function is disabled)
 #pragma config PR1WAY = ON      // PRLOCKED One-Way Set Enable bit (PRLOCK bit can be cleared and set only once)
 #pragma config CSWEN = ON       // Clock Switch Enable bit (Writing to NOSC and NDIV is allowed)
-#pragma config FCMEN = ON       // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor enabled)
+#pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled)
 
 // CONFIG2L
 #pragma config MCLRE = EXTMCLR  // MCLR Enable bit (If LVP = 0, MCLR pin is MCLR; If LVP = 1, RE3 pin function is MCLR )
@@ -32,8 +32,7 @@
 
 // CONFIG3L
 #pragma config WDTCPS = WDTCPS_8// WDT Period selection bits (Divider ratio 1:8192)
-//#pragma config WDTE = ON        // WDT operating mode (WDT enabled regardless of sleep)
-#pragma config WDTE = OFF
+#pragma config WDTE = ON        // WDT operating mode (WDT enabled regardless of sleep)
 
 // CONFIG3H
 #pragma config WDTCWS = WDTCWS_6// WDT Window Select bits (window always open (100%); no software control; keyed access required)

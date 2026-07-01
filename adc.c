@@ -1,27 +1,32 @@
-/*
- * File:   adc.c
- * Author: Manav
- *
- * Created on February 22, 2025, 12:47 PM
- */
-
-// Read current draw value on board
-
 #include "adc.h"
+#include <xc.h>
 
-void ADC_Init() {
-    ADCON0bits.FM = 1; // right justify
-    ADCON0bits.CS = 1; // FRC Clock (dedicated RC oscillator))
-    ADPCH = 0x00; // A0 is Analog channel
-    TRISAbits.TRISA0 = 1; // Set RA0 to input
+void ADC_Init(void) {
+    TRISAbits.TRISA0 = 1;   // Set RA0 to input
     ANSELAbits.ANSELA0 = 1; // Set RA0 to analog
-    ADCON0bits.ON = 1; // Turn ADC On
+
+    // Configure FVR module
+    // b[7] enables FVR
+    // b[1:0] sets the reference to 2.048
+    FVRCON = 0b10000010;
+
+    // Configure ADC module
+    ADCON0bits.FM = 1;     // Right justify
+    ADCON0bits.CONT = 1;   // Continuous conversion
+    ADCON0bits.CS = 0;     // Drive from Fosc/2
+    ADCLKbits.CS = 36;     // Tad = 36 / (12MHz/2) = 6us
+    ADCON2bits.MD = 0b100; // Low-pass filter mode
+    ADCON2bits.CRS = 1;    // 0.72 wT filter cut-off (~13 kHz)
+    ADREFbits.NREF = 0;    // Negative reference is GND
+    ADREFbits.PREF = 0b11; // Positive reference is FVR
+    ADPCH = 0;             // ADC channel to A0
+    ADCON0bits.ADON = 1;   // Turn ADC on
 }
 
-uint16_t read_ADC() {
-    ADCON0bits.GO = 1; // Start conversation
-    while (ADCON0bits.GO) {} // Wait for conversation to be done
-    uint16_t result = ((uint16_t)ADRESH << 8) | ADRESL; // combine two registers into one integer
+uint16_t ADC_read_raw(void) {
+    return (uint16_t) (ADFLTRH << 8) | ADFLTRL;
+}
 
-    return result;
+uint16_t ADC_read_curr_ma(void) {
+    return ADC_read_raw() * 5 / 16; // 2048 mV ref / 12 bit / 100 V/V / 16mR
 }

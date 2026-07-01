@@ -11,10 +11,13 @@
 
 
 #include "cc1200.h"
-#include "canlib/can.h"
-#include "canlib/message/msg_telemetry.h"
+#include "canlib.h"
+#include "timer.h"
+#include "channel_info.h"
+#include "spi.h"
 #include "config.h"
 
+#include <xc.h>
 #include <string.h>
 
 #define MAX_PACKET_LEN 12
@@ -189,7 +192,7 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
  * 1 byte RSSI
  * 1bit CRC and 7 bits LQI
  */
-uint8_t CC1200_Receive_Packet(can_msg_t *msg, uint8_t *rssi, uint8_t *lqi) {
+uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
     if(!RB3) return 0; // CRC_OK is not asserted from CC1200 GPIO2
 
     SPI_Select();
@@ -221,8 +224,11 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg, uint8_t *rssi, uint8_t *lqi) {
     }
 
 CC1200_Receive_Packet_status:
-    if(rssi != NULL) *rssi = SPI_Transfer(0);
-    if(lqi  != NULL) *lqi  = SPI_Transfer(0) & 0x7F;
+    {
+        uint8_t rssi = SPI_Transfer(0);
+        uint8_t lqi  = SPI_Transfer(0) & 0x7F;
+        channel_info_add(rssi, lqi);
+    }
 
 CC1200_Receive_Packet_end:
     SPI_Deselect();
@@ -238,4 +244,44 @@ uint8_t CC1200_Transmit_End(uint8_t next_channel) {
     SPI_Transfer(next_channel);
     SPI_Deselect();
     return Command_CC1200(COMMAND_STX);
+}
+
+void CC1200_Set_Power(int8_t power) {
+    if (power > 14) {
+        power = 14;
+    }
+
+    uint8_t reg_value = 0;
+
+    // special low power modes https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/448235/cc1200--38dbm-tx-power-output
+    if (power <= -70) {
+        reg_value = 0x00;
+    } else if (power <= -32) {
+        reg_value = 0x01;
+    } else if (power <= -26) {
+        reg_value = 0x02;
+    } else { // User Guide 7.1 Equation 21
+        // Pout = (reg + 1) / 2 - 18 [dBm]
+        int16_t tmp = 2 * (power + 18) - 1;
+        reg_value = (uint8_t) tmp;
+    }
+
+    // Preserve bits 7:6, update bits 5:0 with new reg_value
+    CC1200ReadResult cur_reg_val = Read_CC1200(CC1200_PA_CFG1);
+    uint8_t new_reg_value = (cur_reg_val.value & 0xC0) | (reg_value & 0x3F);
+    Write_CC1200(CC1200_PA_CFG1, new_reg_value);
+}
+
+void CC1200_Set_Frequency(uint32_t freq) {
+    // freq in kHz
+    // Refer to Section 9.12 (Eqn 27/28, Table 34)
+    uint32_t reg_value = freq * 4096 / 625; 
+
+    SPI_Select();
+    SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
+    SPI_Transfer(CC1200_FREQ2 & 0xFF);
+    SPI_Transfer((reg_value >> 16) & 0xFF); // FREQ2 - MSB
+    SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
+    SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
+    SPI_Deselect();
 }

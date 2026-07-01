@@ -9,16 +9,11 @@
 // more than once.  
 #ifndef LTT_CAN_H
 #define LTT_CAN_H
-#include "priority_queue.h"
-extern PriorityQueue ltt_can_queue;
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 
-void CAN_Init();
-
-void send_board_status(uint8_t status);
-
-void send_current_reading(uint8_t *board_status);
+void CAN_Init(void);
+void CAN_send_messages(void);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

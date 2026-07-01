@@ -7,7 +7,7 @@
 
 #include "leds.h"
 
-void LEDs_Init() {
+void LEDs_Init(void) {
     // Set LEDs as output
     TRISAbits.TRISA2 = 0; // green
     TRISAbits.TRISA3 = 0; // blue

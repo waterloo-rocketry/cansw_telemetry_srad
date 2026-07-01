@@ -9,10 +9,7 @@
 #define CC1200_H
 #define BUFFER_SIZE 128
 
-#include "spi.h"
-#include "stdint.h"
-#include <xc.h>
-#include "canlib/can.h"
+#include "canlib.h"
 
 typedef struct {
     uint16_t addr;
@@ -31,8 +28,11 @@ uint8_t Command_CC1200(uint8_t);
 void CC1200_Init(void);
 
 uint8_t CC1200_Transmit_Packet(can_msg_t*);
-uint8_t CC1200_Receive_Packet(can_msg_t*, uint8_t *rssi, uint8_t *lqi);
+uint8_t CC1200_Receive_Packet(can_msg_t*);
 uint8_t CC1200_Transmit_End(uint8_t next_channel);
+
+void CC1200_Set_Power(int8_t power);
+void CC1200_Set_Frequency(uint32_t freq);
 
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00 // R/W configuration registers, burst access possible
