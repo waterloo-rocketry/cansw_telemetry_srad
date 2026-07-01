@@ -9,7 +9,7 @@
 #include "timer.h"
 
 #define TX_TIMEOUT_MS 10
-#define RX_TIMEOUT_MS 10
+#define RX_TIMEOUT_MS 15
 #define TX_TIME_MAX_MS 100
 
 typedef struct {
@@ -42,7 +42,8 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
         case CC1200_STATE_IDLE:
             // Read anything from FIFO regardless of LTT state
             CC1200_Receive_Packet(rx_msg);
-
+            // fallthrough
+        case CC1200_STATE_RX:
             switch(ltt_state) {
                 case LTT_STATE_TX:
                     if(!rcvb_is_empty()) {
@@ -55,10 +56,11 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
                     CC1200_Transmit_End(channel_remote_from_index(remote_index));
                     break;
 
-                case LTT_STATE_RX: {
-                    CC1200_Command(COMMAND_SRX);
+                case LTT_STATE_RX:
+                    if(state != CC1200_STATE_RX) {
+                        CC1200_Command(COMMAND_SRX);
+                    }
                     break;
-                }
 
                 default:
                     break;
