@@ -21,9 +21,9 @@ typedef struct {
     uint8_t value;
 } CC1200ReadResult;
 
-uint8_t Write_CC1200(uint16_t, uint8_t);
-CC1200ReadResult Read_CC1200(uint16_t);
-uint8_t Command_CC1200(uint8_t);
+uint8_t CC1200_Write(uint16_t, uint8_t);
+CC1200ReadResult CC1200_Read(uint16_t);
+uint8_t CC1200_Command(uint8_t);
 
 void CC1200_Init(void);
 

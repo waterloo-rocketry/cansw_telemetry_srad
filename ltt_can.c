@@ -76,6 +76,8 @@ void CAN_Init(void) {
 }
 
 void CAN_send_messages(void) {
+    static int blinky = 0;
+
     uint32_t now = millis();
     if(now - last_transmit > CAN_MESSAGE_PERIOD_MS) {
         can_msg_t msg;
@@ -88,18 +90,21 @@ void CAN_send_messages(void) {
         }
 
         build_analog_sensor_16bit_msg(PRIO_LOW, (uint16_t) now, SENSOR_12V_CURR, current_sense_val, &msg);
-        pic18f26k83_can_send(&msg);
+        txb_enqueue(&msg);
 
         build_general_board_status_msg(error_bitfield ? PRIO_HIGH : PRIO_LOW, (uint16_t) now, error_bitfield, &msg);
-        pic18f26k83_can_send(&msg);
+        txb_enqueue(&msg);
 
-        for(uint8_t i = 0; i < CHANNEL_REMOTE_LEN; i++) {
+        for(uint8_t i = 0; i < channel_remote_count(); i++) {
             uint8_t rssi = 0, lqi = 0;
             channel_info_get(i, &rssi, &lqi);
-            build_telemetry_info_msg(PRIO_MEDIUM, (uint16_t) now, channel_remote_list[i], lqi, rssi, &msg);
-            pic18f26k83_can_send(&msg);
+            build_telemetry_info_msg(PRIO_MEDIUM, (uint16_t) now, channel_remote_from_index(i), lqi, rssi, &msg);
+            txb_enqueue(&msg);
         }
-        last_transmit = now;
 
+        last_transmit = now;
+        toggle_LED_Blue(blinky++ % 2);
     }
+
+    txb_heartbeat();
 }

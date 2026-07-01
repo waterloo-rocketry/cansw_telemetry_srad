@@ -36,10 +36,13 @@ static bool timer_expired(StateTimer *timer, uint32_t now) {
 }
 
 static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, can_msg_t *rx_msg) {
-    uint8_t state = (Command_CC1200(COMMAND_SNOP) >> 4) & 0x7;
+    uint8_t state = (CC1200_Command(COMMAND_SNOP) >> 4) & 0x7;
 
     switch (state) {
         case CC1200_STATE_IDLE:
+            // Read anything from FIFO regardless of LTT state
+            CC1200_Receive_Packet(rx_msg);
+
             switch(ltt_state) {
                 case LTT_STATE_TX:
                     if(!rcvb_is_empty()) {
@@ -49,11 +52,11 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
                     break;
 
                 case LTT_STATE_TX_END:
-                    CC1200_Transmit_End(channel_remote_list[remote_index]);
+                    CC1200_Transmit_End(channel_remote_from_index(remote_index));
                     break;
 
                 case LTT_STATE_RX: {
-                    CC1200_Receive_Packet(rx_msg);
+                    CC1200_Command(COMMAND_SRX);
                     break;
                 }
 
@@ -63,11 +66,11 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
             break;
 
         case CC1200_STATE_RX_FIFO_ERROR:
-            Command_CC1200(COMMAND_SFRX);
+            CC1200_Command(COMMAND_SFRX);
             break;
 
         case CC1200_STATE_TX_FIFO_ERROR:
-            Command_CC1200(COMMAND_SFTX);
+            CC1200_Command(COMMAND_SFTX);
             break;
     }
 
@@ -85,7 +88,7 @@ void SM_LTT_State_Machine(void) {
 
     switch(ltt_state) {
         case LTT_STATE_INIT:
-            next_state = BOARD_MODE_ROCKET ? LTT_STATE_TX : LTT_STATE_RX;
+            next_state = channel_is_rocket() ? LTT_STATE_TX : LTT_STATE_RX;
             break;
 
         case LTT_STATE_TX:
@@ -116,17 +119,16 @@ void SM_LTT_State_Machine(void) {
                         break;
                     }
                     default:
-                        pic18f26k83_can_send(&rx_msg);
+                        txb_enqueue(&rx_msg);
+                        toggle_LED_Red(1);
                         break;
                 }
                 rx_timer.last = now;
-                toggle_LED_Red(1);
             }
-#if BOARD_MODE_ROCKET
-            if(timer_expired(&rx_timer, now)) {
+            if(channel_is_rocket() && timer_expired(&rx_timer, now)) {
                 next_state = LTT_STATE_TX;
             }
-#endif
+
             break;
     }
 
@@ -139,7 +141,7 @@ void SM_LTT_State_Machine(void) {
                 toggle_LED_Green(0);
                 break;
             case LTT_STATE_TX_END:
-                remote_index = (remote_index + 1) % CHANNEL_REMOTE_LEN;
+                remote_index = (remote_index + 1) % channel_remote_count();
                 break;
             case LTT_STATE_RX:
                 channel_info_end(remote_index);

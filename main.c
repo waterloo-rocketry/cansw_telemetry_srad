@@ -41,7 +41,7 @@ void main(void) {
     CC1200_Set_Power(14);
 
     toggle_LED_Green(0);
-    toggle_LED_Blue(1);
+    toggle_LED_Blue(0);
     toggle_LED_Red(0);
 
     while (1) {

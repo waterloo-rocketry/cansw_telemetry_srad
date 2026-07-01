@@ -18,7 +18,7 @@ typedef struct {
     uint16_t lqi;
 } telem_channel_info;
 
-static telem_channel_info channel_info[CHANNEL_REMOTE_LEN]; //only rocket to track
+static telem_channel_info channel_info[8]; // assume we'll never have more than 8 nodes
 static telem_channel_info current_channel;
 static uint16_t current_sample_count;
 

@@ -21,6 +21,7 @@ void ADC_Init(void) {
     ADREFbits.PREF = 0b11; // Positive reference is FVR
     ADPCH = 0;             // ADC channel to A0
     ADCON0bits.ADON = 1;   // Turn ADC on
+    ADCON0bits.ADGO = 1;   // Start ADC conversion
 }
 
 uint16_t ADC_read_raw(void) {

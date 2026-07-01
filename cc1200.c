@@ -11,11 +11,12 @@
 
 
 #include "cc1200.h"
-#include "canlib.h"
 #include "timer.h"
 #include "channel_info.h"
 #include "spi.h"
 #include "config.h"
+
+#include "canlib.h"
 
 #include <xc.h>
 #include <string.h>
@@ -44,7 +45,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG0,         0x73}, // GPIO0 to 1 TODO antenna diversity
     {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
-    {CC1200_RFEND_CFG1,     0x0E}, // RXOFF_MODE = IDLE, RX_TIME = 0
+    {CC1200_RFEND_CFG1,     0x00}, // RXOFF_MODE = IDLE, RX_TIME = 0
     {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 1 TODO antenna diversity
     {CC1200_WOR_EVENT0_MSB, 0x01}, // EVENT0 = 256
     {CC1200_WOR_EVENT0_LSB, 0x00}, // EVENT0 / 2^(RX_TIME+3) * 1250 / 40MHz = 1ms
@@ -99,7 +100,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_XOSC1,          0x03},
 };
 
-CC1200ReadResult Read_CC1200(uint16_t reg) {
+CC1200ReadResult CC1200_Read(uint16_t reg) {
     CC1200ReadResult result;
 
     SPI_Select();
@@ -107,7 +108,7 @@ CC1200ReadResult Read_CC1200(uint16_t reg) {
     // If accessing extended registers
     if (reg >= 0x2F00) {
         // extended register read command
-        SPI_Transfer(0x80 | CC1200_EXTENDED_REGISTER);
+        SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_READ);
         result.status = SPI_Transfer(reg & 0xFF);
     } else {
         result.status = SPI_Transfer((reg & 0xFF) | CC1200_READ);
@@ -119,7 +120,7 @@ CC1200ReadResult Read_CC1200(uint16_t reg) {
     return result;
 };
 
-uint8_t Write_CC1200(uint16_t reg, uint8_t val) {
+uint8_t CC1200_Write(uint16_t reg, uint8_t val) {
     uint8_t status;
 
     SPI_Select();
@@ -137,7 +138,7 @@ uint8_t Write_CC1200(uint16_t reg, uint8_t val) {
     return status;
 };
 
-uint8_t Command_CC1200(uint8_t command) {
+uint8_t CC1200_Command(uint8_t command) {
     SPI_Select();
     uint8_t status = SPI_Transfer(command);
     SPI_Deselect();
@@ -158,7 +159,7 @@ void CC1200_Init(void) {
     // configure CC1200 Registers
     size_t numSettings = sizeof (preferredSettings) / sizeof (preferredSettings[0]);
     for (size_t i = 0; i < numSettings; i++) {
-        Write_CC1200(preferredSettings[i].addr, preferredSettings[i].value);
+        CC1200_Write(preferredSettings[i].addr, preferredSettings[i].value);
     }
 }
 
@@ -181,7 +182,7 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
 
     SPI_Deselect();
 
-    return Command_CC1200(COMMAND_STX);
+    return CC1200_Command(COMMAND_STX);
 }
 
 /*
@@ -193,10 +194,12 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
  * 1bit CRC and 7 bits LQI
  */
 uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
-    if(!RB3) return 0; // CRC_OK is not asserted from CC1200 GPIO2
+    if(!PORTBbits.RB3) {
+        return 0; // CRC_OK is not asserted from CC1200 GPIO2
+    }
 
     SPI_Select();
-    SPI_Transfer(CC1200_FIFO_CFG | CC1200_READ | CC1200_BURST);
+    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
 
     uint8_t len = SPI_Transfer(0);
 
@@ -232,7 +235,7 @@ CC1200_Receive_Packet_status:
 
 CC1200_Receive_Packet_end:
     SPI_Deselect();
-    return Command_CC1200(COMMAND_SFRX);
+    return CC1200_Command(COMMAND_SFRX);
 }
 
 // transmit single byte indicating end of transmissio period + id of the board
@@ -243,7 +246,7 @@ uint8_t CC1200_Transmit_End(uint8_t next_channel) {
     SPI_Transfer(1);
     SPI_Transfer(next_channel);
     SPI_Deselect();
-    return Command_CC1200(COMMAND_STX);
+    return CC1200_Command(COMMAND_STX);
 }
 
 void CC1200_Set_Power(int8_t power) {
@@ -267,9 +270,9 @@ void CC1200_Set_Power(int8_t power) {
     }
 
     // Preserve bits 7:6, update bits 5:0 with new reg_value
-    CC1200ReadResult cur_reg_val = Read_CC1200(CC1200_PA_CFG1);
+    CC1200ReadResult cur_reg_val = CC1200_Read(CC1200_PA_CFG1);
     uint8_t new_reg_value = (cur_reg_val.value & 0xC0) | (reg_value & 0x3F);
-    Write_CC1200(CC1200_PA_CFG1, new_reg_value);
+    CC1200_Write(CC1200_PA_CFG1, new_reg_value);
 }
 
 void CC1200_Set_Frequency(uint32_t freq) {
