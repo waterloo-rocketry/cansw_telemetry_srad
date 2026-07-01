@@ -53,7 +53,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_SYNC_CFG1,      0xA8},
     {CC1200_SYNC_CFG0,      0x13},
     {CC1200_DEVIATION_M,    0x99},
-    {CC1200_MODCFG_DEV_E,   0x85},
+    {CC1200_MODCFG_DEV_E,   0x05},
     {CC1200_DCFILT_CFG,     0x26},
     {CC1200_PREAMBLE_CFG0,  0x8A},
     {CC1200_IQIC,           0x00},
