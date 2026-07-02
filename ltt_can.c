@@ -33,8 +33,11 @@ static uint32_t last_transmit;
 // store the last message sent so it's not forwarded back to air
 static can_msg_t last_can_message_sent;
 
+// for blinking heartbeat LED
+static int blinky = 0;
+
 static void can_msg_handler(const can_msg_t *msg) {
-    uint16_t msg_type = get_message_type(msg);
+    can_msg_type_t msg_type = get_message_type(msg);
 
     if(msg_type == MSG_TELEMETRY_STATE_SWITCH) return; // this should be internal only
 
@@ -120,8 +123,6 @@ void CAN_Init(void) {
 }
 
 void CAN_send_messages(void) {
-    static int blinky = 0;
-
     uint32_t now = millis();
     if(now - last_transmit > CAN_MESSAGE_PERIOD_MS) {
         can_msg_t msg;

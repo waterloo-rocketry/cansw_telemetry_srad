@@ -152,7 +152,7 @@ void SM_LTT_State_Machine(void) {
                     // end frame gets packaged into can message in CC1200_Receive_Packet
                     case MSG_TELEMETRY_STATE_SWITCH: {
                         uint8_t channel_id = get_message_metadata(&rx_msg);
-                        if(channel_id == BOARD_INST_UNIQUE_ID) {
+                        if(!stop_tx && channel_id == BOARD_INST_UNIQUE_ID) {
                             next_state = LTT_STATE_TX;
                         }
                         break;
@@ -164,8 +164,20 @@ void SM_LTT_State_Machine(void) {
                 }
                 rx_timer.last = now;
             }
-            if(!stop_tx && channel_is_rocket() && timer_expired(&rx_timer, now)) {
-                next_state = LTT_STATE_TX;
+            if(!stop_tx && timer_expired(&rx_timer, now)) {
+                if(channel_is_rocket()) {
+                    next_state = LTT_STATE_TX;
+                } else if(!rcvb_is_empty()) {
+                    // special case: send telemetry ON command without needing to hear from the rocket
+                    can_msg_t msg = {0};
+                    rcvb_peek_message(&msg);
+                    can_msg_type_t msg_type = get_message_type(&msg);
+                    can_actuator_id_t actuator_id = ACTUATOR_ENUM_MAX;
+                    get_actuator_id(&msg, &actuator_id);
+                    if(msg_type == MSG_ACTUATOR_CMD && actuator_id == ACTUATOR_TELEMETRY) {
+                        next_state = LTT_STATE_TX;
+                    }
+                }
             }
             break;
     }
