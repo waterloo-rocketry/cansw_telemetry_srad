@@ -12,6 +12,7 @@
 #include "channel_info.h"
 #include "channels.h"
 #include "leds.h"
+#include "statemachine.h"
 #include "config.h"
 
 #include "canlib.h"
@@ -42,18 +43,49 @@ static void can_msg_handler(const can_msg_t *msg) {
         rcvb_push_message(msg);
     }
 
-    switch (msg_type) {
+    switch(msg_type) {
         case MSG_LEDS_ON:
-            toggle_LED_Green(1);
-            toggle_LED_Red(1);
-            toggle_LED_Blue(1);
+            LED_set_Green(1);
+            LED_set_Red(1);
+            LED_set_Blue(1);
             break;
 
         case MSG_LEDS_OFF:
-            toggle_LED_Green(0);
-            toggle_LED_Red(0);
-            toggle_LED_Blue(0);
+            LED_set_Green(0);
+            LED_set_Red(0);
+            LED_set_Blue(0);
             break;
+
+        case MSG_ACTUATOR_CMD: {
+            if(!channel_is_rocket()) break;
+
+            can_actuator_id_t actuator_id = ACTUATOR_ENUM_MAX;
+            can_actuator_state_t actuator_state = ACT_STATE_ILLEGAL;
+
+            get_actuator_id(msg, &actuator_id);
+            get_cmd_actuator_state(msg, &actuator_state);
+
+            if(actuator_id == ACTUATOR_TELEMETRY) {
+                switch(actuator_state) {
+                    case ACT_STATE_ON:
+                        SM_LTT_Stop_TX(false);
+                        break;
+                    case ACT_STATE_OFF:
+                        SM_LTT_Stop_TX(true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            break;
+        }
+
+        case MSG_RESET_CMD: {
+            bool need_reset = false;
+            check_board_need_reset(msg, &need_reset);
+            if(need_reset) RESET();
+            break;
+        }
 
         default:
             break;
@@ -115,7 +147,7 @@ void CAN_send_messages(void) {
         }
 
         last_transmit = now;
-        toggle_LED_Blue(blinky++ % 2);
+        LED_set_Blue(blinky++ % 2);
     }
 
     txb_heartbeat();

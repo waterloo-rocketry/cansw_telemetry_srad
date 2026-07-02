@@ -24,11 +24,14 @@ static StateTimer tx_timer     = { .duration = TX_TIMEOUT_MS };
 static StateTimer rx_timer     = { .duration = RX_TIMEOUT_MS };
 static StateTimer tx_max_timer = { .duration = TX_TIME_MAX_MS };
 
+static bool stop_tx;
+
 // index of the remote that is transmitting / should transmit next based on channels.h
 static uint8_t remote_index;
 
 void SM_Init(void) {
     ltt_state = LTT_STATE_INIT;
+    stop_tx = false;
 }
 
 static bool timer_expired(StateTimer *timer, uint32_t now) {
@@ -96,7 +99,7 @@ void SM_LTT_State_Machine(void) {
         case LTT_STATE_TX:
             if(tx_msg.sid != 0) {
                 tx_timer.last = now;
-                toggle_LED_Green(1);
+                LED_set_Green(1);
             }
             if(timer_expired(&tx_timer, now) || timer_expired(&tx_max_timer, now)) {
                 next_state = LTT_STATE_TX_END;
@@ -122,15 +125,14 @@ void SM_LTT_State_Machine(void) {
                     }
                     default:
                         txb_enqueue(&rx_msg);
-                        toggle_LED_Red(1);
+                        LED_set_Red(1);
                         break;
                 }
                 rx_timer.last = now;
             }
-            if(channel_is_rocket() && timer_expired(&rx_timer, now)) {
+            if(!stop_tx && channel_is_rocket() && timer_expired(&rx_timer, now)) {
                 next_state = LTT_STATE_TX;
             }
-
             break;
     }
 
@@ -140,12 +142,12 @@ void SM_LTT_State_Machine(void) {
                 remote_index = 0;
                 break;
             case LTT_STATE_TX:
-                toggle_LED_Green(0);
+                LED_set_Green(0);
                 break;
             case LTT_STATE_RX:
                 channel_info_end(remote_index);
                 remote_index = (remote_index + 1) % channel_remote_count();
-                toggle_LED_Red(0);
+                LED_set_Red(0);
                 break;
             default:
                 break;
@@ -164,4 +166,10 @@ void SM_LTT_State_Machine(void) {
         }
         ltt_state = next_state;
     }
+}
+
+void SM_LTT_Stop_TX(bool stop) {
+    if(stop) CC1200_PA_Off();
+    else     CC1200_PA_On();
+    stop_tx = stop;
 }

@@ -12,12 +12,12 @@
 
 #include "stdbool.h"
 
-void LEDs_Init(void);
+void LED_Init(void);
 
-void toggle_LED_Green(bool);
+void LED_set_Green(bool);
 
-void toggle_LED_Blue(bool);
+void LED_set_Blue(bool);
 
-void toggle_LED_Red(bool);
+void LED_set_Red(bool);
 
 #endif

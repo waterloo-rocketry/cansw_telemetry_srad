@@ -2,6 +2,7 @@
 #define STATEMACHINE_H
 
 #include "ltt_can.h"
+#include <stdbool.h>
 
 typedef enum {
     LTT_STATE_INIT,
@@ -12,5 +13,6 @@ typedef enum {
 
 void SM_Init(void);
 void SM_LTT_State_Machine(void);
+void SM_LTT_Stop_TX(bool);
 
 #endif

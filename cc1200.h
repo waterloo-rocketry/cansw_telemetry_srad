@@ -34,6 +34,9 @@ uint8_t CC1200_Transmit_End(uint8_t next_channel);
 void CC1200_Set_Power(int8_t power);
 void CC1200_Set_Frequency(uint32_t freq);
 
+void CC1200_PA_Off(void);
+void CC1200_PA_On(void);
+
 // Registers: See CC1200 User's Guide
 #define CC1200_IOCFG3 0x00 // R/W configuration registers, burst access possible
 #define CC1200_IOCFG2 0x01

@@ -149,6 +149,14 @@ void CC1200_Init(void) {
     __delay_ms(100);
     LATC7 = 1;
 
+    // configure PA enable pin
+    ODCONBbits.ODCB4 = 1;
+    ODCONBbits.ODCB5 = 1;
+    TRISB4 = 0;
+    TRISB5 = 0;
+    LATB4 = 1;
+    LATB5 = 1;
+
     // configure CC1200 GPIO2
     TRISB3 = 1;
     ANSELB3 = 0;
@@ -284,4 +292,14 @@ void CC1200_Set_Frequency(uint32_t freq) {
     SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
     SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
     SPI_Deselect();
+}
+
+void CC1200_PA_Off(void) {
+    LATB4 = 0;
+    LATB5 = 0;
+}
+
+void CC1200_PA_On(void) {
+    LATB4 = 1;
+    LATB5 = 1;
 }

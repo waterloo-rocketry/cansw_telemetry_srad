@@ -25,7 +25,7 @@ static void OSC_Init(void) {
 
 static void board_Init(void) {
     timer0_init();
-    LEDs_Init();
+    LED_Init();
     OSC_Init();
     ADC_Init();
     SPI_Init();
@@ -38,11 +38,11 @@ void main(void) {
     board_Init();
 
     CC1200_Set_Frequency(915000);
-    CC1200_Set_Power(14);
+    CC1200_Set_Power(0);
 
-    toggle_LED_Green(0);
-    toggle_LED_Blue(0);
-    toggle_LED_Red(0);
+    LED_set_Green(0);
+    LED_set_Blue(0);
+    LED_set_Red(0);
 
     while (1) {
         CLRWDT();
