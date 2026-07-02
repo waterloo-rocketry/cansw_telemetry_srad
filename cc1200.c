@@ -22,32 +22,11 @@
 
 #define MAX_PACKET_LEN 12
 
-/* RX flow:
- *
- * In RX state, CC1200 transitions to IDLE when a packet is received
- * (configured by RFEND_CFGx). CC1200_State_Transition would attempt to read a
- * packet from fifo when CC1200 is in idle, flush the FIFO, then go back to RX
- * state.
- *
- * Packet is prepended with length, appeneded with RSSI, CRC, and LQI. See user
- * guide section 8.7.3
- */
-
 // Register assignments, use MARTRFTM-STUDIO to configure and copy and paste in
 // "TrxEB RF Settings Value Line" format
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
 // frequency and power has helper function for runtime configuration
 static const registerSetting_t preferredSettings[] = {
-    // manual configs
-    {CC1200_IOCFG3,         0x57}, // GPIO3 to LNA_PA_REG_PD, inverted
-    {CC1200_IOCFG2,         0x07}, // GPIO2 to CRC_OK
-    {CC1200_IOCFG0,         0x73}, // GPIO0 to 1 TODO antenna diversity
-    {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
-    {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
-    {CC1200_RFEND_CFG1,     0x0E}, // RXOFF_MODE = IDLE, RX_TIME = disable
-    {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 1 TODO antenna diversity
-    {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
-
     // automatic configs
     {CC1200_SYNC_CFG1,      0xA8},
     {CC1200_SYNC_CFG0,      0x13},
@@ -95,6 +74,16 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_IFAMP,          0x0D},
     {CC1200_XOSC5,          0x0E},
     {CC1200_XOSC1,          0x03},
+
+    // manual configs
+    {CC1200_IOCFG3,         0x57}, // GPIO3 to LNA_PA_REG_PD, inverted
+    {CC1200_IOCFG2,         0x07}, // GPIO2 to CRC_OK
+    {CC1200_IOCFG0,         0x73}, // GPIO0 to 1 TODO antenna diversity
+    {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
+    {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
+    {CC1200_RFEND_CFG1,     0x0E}, // RXOFF_MODE = IDLE, RX_TIME = disable
+    {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 1 TODO antenna diversity
+    {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
 };
 
 CC1200ReadResult CC1200_Read(uint16_t reg) {
@@ -197,6 +186,8 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
  * 2-8 bytes data
  * 1 byte RSSI
  * 1bit CRC and 7 bits LQI
+ *
+ * See user guide section 8.7.3
  */
 uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
     if(!PORTBbits.RB3) {

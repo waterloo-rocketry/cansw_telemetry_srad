@@ -8,6 +8,40 @@
 #include "canlib.h"
 #include "timer.h"
 
+/*
+ * LTT communication is managed by two finite state machines. The top FSM in
+ * SM_LTT_State_Machine manages when to transmit and when to receive. And a low
+ * level FSM partially in CC1200_State_Transition, partially inside CC1200's
+ * own firmware, manages the TX and RX FIFO of CC1200.
+ *
+ * For the top level FSM, in TX state, if there is no CAN message in queue for
+ * TX_TIMEOUT_MS, or the state has been in TX for more than TX_TIME_MAX_MS, it
+ * transitions into TX_END. TX_END state sends an end-of-transmission (EOT) frame and
+ * waits until CC1200 goes into IDLE mode, then the FSM transitions into RX.
+ *
+ * In RX state, the FSM waits for an EOT frame containing the instance ID of
+ * the current instance, then goes back to TX state. Additionally, if the
+ * current instance ID is ROCKET, the FSM also transitions to TX when there is
+ * no message received for RX_TIMEOUT_MS. This is to make sure it continues to
+ * transmit telemetry even if the receivers may be too weak.
+ *
+ * The ROCKET instance distributes time slot between all other instances with
+ * this EOT frame in a round-robin fashion. Since each instance only enters TX
+ * state when a matching EOT frame is received, this ensures only one of them is
+ * transmitting at the same time. For all non-ROCKET instances, the EOT should
+ * only contain the instance id ROCKET.
+ *
+ * For the low level FSM, the CC1200 is configured to transition from RX->IDLE
+ * when a packet is received (or dropped due to CRC error), and from TX->IDLE
+ * when a packet is transmitted. CC1200_State_Transition additionally do
+ * IDLE->RX transition when the top level FSM is in RX mode, and IDLE->TX
+ * transition when there are messages in the queue and the top level FSM is in
+ * TX mode. Reading and write messages from/to the FIFO are all done during
+ * IDLE state.
+ *
+ * The low level FSM additional clears the FIFOs when they over/under flows.
+ */
+
 #define TX_TIMEOUT_MS 10
 #define RX_TIMEOUT_MS 15
 #define TX_TIME_MAX_MS 100
@@ -43,7 +77,7 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
 
     switch (state) {
         case CC1200_STATE_IDLE:
-            // Read anything from FIFO regardless of LTT state
+            // Attempt to read from RX FIFO regardless of LTT state (because why not)
             CC1200_Receive_Packet(rx_msg);
             // fallthrough
         case CC1200_STATE_RX:
