@@ -76,13 +76,13 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_XOSC1,          0x03},
 
     // manual configs
-    {CC1200_IOCFG3,         0x57}, // GPIO3 to LNA_PA_REG_PD, inverted
+    {CC1200_IOCFG3,         0x5A}, // GPIO3 to RX0TX1_CFG, inverted
     {CC1200_IOCFG2,         0x07}, // GPIO2 to CRC_OK
-    {CC1200_IOCFG0,         0x73}, // GPIO0 to 1 TODO antenna diversity
+    {CC1200_IOCFG0,         0x24}, // GPIO0 to ANTENNA_SELECT
     {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
     {CC1200_RFEND_CFG1,     0x0E}, // RXOFF_MODE = IDLE, RX_TIME = disable
-    {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 1 TODO antenna diversity
+    {CC1200_RFEND_CFG0,     0x03}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0, ANT_DIV_RX_TERM_CFG = continuous-switch based on carrier-sense
     {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
 };
 

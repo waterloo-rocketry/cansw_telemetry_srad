@@ -32,12 +32,11 @@
  * only contain the instance id ROCKET.
  *
  * For the low level FSM, the CC1200 is configured to transition from RX->IDLE
- * when a packet is received (or dropped due to CRC error), and from TX->IDLE
- * when a packet is transmitted. CC1200_State_Transition additionally do
- * IDLE->RX transition when the top level FSM is in RX mode, and IDLE->TX
- * transition when there are messages in the queue and the top level FSM is in
- * TX mode. Reading and write messages from/to the FIFO are all done during
- * IDLE state.
+ * when a packet is received, and from TX->IDLE when a packet is transmitted.
+ * CC1200_State_Transition additionally do IDLE->RX transition when the top
+ * level FSM is in RX mode, and IDLE->TX transition when there are messages in
+ * the queue and the top level FSM is in TX mode. Reading and write messages
+ * from/to the FIFO are all done during IDLE state.
  *
  * The low level FSM additional clears the FIFOs when they over/under flows.
  */
