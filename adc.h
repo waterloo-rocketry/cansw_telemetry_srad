@@ -13,5 +13,7 @@
 void ADC_Init(void);
 uint16_t ADC_read_raw(void);
 uint16_t ADC_read_curr_ma(void);
+uint16_t ADC_read_curr_filter(void);
+void ADC_run_filter(void);
 
 #endif

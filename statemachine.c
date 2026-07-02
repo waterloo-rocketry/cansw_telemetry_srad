@@ -142,11 +142,9 @@ void SM_LTT_State_Machine(void) {
             case LTT_STATE_TX:
                 toggle_LED_Green(0);
                 break;
-            case LTT_STATE_TX_END:
-                remote_index = (remote_index + 1) % channel_remote_count();
-                break;
             case LTT_STATE_RX:
                 channel_info_end(remote_index);
+                remote_index = (remote_index + 1) % channel_remote_count();
                 toggle_LED_Red(0);
                 break;
             default:

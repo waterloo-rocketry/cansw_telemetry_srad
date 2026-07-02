@@ -94,7 +94,7 @@ void CAN_send_messages(void) {
     if(now - last_transmit > CAN_MESSAGE_PERIOD_MS) {
         can_msg_t msg;
         uint32_t error_bitfield = 0;
-        uint16_t current_sense_val = ADC_read_curr_ma();
+        uint16_t current_sense_val = ADC_read_curr_filter();
 
         // Send overcurrent warning if current over 0.8A
         if (current_sense_val >= 800) {

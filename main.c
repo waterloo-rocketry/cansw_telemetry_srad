@@ -46,6 +46,7 @@ void main(void) {
 
     while (1) {
         CLRWDT();
+        ADC_run_filter();
         SM_LTT_State_Machine();
         CAN_send_messages();
     }

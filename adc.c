@@ -1,6 +1,10 @@
 #include "adc.h"
 #include <xc.h>
 
+#define FILTER_ALPHA 0.9
+
+static uint16_t current_filtered;
+
 void ADC_Init(void) {
     TRISAbits.TRISA0 = 1;   // Set RA0 to input
     ANSELAbits.ANSELA0 = 1; // Set RA0 to analog
@@ -22,6 +26,8 @@ void ADC_Init(void) {
     ADPCH = 0;             // ADC channel to A0
     ADCON0bits.ADON = 1;   // Turn ADC on
     ADCON0bits.ADGO = 1;   // Start ADC conversion
+
+    current_filtered = 0;
 }
 
 uint16_t ADC_read_raw(void) {
@@ -29,5 +35,15 @@ uint16_t ADC_read_raw(void) {
 }
 
 uint16_t ADC_read_curr_ma(void) {
-    return ADC_read_raw() * 5 / 16; // 2048 mV ref / 12 bit / 100 V/V / 16mR
+    return ADC_read_raw() / 5; // 2048 mV ref / 2^(12 bit) / 100 V/V / 25mR
+}
+
+uint16_t ADC_read_curr_filter(void) {
+    return current_filtered;
+}
+
+void ADC_run_filter(void) {
+    current_filtered =
+        (uint16_t) (FILTER_ALPHA * current_filtered) +
+        (uint16_t) ((1-FILTER_ALPHA) * ADC_read_curr_ma());
 }
