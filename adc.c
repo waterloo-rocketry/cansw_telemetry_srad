@@ -35,7 +35,7 @@ uint16_t ADC_read_raw(void) {
 }
 
 uint16_t ADC_read_curr_ma(void) {
-    return ADC_read_raw() / 5; // 2048 mV ref / 2^(12 bit) / 100 V/V / 25mR
+    return ADC_read_raw() * 5 / 16; // 2048 mV ref / 2^(12 bit) / 100 V/V / 16mR
 }
 
 uint16_t ADC_read_curr_filter(void) {
