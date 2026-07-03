@@ -11,6 +11,7 @@
 #include "leds.h" // interface with LEDs
 #include "statemachine.h"
 #include "spi.h"
+#include "channels.h"
 #include "config.h"
 
 #include <xc.h>
