@@ -36,7 +36,6 @@ void SPI_Init(void) {
     SPI1CON0bits.EN = 1; // enable SPI
 }
 
-/**/
 uint8_t SPI_Transfer(uint8_t data) {
     while (!PIR2bits.SPI1TXIF);
     SPI1TXB = data;

@@ -9,8 +9,7 @@
 #define SPI_H
 
 #include <xc.h>
-
-#include "stdint.h"
+#include <stdint.h>
 
 void SPI_Init(void);
 

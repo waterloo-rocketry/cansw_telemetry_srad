@@ -104,7 +104,7 @@ CC1200ReadResult CC1200_Read(uint16_t reg) {
 
     SPI_Deselect();
     return result;
-};
+}
 
 uint8_t CC1200_Write(uint16_t reg, uint8_t val) {
     uint8_t status;
@@ -122,14 +122,14 @@ uint8_t CC1200_Write(uint16_t reg, uint8_t val) {
 
     SPI_Deselect();
     return status;
-};
+}
 
 uint8_t CC1200_Command(uint8_t command) {
     SPI_Select();
     uint8_t status = SPI_Transfer(command);
     SPI_Deselect();
     return status;
-};
+}
 
 void CC1200_Init(void) {
     // configure RESET_n pin

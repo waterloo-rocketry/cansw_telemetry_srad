@@ -40,9 +40,11 @@ void channel_info_add(uint8_t rssi, uint8_t lqi) {
 
 void channel_info_end(uint8_t channel_index) {
     channel_info[channel_index].rssi =
+        current_sample_count == 0 ? 0 :
         (uint8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].rssi) +
         (uint8_t) ((1-ROLLING_AVG_ALPHA) * current_channel.rssi / current_sample_count);
     channel_info[channel_index].lqi =
+        current_sample_count == 0 ? 0 :
         (uint8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].lqi) +
         (uint8_t) ((1-ROLLING_AVG_ALPHA) * current_channel.lqi / current_sample_count);
 }

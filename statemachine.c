@@ -34,9 +34,10 @@
  * For the low level FSM, the CC1200 is configured to transition from RX->IDLE
  * when a packet is received, and from TX->IDLE when a packet is transmitted.
  * CC1200_State_Transition additionally do IDLE->RX transition when the top
- * level FSM is in RX mode, and IDLE->TX transition when there are messages in
- * the queue and the top level FSM is in TX mode. Reading and write messages
- * from/to the FIFO are all done during IDLE state.
+ * level FSM is in RX mode, and IDLE->TX or RX->TX transition when there are
+ * messages in the queue and the top level FSM is in TX mode. Reading messages
+ * from the FIFO is done during IDLE state, while writing can be done in both
+ * IDLE and RX state.
  *
  * The low level FSM additional clears the FIFOs when they over/under flows.
  */
@@ -68,7 +69,7 @@ void SM_Init(void) {
 }
 
 static bool timer_expired(StateTimer *timer, uint32_t now) {
-    return (int32_t) (now - timer->duration - timer->last) > 0;
+    return now - timer->last > timer->duration;
 }
 
 static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, can_msg_t *rx_msg) {

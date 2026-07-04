@@ -17,8 +17,6 @@
 #include <xc.h>
 #include <string.h>
 
-#define TEST_SIZE 32
-
 static void OSC_Init(void) {
     OSCCON1 = 0x70; // Fosc with division of 1
     while (OSCCON3bits.ORDY == 0) {}
