@@ -21,7 +21,7 @@
 #include <xc.h>
 #include <string.h>
 
-#define CAN_MESSAGE_PERIOD_MS 1000
+#define CAN_MESSAGE_PERIOD_MS 500
 
 // memory pools for the CAN buffer
 static uint8_t tx_pool[sizeof(can_msg_t)*128];
