@@ -22,6 +22,7 @@
 #include <string.h>
 
 #define CAN_MESSAGE_PERIOD_MS 500
+#define OVER_CURRENT_THRESHOLD 200
 
 // memory pools for the CAN buffer
 static uint8_t tx_pool[sizeof(can_msg_t)*128];
@@ -129,8 +130,8 @@ void CAN_send_messages(void) {
         uint32_t error_bitfield = 0;
         uint16_t current_sense_val = ADC_read_curr_filter();
 
-        // Send overcurrent warning if current over 0.8A
-        if (current_sense_val >= 800) {
+        // Send overcurrent warning if current over threshold
+        if (current_sense_val >= OVER_CURRENT_THRESHOLD) {
             error_bitfield |= E_12V_OVER_CURRENT_OFFSET;
         }
 
