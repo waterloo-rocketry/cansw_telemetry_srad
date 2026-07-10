@@ -29,6 +29,8 @@ void CC1200_Init(void);
 
 uint8_t CC1200_Transmit_Packet(can_msg_t*);
 uint8_t CC1200_Receive_Packet(can_msg_t*);
+
+uint8_t CC1200_Receive_Start(void);
 uint8_t CC1200_Transmit_End(uint8_t next_channel);
 
 void CC1200_Set_Power(int8_t power);

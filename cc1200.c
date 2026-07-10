@@ -77,14 +77,22 @@ static const registerSetting_t preferredSettings[] = {
 
     // manual configs
     {CC1200_IOCFG3,         0x24}, // GPIO3 to ANTENNA_SELECT
-    {CC1200_IOCFG2,         0x07}, // GPIO2 to CRC_OK
+    {CC1200_IOCFG2,         0x13}, // GPIO2 to PKT_CRC_OK
     {CC1200_IOCFG0,         0x5A}, // GPIO0 to RX0TX1_CFG, inverted
     {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
-    {CC1200_RFEND_CFG1,     0x0E}, // RXOFF_MODE = IDLE, RX_TIME = disable
+    {CC1200_RFEND_CFG1,     0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
     {CC1200_RFEND_CFG0,     0x08}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 1 TODO antenna diversity
     {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
 };
+
+// the difference between TMR3 and rx_packet_count is the number of packets in RX FIFO
+static uint16_t rx_packet_count;
+static uint16_t read_packet_counter(void) {
+    uint16_t count = TMR3L; // TMR3L needs to be read before TMR3H
+    count |= (uint16_t) TMR3H << 8;
+    return count;
+}
 
 CC1200ReadResult CC1200_Read(uint16_t reg) {
     CC1200ReadResult result;
@@ -132,6 +140,8 @@ uint8_t CC1200_Command(uint8_t command) {
 }
 
 void CC1200_Init(void) {
+    rx_packet_count = 0;
+
     // configure RESET_n pin
     TRISC7 = 0;
     LATC7 = 0;
@@ -149,6 +159,12 @@ void CC1200_Init(void) {
     // configure CC1200 GPIO2
     TRISB3 = 1;
     ANSELB3 = 0;
+
+    // configure TMR3 to as RX packet counter from PKT_CRC_OK
+    T3CLKbits.CS = 0;   // TMR3 source to T3CKIPPS
+    T3CKIPPS = 0x0B;     // TMR3 PPS set to RB3
+    T3CONbits.RD16 = 1; // enable 16-bit mode
+    T3CONbits.ON = 1;   // enable TMR3
 
     // configure CC1200 Registers
     size_t numSettings = sizeof (preferredSettings) / sizeof (preferredSettings[0]);
@@ -190,12 +206,13 @@ uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
  * See user guide section 8.7.3
  */
 uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
-    if(!PORTBbits.RB3) {
-        return 0; // CRC_OK is not asserted from CC1200 GPIO2
+    if(rx_packet_count == read_packet_counter()) {
+        // no packets in FIFO
+        return 0;
     }
 
     SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+    uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
 
     uint8_t len = SPI_Transfer(0);
 
@@ -231,7 +248,17 @@ CC1200_Receive_Packet_status:
 
 CC1200_Receive_Packet_end:
     SPI_Deselect();
-    return CC1200_Command(COMMAND_SFRX);
+    return status;
+}
+
+// resets packet counter and goes into RX
+uint8_t CC1200_Receive_Start(void) {
+    // update packet count at beginning of RX since PKT_CRC_OK also goggles during TX
+    rx_packet_count = read_packet_counter();
+
+    // clear RX FIFO and go to RX state
+    CC1200_Command(COMMAND_SFRX);
+    return CC1200_Command(COMMAND_SRX);
 }
 
 // transmit single byte indicating end of transmissio period + id of the board

@@ -31,13 +31,12 @@
  * transmitting at the same time. For all non-ROCKET instances, the EOT should
  * only contain the instance id ROCKET.
  *
- * For the low level FSM, the CC1200 is configured to transition from RX->IDLE
+ * For the low level FSM, the CC1200 is configured to transition from RX->RX
  * when a packet is received, and from TX->IDLE when a packet is transmitted.
- * CC1200_State_Transition additionally do IDLE->RX transition when the top
- * level FSM is in RX mode, and IDLE->TX or RX->TX transition when there are
- * messages in the queue and the top level FSM is in TX mode. Reading messages
- * from the FIFO is done during IDLE state, while writing can be done in both
- * IDLE and RX state.
+ * TX FIFO writes can happens in both IDLE or RX state, then STX command is
+ * sent to go into TX state. In RX state, IDLE->RX transition is done using SRX
+ * command. During RX TMR3 is incremented with CC1200's PKT_CRC_OK to keep
+ * track of number of packets in the RX FIFO.
  *
  * The low level FSM additional clears the FIFOs when they over/under flows.
  */
@@ -76,11 +75,10 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
     uint8_t state = (CC1200_Command(COMMAND_SNOP) >> 4) & 0x7;
 
     switch (state) {
-        case CC1200_STATE_IDLE:
-            // Attempt to read from RX FIFO regardless of LTT state (because why not)
+        case CC1200_STATE_RX:
             CC1200_Receive_Packet(rx_msg);
             // fallthrough
-        case CC1200_STATE_RX:
+        case CC1200_STATE_IDLE:
             switch(ltt_state) {
                 case LTT_STATE_TX:
                     if(!rcvb_is_empty()) {
@@ -95,7 +93,7 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
 
                 case LTT_STATE_RX:
                     if(state != CC1200_STATE_RX) {
-                        CC1200_Command(COMMAND_SRX);
+                        CC1200_Receive_Start();
                     }
                     break;
 

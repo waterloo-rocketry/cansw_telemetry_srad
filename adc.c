@@ -1,8 +1,6 @@
 #include "adc.h"
 #include <xc.h>
 
-#define FILTER_ALPHA 0.9
-
 static uint16_t current_filtered;
 
 void ADC_Init(void) {
@@ -43,7 +41,5 @@ uint16_t ADC_read_curr_filter(void) {
 }
 
 void ADC_run_filter(void) {
-    current_filtered =
-        (uint16_t) (FILTER_ALPHA * current_filtered) +
-        (uint16_t) ((1-FILTER_ALPHA) * ADC_read_curr_ma());
+    current_filtered = current_filtered * 9 / 10 + ADC_read_curr_ma() / 10;
 }

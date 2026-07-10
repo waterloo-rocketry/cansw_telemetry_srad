@@ -37,12 +37,7 @@ void main(void) {
     board_Init();
 
     CC1200_Set_Frequency(915000);
-    if(channel_is_rocket()) {
-        CC1200_Set_Power(14);
-    } else {
-        // don't need full power when transmitting from mission control to rocket
-        CC1200_Set_Power(0);
-    }
+    CC1200_Set_Power(14);
 
     LED_set_Green(0);
     LED_set_Blue(0);
