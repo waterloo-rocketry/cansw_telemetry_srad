@@ -132,7 +132,7 @@ void CAN_send_messages(void) {
 
         // Send overcurrent warning if current over threshold
         if (current_sense_val >= OVER_CURRENT_THRESHOLD) {
-            error_bitfield |= E_12V_OVER_CURRENT_OFFSET;
+            error_bitfield |= 1 << E_12V_OVER_CURRENT_OFFSET;
         }
 
         build_analog_sensor_16bit_msg(PRIO_LOW, (uint16_t) now, SENSOR_12V_CURR, current_sense_val, &msg);
