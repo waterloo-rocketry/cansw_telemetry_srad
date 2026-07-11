@@ -82,7 +82,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
     {CC1200_RFEND_CFG1,     0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
-    {CC1200_RFEND_CFG0,     0x08}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 1 TODO antenna diversity
+    {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0
     {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
 };
 
