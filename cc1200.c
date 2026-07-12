@@ -42,7 +42,6 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_SYMBOL_RATE1,   0x99},
     {CC1200_SYMBOL_RATE0,   0x99},
     {CC1200_AGC_REF,        0x2F},
-    {CC1200_AGC_CS_THR,     0x01},
     {CC1200_AGC_CFG1,       0x16},
     {CC1200_AGC_CFG0,       0x84},
     {CC1200_FS_CFG,         0x12},
@@ -84,6 +83,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_RFEND_CFG1,     0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
     {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0
     {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
+    {CC1200_AGC_CS_THR, (uint8_t) -126}, // AGC_CS_TH set to -dB RSSI
 };
 
 // the difference between TMR3 and rx_packet_count is the number of packets in RX FIFO
@@ -310,6 +310,13 @@ void CC1200_Set_Frequency(uint32_t freq) {
     SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
     SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
     SPI_Deselect();
+}
+
+void CC1200_Set_Ant_Diversity(bool diversity) {
+    // Preserve bits 7:3, update bits 2:0 with new reg_value
+    CC1200ReadResult cur_reg_val = CC1200_Read(CC1200_RFEND_CFG0);
+    uint8_t new_reg_value = (cur_reg_val.value & 0xF8) | (diversity ? 0x03 : 0x00);
+    CC1200_Write(CC1200_RFEND_CFG0, new_reg_value);
 }
 
 void CC1200_PA_Off(void) {

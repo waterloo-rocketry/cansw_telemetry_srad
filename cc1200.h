@@ -35,6 +35,7 @@ uint8_t CC1200_Transmit_End(uint8_t next_channel);
 
 void CC1200_Set_Power(int8_t power);
 void CC1200_Set_Frequency(uint32_t freq);
+void CC1200_Set_Ant_Diversity(bool diversity);
 
 void CC1200_PA_Off(void);
 void CC1200_PA_On(void);
