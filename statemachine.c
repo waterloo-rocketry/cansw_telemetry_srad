@@ -61,10 +61,10 @@ static bool stop_tx;
 
 // index of the remote that is transmitting / should transmit next based on channels.h
 static uint8_t remote_index;
+static can_msg_t remote_on_msg;
 
 void SM_Init(void) {
     ltt_state = LTT_STATE_INIT;
-    stop_tx = false;
 }
 
 static bool timer_expired(StateTimer *timer, uint32_t now) {
@@ -162,16 +162,24 @@ void SM_LTT_State_Machine(void) {
                 }
                 rx_timer.last = now;
             }
-            if(!stop_tx && timer_expired(&rx_timer, now) && channel_is_rocket()) {
-                next_state = LTT_STATE_TX;
+            if(timer_expired(&rx_timer, now)) {
+                if(!stop_tx && channel_is_rocket()) {
+                    next_state = LTT_STATE_TX;
+                }
+                // special case: sends out telemetry on command when we haven't
+                // heard from rocket for a while
+                if(remote_on_msg.sid != 0) {
+                    CC1200_Transmit_Packet(&remote_on_msg);
+                    remote_on_msg.sid = 0;
+                }
             }
             break;
     }
 
     if(next_state != ltt_state) {
         switch(ltt_state) {
-            case LTT_STATE_INIT:
                 remote_index = 0;
+                stop_tx = false;
                 break;
             case LTT_STATE_TX:
                 LED_set_Green(0);
@@ -192,6 +200,7 @@ void SM_LTT_State_Machine(void) {
             case LTT_STATE_RX:
                 channel_info_start();
                 rx_timer.last = now;
+                remote_on_msg.sid = 0;
                 break;
             default:
                 break;
@@ -204,4 +213,9 @@ void SM_LTT_Stop_TX(bool stop) {
     if(stop) CC1200_PA_Off();
     else     CC1200_PA_On();
     stop_tx = stop;
+}
+
+// sends telemetry on command to potentially off rocket side
+void SM_LTT_Wake_Remote(const can_msg_t *on_command) {
+    remote_on_msg = *on_command;
 }

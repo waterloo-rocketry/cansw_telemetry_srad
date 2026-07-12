@@ -61,8 +61,6 @@ static void can_msg_handler(const can_msg_t *msg) {
             break;
 
         case MSG_ACTUATOR_CMD: {
-            if(!channel_is_rocket()) break;
-
             can_actuator_id_t actuator_id = ACTUATOR_ENUM_MAX;
             can_actuator_state_t actuator_state = ACT_STATE_ILLEGAL;
 
@@ -72,10 +70,16 @@ static void can_msg_handler(const can_msg_t *msg) {
             if(actuator_id == ACTUATOR_TELEMETRY) {
                 switch(actuator_state) {
                     case ACT_STATE_ON:
-                        SM_LTT_Stop_TX(false);
+                        if(channel_is_rocket()) {
+                            SM_LTT_Stop_TX(false);
+                        } else {
+                            SM_LTT_Wake_Remote(msg);
+                        }
                         break;
                     case ACT_STATE_OFF:
-                        SM_LTT_Stop_TX(true);
+                        if(channel_is_rocket()) {
+                            SM_LTT_Stop_TX(true);
+                        }
                         break;
                     default:
                         break;

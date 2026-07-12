@@ -173,7 +173,7 @@ void CC1200_Init(void) {
     }
 }
 
-uint8_t CC1200_Transmit_Packet(can_msg_t *msg) {
+uint8_t CC1200_Transmit_Packet(const can_msg_t *msg) {
     SPI_Select();
     SPI_Transfer(CC1200_FIFO | CC1200_BURST);
 
