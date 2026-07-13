@@ -36,7 +36,7 @@ static void board_Init(void) {
 void main(void) {
     board_Init();
 
-    CC1200_Set_Frequency(915000);
+    CC1200_Set_Frequency(904000);
     CC1200_Set_Power(14);
     CC1200_Set_Ant_Diversity(!channel_is_rocket());
 
