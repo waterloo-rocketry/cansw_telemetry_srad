@@ -11,6 +11,7 @@
 void channel_info_get(uint8_t channel_index, uint8_t *rssi, uint8_t *lqi);
 void channel_info_start(void);
 void channel_info_add(uint8_t rssi, uint8_t lqi);
+bool channel_info_started(void);
 void channel_info_end(uint8_t channel_index);
 
 #endif	/* STATUS_TRACKER_H */

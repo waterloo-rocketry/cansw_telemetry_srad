@@ -41,9 +41,9 @@
  * The low level FSM additional clears the FIFOs when they over/under flows.
  */
 
-#define TX_TIMEOUT_MS 10
-#define RX_TIMEOUT_MS 15
-#define TX_TIME_MAX_MS 100
+#define TX_TIMEOUT_MS 50
+#define RX_TIMEOUT_MS 60
+#define TX_TIME_MAX_MS 200
 
 typedef struct {
     uint32_t start;
@@ -139,9 +139,7 @@ void SM_LTT_State_Machine(void) {
             break;
 
         case LTT_STATE_TX_END:
-            if(cc1200_state == CC1200_STATE_IDLE) {
-                next_state = LTT_STATE_RX;
-            }
+            next_state = LTT_STATE_RX;
             break;
 
         case LTT_STATE_RX:
@@ -163,12 +161,13 @@ void SM_LTT_State_Machine(void) {
                 rx_timer.last = now;
             }
             if(timer_expired(&rx_timer, now)) {
-                if(!stop_tx && channel_is_rocket()) {
-                    next_state = LTT_STATE_TX;
-                }
-                // special case: sends out telemetry on command when we haven't
-                // heard from rocket for a while
-                if(remote_on_msg.sid != 0) {
+                if(channel_is_rocket()) {
+                    if(!stop_tx && channel_is_rocket()) {
+                        next_state = LTT_STATE_TX;
+                    }
+                } else if(remote_on_msg.sid != 0) {
+                    // special case: sends out telemetry on command when we haven't
+                    // heard from rocket for a while
                     CC1200_Transmit_Packet(&remote_on_msg);
                     remote_on_msg.sid = 0;
                 }
