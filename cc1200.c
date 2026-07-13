@@ -213,7 +213,6 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
 
     SPI_Select();
     uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-
     uint8_t len = SPI_Transfer(0);
 
     if(len == 1) {
@@ -222,10 +221,14 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
         // will never leave LTT but it is what it is
         uint8_t channel_id = SPI_Transfer(0);
         build_telemetry_state_switch_msg(PRIO_LOW, 0, channel_id, msg);
-        goto CC1200_Receive_Packet_status;
+        goto CC1200_Receive_Packet_end;
     }
 
     if(len < 4 || len > MAX_PACKET_LEN) {
+        // remove the malformed packet from FIFO
+        for(int i = 0; i < len; i++) {
+            SPI_Transfer(0);
+        }
         goto CC1200_Receive_Packet_end;
     }
 
@@ -239,15 +242,16 @@ uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
         msg->data[i] = SPI_Transfer(0);
     }
 
-CC1200_Receive_Packet_status:
+CC1200_Receive_Packet_end:
     {
         uint8_t rssi = SPI_Transfer(0);
         uint8_t lqi  = SPI_Transfer(0) & 0x7F;
         channel_info_add(rssi, lqi);
     }
 
-CC1200_Receive_Packet_end:
     SPI_Deselect();
+    rx_packet_count++;
+
     return status;
 }
 
