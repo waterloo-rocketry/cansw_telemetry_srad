@@ -46,7 +46,6 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_AGC_CFG0,       0x84},
     {CC1200_FS_CFG,         0x12},
     {CC1200_PKT_CFG2,       0x00},
-    {CC1200_PKT_CFG1,       0x43},
     {CC1200_PKT_CFG0,       0x20},
     {CC1200_PA_CFG1,        0x5F},
     {CC1200_PKT_LEN,        0xFF},
@@ -80,6 +79,7 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG0,         0x5A}, // GPIO0 to RX0TX1_CFG, inverted
     {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
     {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
+    {CC1200_PKT_CFG1,       0xC3}, // FEC_EN = 1, WHITE_DATA = 1, CRC_CFG = 01, APPEND_STATUS = 1
     {CC1200_RFEND_CFG1,     0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
     {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0
     {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
