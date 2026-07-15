@@ -25,11 +25,6 @@
 #define CAN_MESSAGE_PERIOD_MS 500
 #define OVER_CURRENT_THRESHOLD 200
 
-typedef enum {
-    CAN_CONFIG_ID_FREQ  = 0,
-    CAN_CONFIG_ID_POWER = 1,
-} can_config_id_t;
-
 // memory pools for the CAN buffer
 static uint8_t tx_pool[sizeof(can_msg_t)*128];
 static uint8_t rx_pool[sizeof(can_msg_t)*128];

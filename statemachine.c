@@ -143,7 +143,7 @@ void SM_LTT_State_Machine(void) {
             break;
 
         case LTT_STATE_TX_END:
-            next_state = LTT_STATE_RX;
+            next_state = reload_config ? LTT_STATE_INIT : LTT_STATE_RX;
             break;
 
         case LTT_STATE_RX:
@@ -176,23 +176,35 @@ void SM_LTT_State_Machine(void) {
                     remote_on_msg.sid = 0;
                 }
             }
+            if(reload_config) {
+                next_state = LTT_STATE_INIT;
+            }
             break;
-    }
-
-    if(reload_config) {
-        next_state = LTT_STATE_INIT;
     }
 
     if(next_state != ltt_state) {
         switch(ltt_state) {
-            case LTT_STATE_INIT:
-                CC1200_Set_Frequency(eeprom_get_frequency());
-                CC1200_Set_Power(eeprom_get_power());
-                CC1200_Set_Ant_Diversity(!channel_is_rocket());
+            case LTT_STATE_INIT: {
                 remote_index = 0;
                 stop_tx = false;
-                reload_config = true;
+                reload_config = false;
+
+                uint32_t freq = eeprom_get_frequency();
+                int8_t power = eeprom_get_power();
+
+                CC1200_Set_Frequency(freq);
+                CC1200_Set_Power(power);
+                CC1200_Set_Ant_Diversity(!channel_is_rocket());
+
+                can_msg_t msg;
+                build_config_status_msg(PRIO_MEDIUM, (uint16_t) now, CAN_CONFIG_ID_FREQ, (uint16_t) (freq-900000), &msg);
+                CAN_enqueue(&msg);
+
+                build_config_status_msg(PRIO_MEDIUM, (uint16_t) now, CAN_CONFIG_ID_POWER, (uint16_t) (power+100), &msg);
+                CAN_enqueue(&msg);
+
                 break;
+            }
             case LTT_STATE_TX:
                 LED_set_Green(0);
                 break;
@@ -205,6 +217,9 @@ void SM_LTT_State_Machine(void) {
                 break;
         }
         switch(next_state) {
+            case LTT_STATE_INIT:
+                CC1200_Command(COMMAND_SIDLE);
+                break;
             case LTT_STATE_TX:
                 tx_timer.last = now;
                 tx_max_timer.last = now;

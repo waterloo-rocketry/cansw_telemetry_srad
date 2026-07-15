@@ -13,6 +13,11 @@
 #include "canlib.h"
 #include <xc.h> // include processor files - each processor file is guarded.  
 
+typedef enum {
+    CAN_CONFIG_ID_FREQ  = 0,
+    CAN_CONFIG_ID_POWER = 1,
+} can_config_id_t;
+
 void CAN_Init(void);
 void CAN_send_messages(void);
 void CAN_enqueue(const can_msg_t*);
