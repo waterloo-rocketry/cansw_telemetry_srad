@@ -12,6 +12,7 @@
 #include "statemachine.h"
 #include "spi.h"
 #include "channels.h"
+#include "eeprom.h"
 #include "config.h"
 
 #include <xc.h>
@@ -35,10 +36,6 @@ static void board_Init(void) {
 
 void main(void) {
     board_Init();
-
-    CC1200_Set_Frequency(904000);
-    CC1200_Set_Power(14);
-    CC1200_Set_Ant_Diversity(!channel_is_rocket());
 
     LED_set_Green(0);
     LED_set_Blue(0);

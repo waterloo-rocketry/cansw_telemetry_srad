@@ -41,6 +41,7 @@
       <itemPath>statemachine.c</itemPath>
       <itemPath>channel_info.c</itemPath>
       <itemPath>channels.c</itemPath>
+      <itemPath>eeprom.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

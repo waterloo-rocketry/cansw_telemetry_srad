@@ -15,5 +15,6 @@ void SM_Init(void);
 void SM_LTT_State_Machine(void);
 void SM_LTT_Stop_TX(bool);
 void SM_LTT_Wake_Remote(const can_msg_t*);
+void SM_LTT_Reload_Config(void);
 
 #endif

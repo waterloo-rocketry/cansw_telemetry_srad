@@ -4,6 +4,7 @@
 #include "leds.h"
 #include "channels.h"
 #include "channel_info.h"
+#include "eeprom.h"
 
 #include "canlib.h"
 #include "timer.h"
@@ -58,6 +59,7 @@ static StateTimer rx_timer     = { .duration = RX_TIMEOUT_MS };
 static StateTimer tx_max_timer = { .duration = TX_TIME_MAX_MS };
 
 static bool stop_tx;
+static bool reload_config;
 
 // index of the remote that is transmitting / should transmit next based on channels.h
 static uint8_t remote_index;
@@ -125,7 +127,9 @@ void SM_LTT_State_Machine(void) {
 
     switch(ltt_state) {
         case LTT_STATE_INIT:
-            next_state = channel_is_rocket() ? LTT_STATE_TX : LTT_STATE_RX;
+            if(cc1200_state == CC1200_STATE_IDLE) {
+                next_state = channel_is_rocket() ? LTT_STATE_TX : LTT_STATE_RX;
+            }
             break;
 
         case LTT_STATE_TX:
@@ -175,10 +179,19 @@ void SM_LTT_State_Machine(void) {
             break;
     }
 
+    if(reload_config) {
+        next_state = LTT_STATE_INIT;
+    }
+
     if(next_state != ltt_state) {
         switch(ltt_state) {
+            case LTT_STATE_INIT:
+                CC1200_Set_Frequency(eeprom_get_frequency());
+                CC1200_Set_Power(eeprom_get_power());
+                CC1200_Set_Ant_Diversity(!channel_is_rocket());
                 remote_index = 0;
                 stop_tx = false;
+                reload_config = true;
                 break;
             case LTT_STATE_TX:
                 LED_set_Green(0);
@@ -217,4 +230,8 @@ void SM_LTT_Stop_TX(bool stop) {
 // sends telemetry on command to potentially off rocket side
 void SM_LTT_Wake_Remote(const can_msg_t *on_command) {
     remote_on_msg = *on_command;
+}
+
+void SM_LTT_Reload_Config(void) {
+    reload_config = true;
 }

@@ -13,6 +13,7 @@
 #include "channels.h"
 #include "leds.h"
 #include "statemachine.h"
+#include "eeprom.h"
 #include "config.h"
 
 #include "canlib.h"
@@ -23,6 +24,11 @@
 
 #define CAN_MESSAGE_PERIOD_MS 500
 #define OVER_CURRENT_THRESHOLD 200
+
+typedef enum {
+    CAN_CONFIG_ID_FREQ  = 0,
+    CAN_CONFIG_ID_POWER = 1,
+} can_config_id_t;
 
 // memory pools for the CAN buffer
 static uint8_t tx_pool[sizeof(can_msg_t)*128];
@@ -83,6 +89,39 @@ static void can_msg_handler(const can_msg_t *msg) {
                         break;
                     default:
                         break;
+                }
+            }
+            break;
+        }
+
+        case MSG_CONFIG_SET: {
+            uint8_t board_type = BOARD_TYPE_ID_ENUM_MAX;
+            uint8_t board_inst = BOARD_INST_ID_TELEMETRY_ENUM_MAX;
+            if(
+                get_config_set_target_board(msg, &board_type, &board_inst) == W_SUCCESS &&
+                board_type == BOARD_TYPE_ID_TELEMETRY &&
+                (board_inst == BOARD_INST_UNIQUE_ID || board_inst == BOARD_INST_ID_ANY)
+            ) {
+                uint16_t config_id = 0;
+                uint16_t config_value = 0;
+                get_config_id_value(msg, &config_id, &config_value);
+                switch(config_id) {
+                    case CAN_CONFIG_ID_FREQ: {
+                        // offset frequency by 900MHz so value can fit in an uint16_t
+                        uint32_t freq = config_value + 900000;
+                        if(eeprom_set_frequency(freq)) {
+                            SM_LTT_Reload_Config();
+                        }
+                        break;
+                    }
+                    case CAN_CONFIG_ID_POWER: {
+                        // offset power value by 100 to get signed value
+                        int8_t power = (int8_t) (config_value - 100);
+                        if(eeprom_set_power(power)) {
+                            SM_LTT_Reload_Config();
+                        }
+                        break;
+                    }
                 }
             }
             break;
