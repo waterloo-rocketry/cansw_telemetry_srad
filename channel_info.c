@@ -16,22 +16,22 @@
 #define CHANNEL_INFO_TIMEOUT 3000
 
 typedef struct {
-    uint8_t rssi;
+    int8_t rssi;
     uint8_t lqi;
 } telem_channel_info;
 
 static telem_channel_info channel_info[8]; // assume we'll never have more than 8 nodes
 
-static uint32_t current_rssi;
+static int32_t current_rssi;
 static uint32_t current_lqi;
 
 static uint16_t current_sample_count;
 static uint32_t last_update;
 
 // channel ordered by index in array
-void channel_info_get(uint8_t channel_index, uint8_t *rssi, uint8_t *lqi) {
+void channel_info_get(uint8_t channel_index, int8_t *rssi, uint8_t *lqi) {
     if(millis() - last_update > CHANNEL_INFO_TIMEOUT) {
-        *rssi = 0;
+        *rssi = -128;
         *lqi = 0;
     } else {
         *rssi = channel_info[channel_index].rssi;
@@ -43,19 +43,18 @@ void channel_info_start(void) {
     current_sample_count = current_rssi = current_lqi = 0;
 }
 
-void channel_info_add(uint8_t rssi, uint8_t lqi) {
+void channel_info_add(int8_t rssi, uint8_t lqi) {
     current_rssi += rssi;
     current_lqi += lqi;
     current_sample_count++;
 }
 
 void channel_info_end(uint8_t channel_index) {
+    if(current_sample_count == 0) return;
     channel_info[channel_index].rssi =
-        current_sample_count == 0 ? 0 :
-        (uint8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].rssi) +
-        (uint8_t) ((1-ROLLING_AVG_ALPHA) * current_rssi / current_sample_count);
+        (int8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].rssi) +
+        (int8_t) ((1-ROLLING_AVG_ALPHA) * current_rssi / current_sample_count);
     channel_info[channel_index].lqi =
-        current_sample_count == 0 ? 0 :
         (uint8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].lqi) +
         (uint8_t) ((1-ROLLING_AVG_ALPHA) * current_lqi / current_sample_count);
     last_update = millis();

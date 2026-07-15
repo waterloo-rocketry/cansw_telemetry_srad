@@ -83,7 +83,8 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_RFEND_CFG1,     0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
     {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0
     {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
-    {CC1200_AGC_CS_THR, (uint8_t) -126}, // AGC_CS_TH set to -dB RSSI
+    {CC1200_AGC_CS_THR,      (uint8_t) -126}, // two's complement
+    {CC1200_AGC_GAIN_ADJUST, (uint8_t) -72},  // two's complement
 };
 
 // the difference between TMR3 and rx_packet_count is the number of packets in RX FIFO
@@ -244,7 +245,7 @@ CC1200_Receive_Packet_end:
     {
         uint8_t rssi = SPI_Transfer(0);
         uint8_t lqi  = SPI_Transfer(0) & 0x7F;
-        channel_info_add(rssi, lqi);
+        channel_info_add((int8_t) rssi, lqi);
     }
 
     SPI_Deselect();

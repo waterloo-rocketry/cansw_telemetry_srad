@@ -180,7 +180,8 @@ void CAN_send_messages(void) {
         CAN_enqueue(&msg);
 
         for(uint8_t i = 0; i < channel_remote_count(); i++) {
-            uint8_t rssi = 0, lqi = 0;
+            int8_t rssi = -128;
+            uint8_t lqi = 0;
             channel_info_get(i, &rssi, &lqi);
             build_telemetry_info_msg(PRIO_MEDIUM, (uint16_t) now, channel_remote_from_index(i), lqi, rssi, &msg);
             CAN_enqueue(&msg);
