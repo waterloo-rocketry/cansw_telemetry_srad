@@ -149,20 +149,18 @@ void CC1200_Init(void) {
     LATC7 = 1;
 
     // configure PA enable pin
-    ODCONBbits.ODCB4 = 1;
-    ODCONBbits.ODCB5 = 1;
+    ODCONBbits.ODCB4 = 1; // enable open-drain on B4
+    ODCONBbits.ODCB5 = 1; // enable open-drain on B5
     TRISB4 = 0;
     TRISB5 = 0;
     LATB4 = 1;
     LATB5 = 1;
 
-    // configure CC1200 GPIO2
+    // configure TMR3 to be RX packet counter using PKT_CRC_OK signal
     TRISB3 = 1;
     ANSELB3 = 0;
-
-    // configure TMR3 to as RX packet counter from PKT_CRC_OK
     T3CLKbits.CS = 0;   // TMR3 source to T3CKIPPS
-    T3CKIPPS = 0x0B;     // TMR3 PPS set to RB3
+    T3CKIPPS = 0x0B;    // TMR3 PPS set to RB3
     T3CONbits.RD16 = 1; // enable 16-bit mode
     T3CONbits.ON = 1;   // enable TMR3
 
@@ -196,12 +194,12 @@ uint8_t CC1200_Transmit_Packet(const can_msg_t *msg) {
 }
 
 /*
- * CC1200 FIFO packet format:
+ * CC1200 FIFO + CAN packet format:
  * 1 byte length
  * 4 bytes sid
  * 2-8 bytes data
  * 1 byte RSSI
- * 1bit CRC and 7 bits LQI
+ * 1 bit CRC and 7 bits LQI
  *
  * See user guide section 8.7.3
  */
