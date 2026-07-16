@@ -51,11 +51,11 @@ void channel_info_add(int8_t rssi, uint8_t lqi) {
 
 void channel_info_end(uint8_t channel_index) {
     if(current_sample_count == 0) return;
-    channel_info[channel_index].rssi =
-        (int8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].rssi) +
-        (int8_t) ((1-ROLLING_AVG_ALPHA) * current_rssi / current_sample_count);
-    channel_info[channel_index].lqi =
-        (uint8_t) (ROLLING_AVG_ALPHA * channel_info[channel_index].lqi) +
-        (uint8_t) ((1-ROLLING_AVG_ALPHA) * current_lqi / current_sample_count);
+    channel_info[channel_index].rssi = (int8_t)
+        ((ROLLING_AVG_ALPHA * channel_info[channel_index].rssi) +
+        ((1-ROLLING_AVG_ALPHA) * current_rssi / current_sample_count));
+    channel_info[channel_index].lqi = (uint8_t)
+        ((ROLLING_AVG_ALPHA * channel_info[channel_index].lqi) +
+        ((1-ROLLING_AVG_ALPHA) * current_lqi / current_sample_count));
     last_update = millis();
 }

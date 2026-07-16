@@ -38,12 +38,16 @@ static can_msg_t last_can_message_sent;
 // for blinking heartbeat LED
 static int blinky = 0;
 
+static bool can_msg_compare(const can_msg_t *a, const can_msg_t *b) {
+    return a->sid == b->sid && a->data_len == b->data_len && memcmp(a, b, a->data_len) == 0;
+}
+
 static void can_msg_handler(const can_msg_t *msg) {
     can_msg_type_t msg_type = get_message_type(msg);
 
     if(msg_type == MSG_TELEMETRY_STATE_SWITCH) return; // this should be internal only
 
-    if(memcmp(msg, &last_can_message_sent, msg->data_len + 5)) {
+    if(!can_msg_compare(msg, &last_can_message_sent)) {
         // message is not what we just sent
         rcvb_push_message(msg);
     }

@@ -289,6 +289,8 @@ void CC1200_Set_Power(int8_t power) {
         reg_value = 0x01;
     } else if (power <= -26) {
         reg_value = 0x02;
+    } else if (power <= -16) {
+        reg_value = 0x03;
     } else { // User Guide 7.1 Equation 21
         // Pout = (reg + 1) / 2 - 18 [dBm]
         int16_t tmp = 2 * (power + 18) - 1;

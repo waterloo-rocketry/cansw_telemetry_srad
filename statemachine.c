@@ -66,6 +66,8 @@ static uint8_t remote_index;
 static can_msg_t remote_on_msg;
 
 void SM_Init(void) {
+    remote_index = 0;
+    stop_tx = false;
     ltt_state = LTT_STATE_INIT;
 }
 
@@ -166,7 +168,7 @@ void SM_LTT_State_Machine(void) {
             }
             if(timer_expired(&rx_timer, now)) {
                 if(channel_is_rocket()) {
-                    if(!stop_tx && channel_is_rocket()) {
+                    if(!stop_tx) {
                         next_state = LTT_STATE_TX;
                     }
                 } else if(remote_on_msg.sid != 0) {
@@ -185,8 +187,6 @@ void SM_LTT_State_Machine(void) {
     if(next_state != ltt_state) {
         switch(ltt_state) {
             case LTT_STATE_INIT: {
-                remote_index = 0;
-                stop_tx = false;
                 reload_config = false;
 
                 uint32_t freq = eeprom_get_frequency();
