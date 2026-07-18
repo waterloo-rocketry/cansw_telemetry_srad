@@ -21,6 +21,7 @@ typedef enum {
 void CAN_Init(void);
 void CAN_send_messages(void);
 void CAN_enqueue(const can_msg_t*);
+void CAN_report_error(can_board_error_bitfield_offset_t);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

@@ -5,9 +5,11 @@
 #include "channels.h"
 #include "channel_info.h"
 #include "eeprom.h"
+#include "spi.h"
 
 #include "canlib.h"
 #include "timer.h"
+#include "util/safe_ring_buffer.h"
 
 /*
  * LTT communication is managed by two finite state machines. The top FSM in
@@ -58,6 +60,9 @@ static StateTimer tx_timer     = { .duration = TX_TIMEOUT_MS };
 static StateTimer rx_timer     = { .duration = RX_TIMEOUT_MS };
 static StateTimer tx_max_timer = { .duration = TX_TIME_MAX_MS };
 
+static srb_ctx_t packet_rx_fifo;
+static can_msg_t packet_rx_pool[64];
+
 static bool stop_tx;
 static bool reload_config;
 
@@ -69,18 +74,27 @@ void SM_Init(void) {
     remote_index = 0;
     stop_tx = false;
     ltt_state = LTT_STATE_INIT;
+    srb_init(&packet_rx_fifo, packet_rx_pool, sizeof(packet_rx_pool), sizeof(can_msg_t));
 }
 
-static bool timer_expired(StateTimer *timer, uint32_t now) {
+static bool timer_expired(const StateTimer *timer, uint32_t now) {
     return now - timer->last > timer->duration;
 }
 
-static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, can_msg_t *rx_msg) {
+static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg) {
     uint8_t state = (CC1200_Command(COMMAND_SNOP) >> 4) & 0x7;
 
     switch (state) {
         case CC1200_STATE_RX:
-            CC1200_Receive_Packet(rx_msg);
+            while(1) {
+                can_msg_t rx_msg = { 0 };
+                CC1200_Receive_Packet(&rx_msg);
+                if(rx_msg.sid == 0) break;
+                if(srb_push(&packet_rx_fifo, &rx_msg) != W_SUCCESS) {
+                    // TODO E_OVERFLOW | E_RX_FAILURE | E_LOOP_TIMING
+                    CAN_report_error(E_IO_ERROR_OFFSET);
+                }
+            }
             // fallthrough
         case CC1200_STATE_IDLE:
             switch(ltt_state) {
@@ -107,10 +121,14 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
             break;
 
         case CC1200_STATE_RX_FIFO_ERROR:
+            // TODO E_OVERFLOW | E_RX_FAILURE | E_DEVICE_FAULT
+            // CAN_report_error(E_IO_ERROR_OFFSET); happens too often, disable for now
             CC1200_Command(COMMAND_SFRX);
             break;
 
         case CC1200_STATE_TX_FIFO_ERROR:
+            // TODO E_OVERFLOW | E_TX_FAILURE | E_DEVICE_FAULT
+            CAN_report_error(E_IO_ERROR_OFFSET);
             CC1200_Command(COMMAND_SFTX);
             break;
     }
@@ -120,12 +138,10 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg, c
 
 void SM_LTT_State_Machine(void) {
     can_msg_t tx_msg = { 0 };
-    can_msg_t rx_msg = { 0 };
-
     LTT_State next_state = ltt_state;
 
     uint32_t now = millis();
-    uint8_t cc1200_state = CC1200_State_Transition(ltt_state, &tx_msg, &rx_msg);
+    uint8_t cc1200_state = CC1200_State_Transition(ltt_state, &tx_msg);
 
     switch(ltt_state) {
         case LTT_STATE_INIT:
@@ -148,24 +164,33 @@ void SM_LTT_State_Machine(void) {
             next_state = reload_config ? LTT_STATE_INIT : LTT_STATE_RX;
             break;
 
-        case LTT_STATE_RX:
-            if(rx_msg.sid != 0) {
+        case LTT_STATE_RX: {
+            can_msg_t rx_msg = { 0 };
+
+            while(srb_pop(&packet_rx_fifo, &rx_msg) == W_SUCCESS) {
                 switch(get_message_type(&rx_msg)) {
                     // end frame gets packaged into can message in CC1200_Receive_Packet
                     case MSG_TELEMETRY_STATE_SWITCH: {
                         uint8_t channel_id = get_message_metadata(&rx_msg);
                         if(!stop_tx && channel_id == BOARD_INST_UNIQUE_ID) {
                             next_state = LTT_STATE_TX;
+                        } else {
+                            // shouldn't happen, but respect the last end frame if there's duplicate
+                            next_state = ltt_state;
                         }
                         break;
                     }
                     default:
                         txb_enqueue(&rx_msg);
-                        LED_set_Red(1);
                         break;
                 }
+            }
+
+            if(rx_msg.sid != 0) {
+                LED_set_Red(1);
                 rx_timer.last = now;
             }
+
             if(timer_expired(&rx_timer, now)) {
                 if(channel_is_rocket()) {
                     if(!stop_tx) {
@@ -178,10 +203,13 @@ void SM_LTT_State_Machine(void) {
                     remote_on_msg.sid = 0;
                 }
             }
+
             if(reload_config) {
                 next_state = LTT_STATE_INIT;
             }
+
             break;
+        }
     }
 
     if(next_state != ltt_state) {

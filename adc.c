@@ -1,7 +1,6 @@
 #include "adc.h"
+#include "timer.h"
 #include <xc.h>
-
-static uint16_t current_filtered;
 
 void ADC_Init(void) {
     TRISAbits.TRISA0 = 1;   // Set RA0 to input
@@ -24,8 +23,6 @@ void ADC_Init(void) {
     ADPCH = 0;             // ADC channel to A0
     ADCON0bits.ADON = 1;   // Turn ADC on
     ADCON0bits.ADGO = 1;   // Start ADC conversion
-
-    current_filtered = 0;
 }
 
 uint16_t ADC_read_raw(void) {
@@ -34,12 +31,4 @@ uint16_t ADC_read_raw(void) {
 
 uint16_t ADC_read_curr_ma(void) {
     return ADC_read_raw() * 5 / 16; // 2048 mV ref / 2^(12 bit) / 100 V/V / 16mR
-}
-
-uint16_t ADC_read_curr_filter(void) {
-    return current_filtered;
-}
-
-void ADC_run_filter(void) {
-    current_filtered = current_filtered * 9 / 10 + ADC_read_curr_ma() / 10;
 }

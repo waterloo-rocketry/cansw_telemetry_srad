@@ -26,8 +26,8 @@
 #define OVER_CURRENT_THRESHOLD 200
 
 // memory pools for the CAN buffer
-static uint8_t tx_pool[sizeof(can_msg_t)*128];
-static uint8_t rx_pool[sizeof(can_msg_t)*128];
+static can_msg_t tx_pool[64];
+static can_msg_t rx_pool[64];
 
 // last transmit time
 static uint32_t last_transmit;
@@ -37,6 +37,8 @@ static can_msg_t last_can_message_sent;
 
 // for blinking heartbeat LED
 static int blinky = 0;
+
+static uint32_t error_bitfield;
 
 static bool can_msg_compare(const can_msg_t *a, const can_msg_t *b) {
     return a->sid == b->sid && a->data_len == b->data_len && memcmp(a, b, a->data_len) == 0;
@@ -163,18 +165,18 @@ void CAN_Init(void) {
     rcvb_init(rx_pool, sizeof (rx_pool));
 
     last_transmit = 0;
+    error_bitfield = 0;
 }
 
 void CAN_send_messages(void) {
     uint32_t now = millis();
     if(now - last_transmit > CAN_MESSAGE_PERIOD_MS) {
         can_msg_t msg;
-        uint32_t error_bitfield = 0;
-        uint16_t current_sense_val = ADC_read_curr_filter();
+        uint16_t current_sense_val = ADC_read_curr_ma();
 
         // Send overcurrent warning if current over threshold
         if (current_sense_val >= OVER_CURRENT_THRESHOLD) {
-            error_bitfield |= 1 << E_12V_OVER_CURRENT_OFFSET;
+            CAN_report_error(E_12V_OVER_CURRENT_OFFSET);
         }
 
         build_analog_sensor_16bit_msg(PRIO_LOW, (uint16_t) now, SENSOR_12V_CURR, current_sense_val, &msg);
@@ -192,6 +194,7 @@ void CAN_send_messages(void) {
         }
 
         last_transmit = now;
+        error_bitfield = 0;
         LED_set_Blue(blinky++ % 2);
     }
 
@@ -202,4 +205,8 @@ void CAN_send_messages(void) {
 void CAN_enqueue(const can_msg_t *msg) {
     txb_enqueue(msg);
     rcvb_push_message(msg);
+}
+
+void CAN_report_error(can_board_error_bitfield_offset_t error_bit_offset) {
+    error_bitfield |= 1 << error_bit_offset;
 }

@@ -2,6 +2,7 @@
 #include <xc.h>
 
 #include "spi.h"
+#include "ltt_can.h"
 
 void SPI_Init(void) {
     TRISA5 = 0;
@@ -48,7 +49,14 @@ void SPI_Select(void) {
     //SPI1CON2bits.SSET = 1; // manually set cs
     //SPI1TCNT = byte_count;
     LATA5 = 0;
-    while (PORTCbits.RC4); // wait for MISO to go low, TODO add a timeout and return failure
+    int i = 0;
+    while (PORTCbits.RC4) {
+        // wait for MISO to go low
+        if(i++ > 10000) {
+            CAN_report_error(0x06); // TODO E_COMM_FAILURE
+            break;
+        }
+    }
 }
 
 void SPI_Deselect(void) {
