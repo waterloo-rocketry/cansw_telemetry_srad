@@ -23,7 +23,7 @@
 #include <string.h>
 
 #define CAN_MESSAGE_PERIOD_MS 500
-#define OVER_CURRENT_THRESHOLD 200
+#define OVER_CURRENT_THRESHOLD 300
 
 // memory pools for the CAN buffer
 static can_msg_t tx_pool[64];

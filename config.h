@@ -1,6 +1,6 @@
 // PIC18LF26K83 Configuration Bit Settings
 
-#define _XTAL_FREQ 12000000
+#define _XTAL_FREQ 48000000
 
 // 'C' source line config statements
 

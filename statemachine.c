@@ -5,7 +5,6 @@
 #include "channels.h"
 #include "channel_info.h"
 #include "eeprom.h"
-#include "spi.h"
 
 #include "canlib.h"
 #include "timer.h"
@@ -122,7 +121,7 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg) {
 
         case CC1200_STATE_RX_FIFO_ERROR:
             // TODO E_OVERFLOW | E_RX_FAILURE | E_DEVICE_FAULT
-            // CAN_report_error(E_IO_ERROR_OFFSET); happens too often, disable for now
+            CAN_report_error(E_IO_ERROR_OFFSET);
             CC1200_Command(COMMAND_SFRX);
             break;
 

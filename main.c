@@ -19,7 +19,7 @@
 #include <string.h>
 
 static void OSC_Init(void) {
-    OSCCON1 = 0x70; // Fosc with division of 1
+    OSCCON1 = 0x20; // Fosc with division of 1
     while (OSCCON3bits.ORDY == 0) {}
 }
 
