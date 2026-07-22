@@ -53,7 +53,7 @@ void SPI_Select(void) {
     while (PORTCbits.RC4) {
         // wait for MISO to go low
         if(i++ > 10000) {
-            CAN_report_error(0x06); // TODO E_COMM_FAILURE
+            CAN_report_error(E_IO_ERROR_OFFSET);
             break;
         }
     }

@@ -175,8 +175,13 @@ void CAN_send_messages(void) {
         uint16_t current_sense_val = ADC_read_curr_ma();
 
         // Send overcurrent warning if current over threshold
-        if (current_sense_val >= OVER_CURRENT_THRESHOLD) {
-            CAN_report_error(E_12V_OVER_CURRENT_OFFSET);
+        if(current_sense_val >= OVER_CURRENT_THRESHOLD) {
+            CAN_report_error(E_12V_OVER_CURR_OFFSET);
+        }
+
+        if(rcvb_has_overflowed()) {
+            CAN_report_error(E_IO_ERROR_OFFSET);
+            rcvb_clear_overflow_flag();
         }
 
         build_analog_sensor_16bit_msg(PRIO_LOW, (uint16_t) now, SENSOR_12V_CURR, current_sense_val, &msg);

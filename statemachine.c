@@ -90,7 +90,6 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg) {
                 CC1200_Receive_Packet(&rx_msg);
                 if(rx_msg.sid == 0) break;
                 if(srb_push(&packet_rx_fifo, &rx_msg) != W_SUCCESS) {
-                    // TODO E_OVERFLOW | E_RX_FAILURE | E_LOOP_TIMING
                     CAN_report_error(E_IO_ERROR_OFFSET);
                 }
             }
@@ -120,13 +119,11 @@ static uint8_t CC1200_State_Transition(LTT_State ltt_state, can_msg_t *tx_msg) {
             break;
 
         case CC1200_STATE_RX_FIFO_ERROR:
-            // TODO E_OVERFLOW | E_RX_FAILURE | E_DEVICE_FAULT
             CAN_report_error(E_IO_ERROR_OFFSET);
             CC1200_Command(COMMAND_SFRX);
             break;
 
         case CC1200_STATE_TX_FIFO_ERROR:
-            // TODO E_OVERFLOW | E_TX_FAILURE | E_DEVICE_FAULT
             CAN_report_error(E_IO_ERROR_OFFSET);
             CC1200_Command(COMMAND_SFTX);
             break;
@@ -180,7 +177,9 @@ void SM_LTT_State_Machine(void) {
                         break;
                     }
                     default:
-                        txb_enqueue(&rx_msg);
+                        if(txb_enqueue(&rx_msg) != W_SUCCESS) {
+                            CAN_report_error(E_IO_ERROR_OFFSET);
+                        }
                         break;
                 }
             }
