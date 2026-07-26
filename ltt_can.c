@@ -129,6 +129,7 @@ static void can_msg_handler(const can_msg_t *msg) {
         }
 
         case MSG_RESET_CMD: {
+            if(!channel_is_rocket()) break;
             bool need_reset = false;
             check_board_need_reset(msg, &need_reset);
             if(need_reset) RESET();
