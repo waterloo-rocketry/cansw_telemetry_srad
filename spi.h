@@ -8,8 +8,8 @@
 #ifndef SPI_H
 #define SPI_H
 
-#include <xc.h>
 #include <stdint.h>
+#include <xc.h>
 
 void SPI_Init(void);
 

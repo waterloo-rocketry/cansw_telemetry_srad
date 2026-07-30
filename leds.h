@@ -8,8 +8,8 @@
 #ifndef LEDS_H
 #define LEDS_H
 
-#include <xc.h>
 #include <stdbool.h>
+#include <xc.h>
 
 void LED_Init(void);
 
