@@ -1,7 +1,7 @@
 #include "eeprom.h"
 #include <xc.h>
 
-#define EEPROM_DEFAULT_FREQ 904000
+#define EEPROM_DEFAULT_FREQ 910000
 #define EEPROM_DEFAULT_POWER 8 // 8dBm is already 33dBm after PA, any more is jsut saturating the PA
 
 #define EEPROM_ADDR_FREQ 0
