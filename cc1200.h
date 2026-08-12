@@ -12,13 +12,13 @@
 #include "canlib.h"
 
 typedef struct {
-    uint16_t addr;
-    uint8_t value;
+	uint16_t addr;
+	uint8_t value;
 } registerSetting_t;
 
 typedef struct {
-    uint8_t status;
-    uint8_t value;
+	uint8_t status;
+	uint8_t value;
 } CC1200ReadResult;
 
 uint8_t CC1200_Write(uint16_t, uint8_t);
@@ -27,8 +27,8 @@ uint8_t CC1200_Command(uint8_t);
 
 void CC1200_Init(void);
 
-uint8_t CC1200_Transmit_Packet(const can_msg_t*);
-uint8_t CC1200_Receive_Packet(can_msg_t*);
+uint8_t CC1200_Transmit_Packet(const can_msg_t *);
+uint8_t CC1200_Receive_Packet(can_msg_t *);
 
 uint8_t CC1200_Receive_Start(void);
 uint8_t CC1200_Transmit_End(uint8_t next_channel);

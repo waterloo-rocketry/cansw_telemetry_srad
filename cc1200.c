@@ -9,12 +9,11 @@
  * is tested and characterized
  */
 
-
 #include "cc1200.h"
-#include "timer.h"
 #include "channel_info.h"
-#include "spi.h"
 #include "config.h"
+#include "spi.h"
+#include "timer.h"
 
 #include "canlib.h"
 
@@ -27,169 +26,169 @@
 // https://www.ti.com/tool/SMARTRFTM-STUDIO
 // frequency and power has helper function for runtime configuration
 static const registerSetting_t preferredSettings[] = {
-    // automatic configs
-    {CC1200_SYNC_CFG1,      0xA8},
-    {CC1200_SYNC_CFG0,      0x13},
-    {CC1200_DEVIATION_M,    0x99},
-    {CC1200_MODCFG_DEV_E,   0x05},
-    {CC1200_DCFILT_CFG,     0x26},
-    {CC1200_PREAMBLE_CFG0,  0x8A},
-    {CC1200_IQIC,           0x00},
-    {CC1200_CHAN_BW,        0x02},
-    {CC1200_MDMCFG1,        0xC2},
-    {CC1200_MDMCFG0,        0x05},
-    {CC1200_SYMBOL_RATE2,   0xC9},
-    {CC1200_SYMBOL_RATE1,   0x99},
-    {CC1200_SYMBOL_RATE0,   0x99},
-    {CC1200_AGC_REF,        0x2F},
-    {CC1200_AGC_CFG1,       0x16},
-    {CC1200_AGC_CFG0,       0x84},
-    {CC1200_FS_CFG,         0x12},
-    {CC1200_PKT_CFG2,       0x00},
-    {CC1200_PKT_CFG0,       0x20},
-    {CC1200_PA_CFG1,        0x5F},
-    {CC1200_IF_MIX_CFG,     0x18},
-    {CC1200_FREQOFF_CFG,    0x30},
-    {CC1200_TOC_CFG,        0xC0},
-    {CC1200_MDMCFG2,        0x00},
-    {CC1200_FREQ2,          0x5B},
-    {CC1200_FREQ1,          0x80},
-    {CC1200_IF_ADC1,        0xEE},
-    {CC1200_IF_ADC0,        0x10},
-    {CC1200_FS_DIG1,        0x04},
-    {CC1200_FS_DIG0,        0x55},
-    {CC1200_FS_CAL1,        0x40},
-    {CC1200_FS_CAL0,        0x0E},
-    {CC1200_FS_DIVTWO,      0x03},
-    {CC1200_FS_DSM0,        0x33},
-    {CC1200_FS_DVC0,        0x17},
-    {CC1200_FS_PFD,         0x00},
-    {CC1200_FS_PRE,         0x6E},
-    {CC1200_FS_REG_DIV_CML, 0x1C},
-    {CC1200_FS_SPARE,       0xAC},
-    {CC1200_FS_VCO0,        0xB5},
-    {CC1200_IFAMP,          0x0D},
-    {CC1200_XOSC5,          0x0E},
-    {CC1200_XOSC1,          0x03},
+	// automatic configs
+	{CC1200_SYNC_CFG1, 0xA8},
+	{CC1200_SYNC_CFG0, 0x13},
+	{CC1200_DEVIATION_M, 0x99},
+	{CC1200_MODCFG_DEV_E, 0x05},
+	{CC1200_DCFILT_CFG, 0x26},
+	{CC1200_PREAMBLE_CFG0, 0x8A},
+	{CC1200_IQIC, 0x00},
+	{CC1200_CHAN_BW, 0x02},
+	{CC1200_MDMCFG1, 0xC2},
+	{CC1200_MDMCFG0, 0x05},
+	{CC1200_SYMBOL_RATE2, 0xC9},
+	{CC1200_SYMBOL_RATE1, 0x99},
+	{CC1200_SYMBOL_RATE0, 0x99},
+	{CC1200_AGC_REF, 0x2F},
+	{CC1200_AGC_CFG1, 0x16},
+	{CC1200_AGC_CFG0, 0x84},
+	{CC1200_FS_CFG, 0x12},
+	{CC1200_PKT_CFG2, 0x00},
+	{CC1200_PKT_CFG0, 0x20},
+	{CC1200_PA_CFG1, 0x5F},
+	{CC1200_IF_MIX_CFG, 0x18},
+	{CC1200_FREQOFF_CFG, 0x30},
+	{CC1200_TOC_CFG, 0xC0},
+	{CC1200_MDMCFG2, 0x00},
+	{CC1200_FREQ2, 0x5B},
+	{CC1200_FREQ1, 0x80},
+	{CC1200_IF_ADC1, 0xEE},
+	{CC1200_IF_ADC0, 0x10},
+	{CC1200_FS_DIG1, 0x04},
+	{CC1200_FS_DIG0, 0x55},
+	{CC1200_FS_CAL1, 0x40},
+	{CC1200_FS_CAL0, 0x0E},
+	{CC1200_FS_DIVTWO, 0x03},
+	{CC1200_FS_DSM0, 0x33},
+	{CC1200_FS_DVC0, 0x17},
+	{CC1200_FS_PFD, 0x00},
+	{CC1200_FS_PRE, 0x6E},
+	{CC1200_FS_REG_DIV_CML, 0x1C},
+	{CC1200_FS_SPARE, 0xAC},
+	{CC1200_FS_VCO0, 0xB5},
+	{CC1200_IFAMP, 0x0D},
+	{CC1200_XOSC5, 0x0E},
+	{CC1200_XOSC1, 0x03},
 
-    // manual configs
-    {CC1200_IOCFG3,         0x24}, // GPIO3 to ANTENNA_SELECT
-    {CC1200_IOCFG2,         0x13}, // GPIO2 to PKT_CRC_OK
-    {CC1200_IOCFG0,         0x5A}, // GPIO0 to RX0TX1_CFG, inverted
-    {CC1200_PKT_LEN,        MAX_PACKET_LEN},
-    {CC1200_FREQOFF1,       0x02}, // Frequency Offset MSB
-    {CC1200_FREQOFF0,       0xB6}, // Frequency Offset LSB
-    {CC1200_PKT_CFG1,       0xC3}, // FEC_EN = 1, WHITE_DATA = 1, CRC_CFG = 01, APPEND_STATUS = 1
-    {CC1200_RFEND_CFG1,     0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
-    {CC1200_RFEND_CFG0,     0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0
-    {CC1200_FIFO_CFG,       0x80}, // CRC_AUTOFLUSH = 1
-    {CC1200_AGC_CS_THR,      (uint8_t) -126}, // two's complement
-    {CC1200_AGC_GAIN_ADJUST, (uint8_t) -72},  // two's complement
+	// manual configs
+	{CC1200_IOCFG3, 0x24}, // GPIO3 to ANTENNA_SELECT
+	{CC1200_IOCFG2, 0x13}, // GPIO2 to PKT_CRC_OK
+	{CC1200_IOCFG0, 0x5A}, // GPIO0 to RX0TX1_CFG, inverted
+	{CC1200_PKT_LEN, MAX_PACKET_LEN},
+	{CC1200_FREQOFF1, 0x02}, // Frequency Offset MSB
+	{CC1200_FREQOFF0, 0xB6}, // Frequency Offset LSB
+	{CC1200_PKT_CFG1, 0xC3}, // FEC_EN = 1, WHITE_DATA = 1, CRC_CFG = 01, APPEND_STATUS = 1
+	{CC1200_RFEND_CFG1, 0x3E}, // RXOFF_MODE = RX, RX_TIME = disable
+	{CC1200_RFEND_CFG0, 0x00}, // TXOFF_MODE = IDLE, TERM_ON_BAD_PACKET_EN = 0
+	{CC1200_FIFO_CFG, 0x80}, // CRC_AUTOFLUSH = 1
+	{CC1200_AGC_CS_THR, (uint8_t)-126}, // two's complement
+	{CC1200_AGC_GAIN_ADJUST, (uint8_t)-72}, // two's complement
 };
 
 // the difference between TMR3 and rx_packet_count is the number of packets in RX FIFO
 static uint8_t rx_packet_count;
 
 CC1200ReadResult CC1200_Read(uint16_t reg) {
-    CC1200ReadResult result;
+	CC1200ReadResult result;
 
-    SPI_Select();
+	SPI_Select();
 
-    // If accessing extended registers
-    if (reg >= 0x2F00) {
-        // extended register read command
-        SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_READ);
-        result.status = SPI_Transfer(reg & 0xFF);
-    } else {
-        result.status = SPI_Transfer((reg & 0xFF) | CC1200_READ);
-    }
+	// If accessing extended registers
+	if (reg >= 0x2F00) {
+		// extended register read command
+		SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_READ);
+		result.status = SPI_Transfer(reg & 0xFF);
+	} else {
+		result.status = SPI_Transfer((reg & 0xFF) | CC1200_READ);
+	}
 
-    result.value = SPI_Transfer(0x00);
+	result.value = SPI_Transfer(0x00);
 
-    SPI_Deselect();
-    return result;
+	SPI_Deselect();
+	return result;
 }
 
 uint8_t CC1200_Write(uint16_t reg, uint8_t val) {
-    uint8_t status;
+	uint8_t status;
 
-    SPI_Select();
+	SPI_Select();
 
-    // If accessing extended registers
-    if (reg >= 0x2F00) {
-        // extended register write command
-        SPI_Transfer(CC1200_EXTENDED_REGISTER);
-    }
+	// If accessing extended registers
+	if (reg >= 0x2F00) {
+		// extended register write command
+		SPI_Transfer(CC1200_EXTENDED_REGISTER);
+	}
 
-    SPI_Transfer(reg & 0xFF);
-    status = SPI_Transfer(val);
+	SPI_Transfer(reg & 0xFF);
+	status = SPI_Transfer(val);
 
-    SPI_Deselect();
-    return status;
+	SPI_Deselect();
+	return status;
 }
 
 uint8_t CC1200_Command(uint8_t command) {
-    SPI_Select();
-    uint8_t status = SPI_Transfer(command);
-    SPI_Deselect();
-    return status;
+	SPI_Select();
+	uint8_t status = SPI_Transfer(command);
+	SPI_Deselect();
+	return status;
 }
 
 void CC1200_Init(void) {
-    rx_packet_count = 0;
+	rx_packet_count = 0;
 
-    // configure RESET_n pin
-    TRISC7 = 0;
-    LATC7 = 0;
-    __delay_ms(100);
-    LATC7 = 1;
+	// configure RESET_n pin
+	TRISC7 = 0;
+	LATC7 = 0;
+	__delay_ms(100);
+	LATC7 = 1;
 
-    // configure PA enable pin
-    ODCONBbits.ODCB4 = 1; // enable open-drain on B4
-    ODCONBbits.ODCB5 = 1; // enable open-drain on B5
-    TRISB4 = 0;
-    TRISB5 = 0;
-    LATB4 = 1;
-    LATB5 = 1;
+	// configure PA enable pin
+	ODCONBbits.ODCB4 = 1; // enable open-drain on B4
+	ODCONBbits.ODCB5 = 1; // enable open-drain on B5
+	TRISB4 = 0;
+	TRISB5 = 0;
+	LATB4 = 1;
+	LATB5 = 1;
 
-    // configure TMR3 to be RX packet counter using PKT_CRC_OK signal
-    TRISB3 = 1;
-    ANSELB3 = 0;
-    T3CLKbits.CS = 0;   // TMR3 source to T3CKIPPS
-    T3CKIPPS = 0x0B;    // TMR3 PPS set to RB3
-    T3CONbits.ON = 1;   // enable TMR3
+	// configure TMR3 to be RX packet counter using PKT_CRC_OK signal
+	TRISB3 = 1;
+	ANSELB3 = 0;
+	T3CLKbits.CS = 0; // TMR3 source to T3CKIPPS
+	T3CKIPPS = 0x0B; // TMR3 PPS set to RB3
+	T3CONbits.ON = 1; // enable TMR3
 
-    // configure CC1200 Registers
-    size_t numSettings = sizeof (preferredSettings) / sizeof (preferredSettings[0]);
-    for (size_t i = 0; i < numSettings; i++) {
-        CC1200_Write(preferredSettings[i].addr, preferredSettings[i].value);
-    }
+	// configure CC1200 Registers
+	size_t numSettings = sizeof(preferredSettings) / sizeof(preferredSettings[0]);
+	for (size_t i = 0; i < numSettings; i++) {
+		CC1200_Write(preferredSettings[i].addr, preferredSettings[i].value);
+	}
 }
 
 uint8_t CC1200_Transmit_Packet(const can_msg_t *msg) {
-    if(msg->data_len + 4 > MAX_PACKET_LEN) {
-        return 0;
-    }
+	if (msg->data_len + 4 > MAX_PACKET_LEN) {
+		return 0;
+	}
 
-    SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_BURST);
+	SPI_Select();
+	SPI_Transfer(CC1200_FIFO | CC1200_BURST);
 
-    // length (SID + Data)
-    SPI_Transfer(msg->data_len + 4);
+	// length (SID + Data)
+	SPI_Transfer(msg->data_len + 4);
 
-    // SID
-    for (int i = 3; i >= 0; i--) {
-        SPI_Transfer((msg->sid >> i*8) & 0xFF);
-    }
+	// SID
+	for (int i = 3; i >= 0; i--) {
+		SPI_Transfer((msg->sid >> i * 8) & 0xFF);
+	}
 
-    // data
-    for (int i = 0; i < msg->data_len; i++) {
-        SPI_Transfer(msg->data[i]);
-    }
+	// data
+	for (int i = 0; i < msg->data_len; i++) {
+		SPI_Transfer(msg->data[i]);
+	}
 
-    SPI_Deselect();
+	SPI_Deselect();
 
-    return CC1200_Command(COMMAND_STX);
+	return CC1200_Command(COMMAND_STX);
 }
 
 /*
@@ -203,135 +202,135 @@ uint8_t CC1200_Transmit_Packet(const can_msg_t *msg) {
  * See user guide section 8.7.3
  */
 uint8_t CC1200_Receive_Packet(can_msg_t *msg) {
-    if(CC1200_RX_Packet_Count() == 0) {
-        // no packets in FIFO
-        return 0;
-    }
+	if (CC1200_RX_Packet_Count() == 0) {
+		// no packets in FIFO
+		return 0;
+	}
 
-    SPI_Select();
-    uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
-    uint8_t len = SPI_Transfer(0);
+	SPI_Select();
+	uint8_t status = SPI_Transfer(CC1200_FIFO | CC1200_READ | CC1200_BURST);
+	uint8_t len = SPI_Transfer(0);
 
-    if(len == 1) {
-        // decode end of transmit frame into can message
-        // this doesn't really need to be packaged into can message since it
-        // will never leave LTT but it is what it is
-        uint8_t channel_id = SPI_Transfer(0);
-        build_telemetry_state_switch_msg(PRIO_LOW, 0, channel_id, msg);
-        goto CC1200_Receive_Packet_end;
-    }
+	if (len == 1) {
+		// decode end of transmit frame into can message
+		// this doesn't really need to be packaged into can message since it
+		// will never leave LTT but it is what it is
+		uint8_t channel_id = SPI_Transfer(0);
+		build_telemetry_state_switch_msg(PRIO_LOW, 0, channel_id, msg);
+		goto CC1200_Receive_Packet_end;
+	}
 
-    if(len < 4 || len > MAX_PACKET_LEN) {
-        // remove the malformed packet from FIFO
-        for(int i = 0; i < len; i++) {
-            SPI_Transfer(0);
-        }
-        goto CC1200_Receive_Packet_end;
-    }
+	if (len < 4 || len > MAX_PACKET_LEN) {
+		// remove the malformed packet from FIFO
+		for (int i = 0; i < len; i++) {
+			SPI_Transfer(0);
+		}
+		goto CC1200_Receive_Packet_end;
+	}
 
-    msg->data_len = len - 4;
+	msg->data_len = len - 4;
 
-    for(int i = 0; i < 4; i++) {
-        msg->sid = (msg->sid << 8) | SPI_Transfer(0);
-    }
+	for (int i = 0; i < 4; i++) {
+		msg->sid = (msg->sid << 8) | SPI_Transfer(0);
+	}
 
-    for(int i = 0; i < len-4; i++) {
-        msg->data[i] = SPI_Transfer(0);
-    }
+	for (int i = 0; i < len - 4; i++) {
+		msg->data[i] = SPI_Transfer(0);
+	}
 
-CC1200_Receive_Packet_end:
-    {
-        uint8_t rssi = SPI_Transfer(0);
-        uint8_t lqi  = SPI_Transfer(0) & 0x7F;
-        channel_info_add((int8_t) rssi, lqi);
-    }
+CC1200_Receive_Packet_end: {
+	uint8_t rssi = SPI_Transfer(0);
+	uint8_t lqi = SPI_Transfer(0) & 0x7F;
+	channel_info_add((int8_t)rssi, lqi);
+}
 
-    SPI_Deselect();
-    rx_packet_count++;
+	SPI_Deselect();
+	rx_packet_count++;
 
-    return status;
+	return status;
 }
 
 // resets packet counter and goes into RX
 uint8_t CC1200_Receive_Start(void) {
-    // update packet count at beginning of RX since PKT_CRC_OK also goggles during TX
-    rx_packet_count = TMR3L;
+	// update packet count at beginning of RX since PKT_CRC_OK also goggles during TX
+	rx_packet_count = TMR3L;
 
-    // clear RX FIFO and go to RX state
-    CC1200_Command(COMMAND_SFRX);
-    return CC1200_Command(COMMAND_SRX);
+	// clear RX FIFO and go to RX state
+	CC1200_Command(COMMAND_SFRX);
+	return CC1200_Command(COMMAND_SRX);
 }
 
 // transmit single byte indicating end of transmissio period + id of the board
 // that should transmit next
 uint8_t CC1200_Transmit_End(uint8_t next_channel) {
-    SPI_Select();
-    SPI_Transfer(CC1200_FIFO | CC1200_BURST);
-    SPI_Transfer(1);
-    SPI_Transfer(next_channel);
-    SPI_Deselect();
-    return CC1200_Command(COMMAND_STX);
+	SPI_Select();
+	SPI_Transfer(CC1200_FIFO | CC1200_BURST);
+	SPI_Transfer(1);
+	SPI_Transfer(next_channel);
+	SPI_Deselect();
+	return CC1200_Command(COMMAND_STX);
 }
 
 uint8_t CC1200_RX_Packet_Count(void) {
-    return TMR3L - rx_packet_count;
+	return TMR3L - rx_packet_count;
 }
 
 void CC1200_Set_Power(int8_t power) {
-    if (power > 14) {
-        power = 14;
-    }
+	if (power > 14) {
+		power = 14;
+	}
 
-    uint8_t reg_value = 0;
+	uint8_t reg_value = 0;
 
-    // special low power modes https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/448235/cc1200--38dbm-tx-power-output
-    if (power <= -70) {
-        reg_value = 0x00;
-    } else if (power <= -32) {
-        reg_value = 0x01;
-    } else if (power <= -26) {
-        reg_value = 0x02;
-    } else if (power <= -16) {
-        reg_value = 0x03;
-    } else { // User Guide 7.1 Equation 21
-        // Pout = (reg + 1) / 2 - 18 [dBm]
-        int16_t tmp = 2 * (power + 18) - 1;
-        reg_value = (uint8_t) tmp;
-    }
+	// special low power modes
+	// https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/448235/cc1200--38dbm-tx-power-output
+	if (power <= -70) {
+		reg_value = 0x00;
+	} else if (power <= -32) {
+		reg_value = 0x01;
+	} else if (power <= -26) {
+		reg_value = 0x02;
+	} else if (power <= -16) {
+		reg_value = 0x03;
+	} else { // User Guide 7.1 Equation 21
+		// Pout = (reg + 1) / 2 - 18 [dBm]
+		int16_t tmp = 2 * (power + 18) - 1;
+		reg_value = (uint8_t)tmp;
+	}
 
-    // Preserve bits 7:6, update bits 5:0 with new reg_value
-    CC1200ReadResult cur_reg_val = CC1200_Read(CC1200_PA_CFG1);
-    uint8_t new_reg_value = (cur_reg_val.value & 0xC0) | (reg_value & 0x3F);
-    CC1200_Write(CC1200_PA_CFG1, new_reg_value);
+	// Preserve bits 7:6, update bits 5:0 with new reg_value
+	CC1200ReadResult cur_reg_val = CC1200_Read(CC1200_PA_CFG1);
+	uint8_t new_reg_value = (cur_reg_val.value & 0xC0) | (reg_value & 0x3F);
+	CC1200_Write(CC1200_PA_CFG1, new_reg_value);
 }
 
 void CC1200_Set_Frequency(uint32_t freq) {
-    // freq in kHz
-    // Refer to Section 9.12 (Eqn 27/28, Table 34)
-    uint32_t reg_value = freq * 4096 / 625; 
+	// freq in kHz
+	// Refer to Section 9.12 (Eqn 27/28, Table 34)
+	uint32_t reg_value = freq * 4096 / 625;
 
-    SPI_Select();
-    SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
-    SPI_Transfer(CC1200_FREQ2 & 0xFF);
-    SPI_Transfer((reg_value >> 16) & 0xFF); // FREQ2 - MSB
-    SPI_Transfer((reg_value >> 8) & 0xFF);  // FREQ1 - middle byte
-    SPI_Transfer(reg_value & 0xFF);         // FREQ0 - LSB
-    SPI_Deselect();
+	SPI_Select();
+	SPI_Transfer(CC1200_EXTENDED_REGISTER | CC1200_BURST);
+	SPI_Transfer(CC1200_FREQ2 & 0xFF);
+	SPI_Transfer((reg_value >> 16) & 0xFF); // FREQ2 - MSB
+	SPI_Transfer((reg_value >> 8) & 0xFF); // FREQ1 - middle byte
+	SPI_Transfer(reg_value & 0xFF); // FREQ0 - LSB
+	SPI_Deselect();
 }
 
 void CC1200_Set_Ant_Diversity(bool diversity) {
-    // Preserve bits 7:3, update bits 2:0 with new reg_value
-    CC1200ReadResult cur_reg_val = CC1200_Read(CC1200_RFEND_CFG0);
-    uint8_t new_reg_value = (cur_reg_val.value & 0xF8) | (diversity ? 0x03 : 0x00);
-    CC1200_Write(CC1200_RFEND_CFG0, new_reg_value);
+	// Preserve bits 7:3, update bits 2:0 with new reg_value
+	CC1200ReadResult cur_reg_val = CC1200_Read(CC1200_RFEND_CFG0);
+	uint8_t new_reg_value = (cur_reg_val.value & 0xF8) | (diversity ? 0x03 : 0x00);
+	CC1200_Write(CC1200_RFEND_CFG0, new_reg_value);
 }
 
 void CC1200_PA_Off(void) {
-    LATB4 = 0;
-    LATB5 = 0;
+	LATB4 = 0;
+	LATB5 = 0;
 }
 
 void CC1200_PA_On(void) {
-    LATB4 = 1;
-    LATB5 = 1;
+	LATB4 = 1;
+	LATB5 = 1;
 }
